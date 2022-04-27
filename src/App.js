@@ -2,7 +2,8 @@ import logo from './logo.svg';
 import './App.css';
 import './components/TopNavBar.js';
 import TopNavBar from './components/TopNavBar.js';
-import SignupComponent from './components/SignupComponent';
+import LeftNavBar from './components/LeftNavBar';
+import Register from './components/Register';
 
 import {
   BrowserRouter as Router,
@@ -17,10 +18,13 @@ function App() {
     <>
     <Router>
       <TopNavBar/>
-      <SignupComponent/>
-      <Routes>
-        <Route path="/login" element={<></>}/>
-      </Routes>
+      <div class="d-flex align-items-start mt-2">
+        <LeftNavBar/>
+          <Routes>
+          <Route path="/" element={<Register/>}/>
+            <Route path="/register" element={<Register/>}/>
+          </Routes>
+      </div>
     </Router>
     </>
   );

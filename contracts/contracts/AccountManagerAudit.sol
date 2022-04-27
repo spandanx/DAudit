@@ -6,9 +6,9 @@ import "./Account.sol";
 
 contract AccountManagerAudit {
     using StructLibrary for StructLibrary.Action;
-    mapping (address => Account) public accounts;
-    mapping (address => Department) public departments;
-    mapping (address => Bill) public bills;
+    mapping (address => Account) accounts;
+    mapping (address => Department) departments;
+    // mapping (address => Bill) bills;
     
     Department private rootDepartment;
 
@@ -19,11 +19,17 @@ contract AccountManagerAudit {
     function getRootDepartMentAddress() public view returns (address) {
         return address(rootDepartment);
     }
-    modifier isAccount() {
+    function getDepartmentAddress() public view isDepartMentAssigned returns (address) {
+        return address(departments[msg.sender]);
+    }
+    function getAccountAddress() public view isAccountAssigned returns (address) {
+        return address(accounts[msg.sender]);
+    }
+    modifier isAccountAssigned() {
         require(address(accounts[msg.sender])!=address(0), "No accounts assigned");
         _;
     }
-    modifier isDepartMent() {
+    modifier isDepartMentAssigned() {
         require(address(departments[msg.sender])!=address(0), "No departments assigned");
         _;
     }

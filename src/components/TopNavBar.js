@@ -1,6 +1,10 @@
 import React from 'react'
+import web3 from '../web3';
 
 const TopNavBar = () => {
+  
+  // const
+  
   return (
     <div>
         {/* <Notification/> */}
