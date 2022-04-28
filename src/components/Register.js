@@ -1,15 +1,18 @@
 import React, {useState} from 'react';
 import { TiTick } from "react-icons/ti";
 import { BsExclamation } from "react-icons/bs";
+// import AccountManagerAudit from '../AccountManagerAudit';
+// import web3 from '../web3';
 
 const Register = () => {
 
     // let activeForm = 0;
+
     const [activeForm, setActiveForm] = useState(0);
-    const [acc_depAddress, setAcc_depAddress] = useState('');
-    const [acc_accountName, setAcc_accountName] = useState('');
-    const [acc_ValidForm, setAcc_ValidForm] = useState(false);
-    const [acc_DepAddressError, setAcc_DepAddressError] = useState('');
+    const [emp_depAddress, setEmp_depAddress] = useState('');
+    const [emp_accountName, setEmp_accountName] = useState('');
+    const [emp_ValidForm, setEmp_ValidForm] = useState(false);
+    const [emp_AddressError, setEmp_AddressError] = useState('');
 
     const [dep_depAddress, setDep_depAddress] = useState('');
     const [dep_accountName, setDep_accountName] = useState('');
@@ -22,24 +25,24 @@ const Register = () => {
         <div class="form-group row my-3">
           <div class="col-sm-11">
             <input type="text" class="form-control select2-offscreen" id="parentAdddress" placeholder="Parent department address" tabIndex="-1"
-                value={acc_depAddress} 
-                onChange={(event) => setAcc_depAddress(event.target.value)}
+                value={emp_depAddress} 
+                onChange={(event) => setEmp_depAddress(event.target.value)}
             />
           </div>
           <div class="col-sm-1">
-                  {!dep_AddressError && 
+                  {!emp_AddressError && 
                     <div title={"Valid"} data-toggle="popover" data-trigger="hover" data-content="Some content"><TiTick color='green'/></div>
                   }
-                  {dep_AddressError && 
-                    <div title={dep_AddressError} data-toggle="popover" data-trigger="hover" data-content="Some content"><BsExclamation color='red'/></div>
+                  {emp_AddressError && 
+                    <div title={emp_AddressError} data-toggle="popover" data-trigger="hover" data-content="Some content"><BsExclamation color='red'/></div>
                   }
               </div>
         </div>
         <div class="form-group row my-3">
             <div class="col-sm-11">
                 <input type="text" class="form-control select2-offscreen" id="accountName" placeholder="Account name" tabIndex="-1"
-                    value={acc_accountName} 
-                    onChange={(event) => setAcc_accountName(event.target.value)}
+                    value={emp_accountName} 
+                    onChange={(event) => setEmp_accountName(event.target.value)}
                 />
             </div>
             <div class="col-sm-1">
@@ -48,7 +51,7 @@ const Register = () => {
         <div class="form-group row my-3 justify-content-center">
             {/* <div class="col-sm-9"></div> */}
             <div class="col-sm-12">
-                <button disabled={!acc_ValidForm} class="btn btn-success mx-1" onClick={() => register()}>Register</button>
+                <button disabled={!emp_ValidForm} class="btn btn-success mx-1" onClick={() => register()}>Register</button>
             </div>
         </div>
       </form>
@@ -66,11 +69,11 @@ const Register = () => {
             />
           </div>
           <div class="col-sm-1">
-                  {!acc_DepAddressError && 
+                  {!dep_AddressError && 
                     <div title={"Valid"} data-toggle="popover" data-trigger="hover" data-content="Some content"><TiTick color='green'/></div>
                   }
-                  {acc_DepAddressError && 
-                    <div title={acc_DepAddressError} data-toggle="popover" data-trigger="hover" data-content="Some content"><BsExclamation color='red'/></div>
+                  {dep_AddressError && 
+                    <div title={dep_AddressError} data-toggle="popover" data-trigger="hover" data-content="Some content"><BsExclamation color='red'/></div>
                   }
               </div>
         </div>

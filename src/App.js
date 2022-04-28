@@ -4,6 +4,8 @@ import './components/TopNavBar.js';
 import TopNavBar from './components/TopNavBar.js';
 import LeftNavBar from './components/LeftNavBar';
 import Register from './components/Register';
+import Department from './components/Department';
+import Employee from './components/Employee';
 
 import {
   BrowserRouter as Router,
@@ -19,10 +21,12 @@ function App() {
     <Router>
       <TopNavBar/>
       <div class="d-flex align-items-start mt-2">
-        <LeftNavBar/>
+        {/* <LeftNavBar/> */}
           <Routes>
-          <Route path="/" element={<Register/>}/>
+            <Route path="/" element={<Register/>}/>
             <Route path="/register" element={<Register/>}/>
+            <Route path="/department" element={<Department/>}/>
+            <Route path="/employee" element={<Employee/>}/>
           </Routes>
       </div>
     </Router>

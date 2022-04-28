@@ -2,13 +2,13 @@
 pragma solidity ^0.8.7;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {StructLibrary} from "./StructLibrary.sol";
-import "./Account.sol";
+import "./Employee.sol";
 
 contract AccountManagerAudit {
     using StructLibrary for StructLibrary.Action;
-    mapping (address => Account) accounts;
-    mapping (address => Department) departments;
-    // mapping (address => Bill) bills;
+    mapping (address => Employee) public employees;
+    mapping (address => Department) public departments;
+    // mapping (address => Bill) public bills;
     
     Department private rootDepartment;
 
@@ -22,11 +22,11 @@ contract AccountManagerAudit {
     function getDepartmentAddress() public view isDepartMentAssigned returns (address) {
         return address(departments[msg.sender]);
     }
-    function getAccountAddress() public view isAccountAssigned returns (address) {
-        return address(accounts[msg.sender]);
+    function getEmployeeAddress() public view isEmployeeAssigned returns (address) {
+        return address(employees[msg.sender]);
     }
-    modifier isAccountAssigned() {
-        require(address(accounts[msg.sender])!=address(0), "No accounts assigned");
+    modifier isEmployeeAssigned() {
+        require(address(employees[msg.sender])!=address(0), "No employees assigned");
         _;
     }
     modifier isDepartMentAssigned() {
@@ -39,11 +39,11 @@ contract AccountManagerAudit {
         rootDep.addDepartment(address(subDep));
         departments[msg.sender] = subDep;
     }
-    function registerAccount (address parentDepartMent, string memory accName) public {
+    function registerEmployee (address parentDepartMent, string memory empName) public {
         Department rootDep = Department(parentDepartMent);
-        Account subAcc = new Account(parentDepartMent, accName);
-        rootDep.addAccount(address(subAcc));
-        accounts[msg.sender] = subAcc;
+        Employee subEmp = new Employee(parentDepartMent, empName);
+        rootDep.addEmployee(address(subEmp));
+        employees[msg.sender] = subEmp;
     }
     // function getSubDepartments(address depAddress) public view isDepartMent returns(StructLibrary.DepartmentStruct[] memory){
     //     Department dep = Department(depAddress);

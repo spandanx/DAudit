@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.7;
 import {StructLibrary} from "./StructLibrary.sol";
-import "./Account.sol";
+import "./Employee.sol";
 import "./Bill.sol";
 
 contract Department {
 
     using StructLibrary for StructLibrary.DepartmentStruct;
-    using StructLibrary for StructLibrary.AccountStruct;
+    using StructLibrary for StructLibrary.EmployeeStruct;
 
     // uint balance;
     // string name;
@@ -19,7 +19,7 @@ contract Department {
     StructLibrary.DepartmentStruct[] subDepartmentsList;
 
     // mapping (address => Account) accountsMap;
-    StructLibrary.AccountStruct[] accountsList;
+    StructLibrary.EmployeeStruct[] employeeList;
 
     Bill[] public bills;
     // mapping (address => Bill) billMap;
@@ -40,16 +40,16 @@ contract Department {
         subDepartmentsList.push(dep.getDepartmentStruct());
         // subDepartmentsMap[subDep] = Department(subDep);
     }
-    function addAccount (address subAcc) public {
-        Account acc = Account(subAcc);
-        accountsList.push(acc.getAccountStruct());
+    function addEmployee (address subAcc) public {
+        Employee acc = Employee(subAcc);
+        employeeList.push(acc.getEmployeeStruct());
         // accountsMap[subAcc] = Account(subAcc);
     }
     function getSubDepartments() public view returns (StructLibrary.DepartmentStruct[] memory){
         return subDepartmentsList;
     }
-    function getAccounts() public view returns (StructLibrary.AccountStruct[] memory) {
-        return accountsList;
+    function getEmployees() public view returns (StructLibrary.EmployeeStruct[] memory) {
+        return employeeList;
     }
     function createBill(
         string memory _name,
@@ -95,10 +95,10 @@ contract Department {
         _;
     }
     function handleApproval(uint index) public validateIndexModifier(index){
-        require(accountsList.length!=0, "There should be at least one approver");
-        if ((bills[index].getBillStruct().partiesAccepted/accountsList.length)*100>bills[index].getBillStruct().threshold)
+        require(employeeList.length!=0, "There should be at least one approver");
+        if ((bills[index].getBillStruct().partiesAccepted/employeeList.length)*100>bills[index].getBillStruct().threshold)
             bills[index].setStatus(StructLibrary.Status.ACCEPTED);
-        if ((bills[index].getBillStruct().partiesRejected/accountsList.length)*100>100-bills[index].getBillStruct().threshold)
+        if ((bills[index].getBillStruct().partiesRejected/employeeList.length)*100>100-bills[index].getBillStruct().threshold)
             bills[index].setStatus(StructLibrary.Status.REJECTED);
     }
     function getApprovalByIndex(uint index) public view validateIndexModifier(index) returns(Bill){

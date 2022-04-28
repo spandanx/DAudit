@@ -3,30 +3,30 @@ pragma solidity ^0.8.7;
 import {StructLibrary} from "./StructLibrary.sol";
 import "./Department.sol";
 
-contract Account {
+contract Employee {
     using StructLibrary for StructLibrary.Action;
-    using StructLibrary for StructLibrary.AccountStruct;
+    using StructLibrary for StructLibrary.EmployeeStruct;
 
-    StructLibrary.AccountStruct accountStruct;
+    StructLibrary.EmployeeStruct employeeStruct;
     // Department department;
     string name;
     constructor (address _parentDepartmentAddress, string memory _name) {
         // Department dep = Department(addr);
         // name = _name;
-        accountStruct = StructLibrary.AccountStruct({
+        employeeStruct = StructLibrary.EmployeeStruct({
             name: _name,
-            accountAddress: address(this),
+            employeeAddress: address(this),
             parentDepartmentAddress: _parentDepartmentAddress
         });
     }
-    function getAccountStruct() public view returns(StructLibrary.AccountStruct memory){
-        return accountStruct;
+    function getEmployeeStruct() public view returns(StructLibrary.EmployeeStruct memory){
+        return employeeStruct;
     }
     function getDepartment() public view returns(Department){
-        return Department(accountStruct.parentDepartmentAddress);
+        return Department(employeeStruct.parentDepartmentAddress);
     }
     function vote(uint index, StructLibrary.Action opinion) public {
-        Department dep = Department(accountStruct.parentDepartmentAddress);
+        Department dep = Department(employeeStruct.parentDepartmentAddress);
         dep.validateIndex(index);
         if (opinion==StructLibrary.Action.APPROVE){
             dep.getBillByIndex(index).incrementPartiesAccepted();

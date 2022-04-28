@@ -17,9 +17,9 @@ library StructLibrary {
         uint deadline;
         Status status;
     }
-    struct AccountStruct {
+    struct EmployeeStruct {
         string name;
-        address accountAddress;
+        address employeeAddress;
         address parentDepartmentAddress;
     }
     struct DepartmentStruct {
