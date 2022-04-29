@@ -1,68 +1,47 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.7;
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {StructLibrary} from "./StructLibrary.sol";
-import "./Employee.sol";
 
-contract AccountManagerAudit {
+import "./AuditStorage.sol";
+
+contract AccountManagerAudit is AuditStorage{
     using StructLibrary for StructLibrary.Action;
-    mapping (address => Employee) public employees;
-    mapping (address => Department) public departments;
-    // mapping (address => Bill) public bills;
-    
-    Department private rootDepartment;
 
-    constructor (string memory rootDepartmentName) {
-        rootDepartment = new Department(rootDepartmentName);
-        departments[msg.sender] = rootDepartment;
+    string EMP_EXISTS = "Employee already assigned";
+    string DEP_EXISTS = "Departmemt already assigned";
+
+    constructor (string memory rootDepartmentName, uint fund) {
+        departments[msg.sender] = new Department(rootDepartmentName);
+        departments[msg.sender].createBill({
+            _name: "Goverment Fund",
+            _description: "This is the parent of all bills",
+            _threshold: 0,
+            _imagePath: "dummy",
+            _deadline: 0,
+            _amount: fund,
+            _fromBill: address(0),
+            _fromDepartment: address(0),
+            _toDepartment: address(departments[msg.sender])
+        });
     }
-    function getRootDepartMentAddress() public view returns (address) {
-        return address(rootDepartment);
-    }
-    function getDepartmentAddress() public view isDepartMentAssigned returns (address) {
-        return address(departments[msg.sender]);
-    }
-    function getEmployeeAddress() public view isEmployeeAssigned returns (address) {
-        return address(employees[msg.sender]);
-    }
-    modifier isEmployeeAssigned() {
-        require(address(employees[msg.sender])!=address(0), "No employees assigned");
+    modifier noAccountExists() {
+        require(address(employees[msg.sender])==address(0), EMP_EXISTS);
+        require(address(departments[msg.sender])==address(0), DEP_EXISTS);
         _;
     }
-    modifier isDepartMentAssigned() {
-        require(address(departments[msg.sender])!=address(0), "No departments assigned");
-        _;
-    }
-    function registerDepartment (address parentDepartMent, string memory depName) public {
-        Department rootDep = Department(parentDepartMent);
-        Department subDep = new Department(depName);
-        rootDep.addDepartment(address(subDep));
-        departments[msg.sender] = subDep;
-    }
-    function registerEmployee (address parentDepartMent, string memory empName) public {
+    function registerEmployee (address parentDepartMent, string memory empName) external 
+    noAccountExists
+     {
         Department rootDep = Department(parentDepartMent);
         Employee subEmp = new Employee(parentDepartMent, empName);
         rootDep.addEmployee(address(subEmp));
         employees[msg.sender] = subEmp;
     }
-    // function getSubDepartments(address depAddress) public view isDepartMent returns(StructLibrary.DepartmentStruct[] memory){
-    //     Department dep = Department(depAddress);
-    //     return dep.getSubDepartments();
-    // }
-    // function getAccounts(address depAddress) public view isDepartMent returns(StructLibrary.AccountStruct[] memory){
-    //     Department dep = Department(depAddress);
-    //     return dep.getAccounts();
-    // }
-    // function vote(uint index, StructLibrary.Action opinion) public isAccount {
-    //     accounts[tx.origin].vote(index, opinion);
-    // }
-    // function getBills(uint pageSize, uint pageNumber) public view returns (StructLibrary.BillStruct[] memory){
-    //     require (address(accounts[msg.sender])!=address(0) || address(departments[msg.sender])!=address(0), "Account does not exist");
-    //     if (address(accounts[msg.sender])!=address(0)){
-    //         return accounts[tx.origin].getDepartment().getBills(pageSize, pageNumber);
-    //     }
-    //     else{
-    //         return departments[tx.origin].getBills(pageSize, pageSize);
-    //     }
-    // }
+    function registerDepartment (address parentDepartMent, string memory depName) external
+    noAccountExists
+     {
+        Department rootDep = Department(parentDepartMent);
+        Department subDep = new Department(depName);
+        rootDep.addDepartment(address(subDep));
+        departments[msg.sender] = subDep;
+    }
 }

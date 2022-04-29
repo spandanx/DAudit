@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.7;
-import "./Department.sol";
+// import "./Department.sol";
 
 library StructLibrary {
     enum Status{ OPEN, ACCEPTED, REJECTED }
@@ -16,6 +16,11 @@ library StructLibrary {
         uint partiesRejected;
         uint deadline;
         Status status;
+        uint amount;
+        address fromBill;
+        address fromDepartment;
+        address toDepartment;
+        address billOwnAddress;
     }
     struct EmployeeStruct {
         string name;

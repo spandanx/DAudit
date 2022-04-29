@@ -1,44 +1,63 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
+import web3 from '../web3';
+import { useLocation } from "react-router-dom";
+
+import departmentABI from '../DepartmentABI';
+// import AccountManagerAudit from '../AccountManagerAudit';
 
 const Department = () => {
 
-  const billArr = [
-    {
-      name: "BillName",
-      description:"Some desc",
-      threshold:"70",
-      imagePath:"imagePath",
-      partiesAccepted:0,
-      partiesRejected:0,
-      deadline:110022,
-      status:"OPEN",
-      amount: 20
-    },
-    {
-      name: "BillName",
-      description:"Some desc",
-      threshold:"70",
-      imagePath:"imagePath",
-      partiesAccepted:0,
-      partiesRejected:0,
-      deadline:110022,
-      status:"OPEN",
-      amount: 20
-    },
-    {
-      name: "BillName",
-      description:"Some desc",
-      threshold:"70",
-      imagePath:"imagePath",
-      partiesAccepted:0,
-      partiesRejected:0,
-      deadline:110022,
-      status:"OPEN",
-      amount: 20
-    }
-  ];
+  const location = useLocation();
+  console.log("location department");
+  console.log(location);
+  const [bills, setBills] = useState([]);
+  // const [depAddress, setDepAddress] = useState('');
+  const [depContract, setDepContract] = useState('');
+  // const [bill1, setBill1] = useState([]);
 
-  const [bills, setBills] = useState(billArr);
+  const pageSize = 10;
+
+  // useEffect(()=>{
+  //   console.log("DEPARTMENT RELOADED");
+  //   fetchDepartmentAddress();
+  // },[]);
+
+  useEffect(()=>{
+    console.log("ADDRESS CHANGED, GENERATING NEW CONTRACT");
+    generateContract(location.state.depAddress);
+  },[location.state.depAddress]);
+  useEffect(()=>{
+    console.log("FETCHING BILLS");
+    getBills(0);
+  },[depContract]);
+
+  const generateContract = async (depAddress) => {
+    setDepContract(new web3.eth.Contract(departmentABI, depAddress));
+  }
+  const getBills = async(pageNumber) => {
+    let accounts = await web3.eth.getAccounts();
+    await depContract.methods.getBills(pageSize, pageNumber).call({
+      from: accounts[0]
+    }).then((response)=>{
+      console.log("Fetched Bills");
+      console.log(response);
+      setBills(response);
+    }).catch(error=>{
+      console.log("error: "+error);
+    });
+  }
+  // const fetchDepartmentAddress = async() => {
+  //   let accounts = await web3.eth.getAccounts();
+  //   await AccountManagerAudit.methods.departments(accounts[0]).call().then(function(response) {
+  //     // setAccountType(employeeString);
+  //     console.log("Department address found");
+  //     console.log(response);
+  //     setDepAddress(response);
+      
+  //   }).catch((err) => {
+  //     console.log("Error occured: "+err);
+  //   });
+  // }
 
   return (
     <div class="col-md-12">
@@ -54,7 +73,7 @@ const Department = () => {
           </ul>
         </div>
         <div class="col-md-11">
-        {billArr.map((bill)=> (
+        {bills.map((bill)=> (
           <div>
             <h5 class="card-header">{bill.name}</h5>
             <div class="card-body">

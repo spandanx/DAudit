@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 const TopNavBar = () => {
 
   const navigate = useNavigate();
+
+  const address0 = "0x0000000000000000000000000000000000000000";
   // const [accountType, setAccountType] = useState('');
 
   // const employeeString = "Employee";
@@ -26,25 +28,28 @@ const TopNavBar = () => {
     let accounts = await web3.eth.getAccounts();
     let errors = 0;
     // try{
-      await AccountManagerAudit.methods.getDepartmentAddress().call({
-        from: accounts[0]
-      }).then(function(response) {
+      await AccountManagerAudit.methods.departments(accounts[0]).call().then(function(response) {
         // setAccountType(employeeString);
-        // console.log("Department found");
-        navigate('/department');
+        console.log("Department found");
+        console.log(response);
+        if (response!=address0)
+          navigate('/department', {state: {depAddress:response}});
+        else
+          errors++;
       }).catch((err) => {
         // console.log("Department not found!");
-        errors++;
+        // errors++;
       });
-      await AccountManagerAudit.methods.getEmployeeAddress().call({
-        from: accounts[0]
-      }).then(function(response) {
+      await AccountManagerAudit.methods.employees(accounts[0]).call().then(function(response) {
         // setAccountType(departmentString);
         // console.log("Employee found!");
-        navigate('/employee');
+        if (response!=address0)
+          navigate('/employee', {state: {empAddress:response}});
+        else
+          errors++;
       }).catch((err) => {
         // console.log("Employee not found!");
-        errors++;
+        // errors++;
       });
       // console.log("accountType: "+accountType);
     // }
