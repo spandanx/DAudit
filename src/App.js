@@ -6,6 +6,7 @@ import LeftNavBar from './components/LeftNavBar';
 import Register from './components/Register';
 import Department from './components/Department';
 import Employee from './components/Employee';
+import AccountNotFound from './components/AccountNotFound';
 
 import {
   BrowserRouter as Router,
@@ -27,6 +28,7 @@ function App() {
             <Route path="/register" element={<Register/>}/>
             <Route path="/department" element={<Department/>}/>
             <Route path="/employee" element={<Employee/>}/>
+            <Route path="/not-found" element={<AccountNotFound/>}/>
           </Routes>
       </div>
     </Router>

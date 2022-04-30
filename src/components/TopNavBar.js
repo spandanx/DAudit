@@ -2,6 +2,8 @@ import React, {useState, useEffect} from 'react'
 import web3 from '../web3';
 import AccountManagerAudit from '../AccountManagerAudit';
 import { useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const TopNavBar = () => {
 
@@ -17,15 +19,51 @@ const TopNavBar = () => {
     console.log("Calling useEffect()");
     checkIfAccountsExists();
   }, []);
+
   window.ethereum.on('accountsChanged', function (accounts) {
     console.log("Account Changed");
     console.log(accounts);
-    checkIfAccountsExists();
+    // toast.info('Account change detected!', {
+    //   position: "bottom-right",
+    //   autoClose: 2000,
+    //   hideProgressBar: false,
+    //   closeOnClick: true,
+    //   pauseOnHover: true,
+    //   pauseOnFocusLoss: false,
+    //   draggable: true,
+    //   progress: undefined,
+    //   });
+    // getInfoToast("Account change detected!", 2000);
+      //navigating to other account.
+    // checkIfAccountsExists();
+    let timer1 = setTimeout(() => checkIfAccountsExists(), 500);
+    return () => {
+      clearTimeout(timer1);
+    };
   });
+
+  // const getInfoToast = (message, autoClose) => {
+  //   return toast.info(message, {
+  //     position: "bottom-right",
+  //     autoClose: autoClose,
+  //     hideProgressBar: false,
+  //     closeOnClick: true,
+  //     pauseOnHover: true,
+  //     pauseOnFocusLoss: false,
+  //     draggable: true,
+  //     progress: undefined,
+  //     });
+  // }
 
   const checkIfAccountsExists = async() => {
     console.log("Calling checkIfAccountsExists()");
     let accounts = await web3.eth.getAccounts();
+    // console.log("ACCOUNTS");
+    // console.log(accounts);
+    if (accounts.length==0){
+      navigate("/not-found");
+      return;
+    }
     let errors = 0;
     // try{
       await AccountManagerAudit.methods.departments(accounts[0]).call().then(function(response) {
@@ -63,17 +101,25 @@ const TopNavBar = () => {
     }
   }
   
+  // return (
+  //   <div>
+  //       {/* <Notification/> */}
+  //       {/* <Link to="/login" className="text-decoration-none"> */}
+  //         <nav className="navbar navbar-light bg-light">
+  //             <div className="container-fluid">
+  //                 <a className="navbar-brand">DAudit</a>
+  //             </div>
+  //         </nav>
+  //         <ToastContainer />
+  //       {/* </Link> */}
+  //     </div>
+  // )
   return (
-    <div>
-        {/* <Notification/> */}
-        {/* <Link to="/login" className="text-decoration-none"> */}
-          <nav className="navbar navbar-light bg-light">
-              <div className="container-fluid">
-                  <a className="navbar-brand">DAudit</a>
-              </div>
-          </nav>
-        {/* </Link> */}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">Navbar</a>
       </div>
+    </nav>
   )
 }
 

@@ -13,6 +13,7 @@ const Department = () => {
   const [bills, setBills] = useState([]);
   // const [depAddress, setDepAddress] = useState('');
   const [depContract, setDepContract] = useState('');
+  const [selectedTab, setSelectedTab] = useState('');
   // const [bill1, setBill1] = useState([]);
 
   const pageSize = 10;
@@ -36,6 +37,9 @@ const Department = () => {
   }
   const getBills = async(pageNumber) => {
     let accounts = await web3.eth.getAccounts();
+    if (!depContract){
+      return;
+    }
     await depContract.methods.getBills(pageSize, pageNumber).call({
       from: accounts[0]
     }).then((response)=>{
@@ -46,33 +50,10 @@ const Department = () => {
       console.log("error: "+error);
     });
   }
-  // const fetchDepartmentAddress = async() => {
-  //   let accounts = await web3.eth.getAccounts();
-  //   await AccountManagerAudit.methods.departments(accounts[0]).call().then(function(response) {
-  //     // setAccountType(employeeString);
-  //     console.log("Department address found");
-  //     console.log(response);
-  //     setDepAddress(response);
-      
-  //   }).catch((err) => {
-  //     console.log("Error occured: "+err);
-  //   });
-  // }
-
-  return (
-    <div class="col-md-12">
-      <div class="row">
-        <div class="col-md-1">
-          <ul class="nav flex-column">
-            <li class="nav-item">
-              <a class="nav-link" href="#">Approvals</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Bills</a>
-            </li>
-          </ul>
-        </div>
-        <div class="col-md-11">
+  
+  const billList = () => {
+    return (
+      <div class="col-md-11">
         {bills.map((bill)=> (
           <div>
             <h5 class="card-header">{bill.name}</h5>
@@ -84,6 +65,33 @@ const Department = () => {
           </div>
         ))}
         </div>
+    );
+  }
+
+  const approvalList = () => {
+    return (<></>);
+  }
+  const getHierarchy = () => {
+    return (<></>);
+  }
+
+  return (
+    <div class="col-md-12">
+      <div class="row">
+        <div class="col-md-1">
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link" onClick={()=>setSelectedTab("approvals")}>Approvals</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" onClick={()=>setSelectedTab("bills")}>Bills</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" onClick={()=>setSelectedTab("hierarchy")}>Hierarchy</a>
+            </li>
+          </ul>
+        </div>
+        {selectedTab=="bills"? billList() : selectedTab=="approvals"? approvalList() : selectedTab=="hierarchy"? getHierarchy() : <></>}
       </div>
   </div>
   )
