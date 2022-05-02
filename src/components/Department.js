@@ -3,6 +3,7 @@ import web3 from '../web3';
 import { useLocation } from "react-router-dom";
 
 import departmentABI from '../DepartmentABI';
+import DepartmentHierarchy from './DepartmentHierarchy';
 // import AccountManagerAudit from '../AccountManagerAudit';
 
 const Department = () => {
@@ -17,6 +18,15 @@ const Department = () => {
   // const [bill1, setBill1] = useState([]);
 
   const pageSize = 10;
+
+  let gdata = {
+    name: 'Parent',
+    children: [{
+      name: 'Child One'
+    }, {
+      name: 'Child Two'
+    }]
+  };
 
   // useEffect(()=>{
   //   console.log("DEPARTMENT RELOADED");
@@ -72,14 +82,19 @@ const Department = () => {
     return (<></>);
   }
   const getHierarchy = () => {
-    return (<></>);
+    return (<DepartmentHierarchy depAddress = {location.state.depAddress}/>);
   }
 
   return (
     <div class="col-md-12">
       <div class="row">
         <div class="col-md-1">
-          <ul class="nav flex-column">
+        <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+          <button onClick={()=>setSelectedTab("approvals")} class={'nav-link'+ (selectedTab=="approvals"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Approvals</button>
+          <button onClick={()=>setSelectedTab("bills")} class={'nav-link'+ (selectedTab=="bills"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Bills</button>
+          <button onClick={()=>setSelectedTab("hierarchy")} class={'nav-link'+ (selectedTab=="hierarchy"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Hierarchy</button>
+        </div>
+          {/* <ul class="nav flex-column">
             <li class="nav-item">
               <a class="nav-link" onClick={()=>setSelectedTab("approvals")}>Approvals</a>
             </li>
@@ -89,7 +104,7 @@ const Department = () => {
             <li class="nav-item">
               <a class="nav-link" onClick={()=>setSelectedTab("hierarchy")}>Hierarchy</a>
             </li>
-          </ul>
+          </ul> */}
         </div>
         {selectedTab=="bills"? billList() : selectedTab=="approvals"? approvalList() : selectedTab=="hierarchy"? getHierarchy() : <></>}
       </div>
