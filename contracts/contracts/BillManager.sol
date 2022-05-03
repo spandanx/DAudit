@@ -29,7 +29,18 @@ contract BillManager {
     {
         require(address(auditStorage.departments(msg.sender))!=address(0), "Departmemt does not exists");
         // Department dep = auditStorage.departments(msg.sender);
-        Bill bill = auditStorage.departments(msg.sender).createBill({
+        // Bill bill = Bill(auditStorage.departments(msg.sender).createBill({
+        //     _name: _name,
+        //     _description: _description,
+        //     _threshold: _threshold,
+        //     _imagePath: _imagePath,
+        //     _deadline: _deadline,
+        //     _amount: _amount,
+        //     _fromBill: _fromBill,
+        //     _fromDepartment: _fromDepartment,
+        //     _toDepartment: _toDepartment
+        // }));
+        Bill bill = new Bill({
             _name: _name,
             _description: _description,
             _threshold: _threshold,
@@ -55,7 +66,6 @@ contract BillManager {
     }
     function getBillFromMap(uint pageSize, uint pageNumber, address billAddress) public view returns(StructLibrary.BillStruct[] memory){
         StructLibrary.BillStruct[] memory result;
-        // Bill billInstance = Bill(billAddress);
         uint offset = pageSize * pageNumber;
         if (pageSize<=0 || pageNumber<0 || offset>=billMap[billAddress].length){
             return result;

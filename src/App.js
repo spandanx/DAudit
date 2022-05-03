@@ -2,7 +2,6 @@ import logo from './logo.svg';
 import './App.css';
 import './components/TopNavBar.js';
 import TopNavBar from './components/TopNavBar.js';
-import LeftNavBar from './components/LeftNavBar';
 import Register from './components/Register';
 import Department from './components/Department';
 import Employee from './components/Employee';

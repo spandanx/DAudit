@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react'
 import web3 from '../web3';
 import AccountManagerAudit from '../AccountManagerAudit';
 import { useNavigate } from "react-router-dom";
-import { toast, ToastContainer } from 'react-toastify';
+import {ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const TopNavBar = () => {
@@ -117,8 +117,9 @@ const TopNavBar = () => {
   return (
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">Navbar</a>
+        <a class="navbar-brand" href="#">DAudit</a>
       </div>
+      <ToastContainer/>
     </nav>
   )
 }

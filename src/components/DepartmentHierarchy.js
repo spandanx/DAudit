@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import Tree from 'react-d3-tree';
-import './DepartmentHierarchy.css';
+import './styles/DepartmentHierarchy.css';
 import web3 from '../web3';
 import departmentABI from '../DepartmentABI';
 
