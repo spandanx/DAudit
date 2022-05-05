@@ -17,4 +17,7 @@ contract Auditor {
     function getAuditorStruct() public view returns(StructLibrary.AuditorStruct memory){
         return auditorStruct;
     }
+    // function setParentDepartmentAddress (address parentDepartmentAddress) external {
+    //     auditorStruct.parentDepartmentAddress = parentDepartmentAddress;
+    // }
 }

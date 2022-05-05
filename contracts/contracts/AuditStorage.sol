@@ -10,4 +10,5 @@ contract AuditStorage {
     mapping (address => DepartmentManager) public departments;
     mapping (address => Employee) public employees;
     mapping (address => Auditor) public auditors;
+    mapping (address => bool) public approvedStatus;
 }

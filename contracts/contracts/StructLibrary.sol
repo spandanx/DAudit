@@ -93,4 +93,29 @@ library StructLibrary {
         }
         return result;
     }
+    function getApprovalsPaginate(uint pageSize, uint pageNumber, StructLibrary.ApprovalStruct[] storage approvalList) external view returns(StructLibrary.ApprovalStruct[] memory){
+        StructLibrary.ApprovalStruct[] memory result;
+        uint offset = pageSize * pageNumber;
+        if (pageSize<=0 || pageNumber<0 || offset>=approvalList.length){
+            return result;
+        }
+        result = new StructLibrary.ApprovalStruct[](pageSize<(approvalList.length-offset)? pageSize: (approvalList.length-offset));
+        for (uint i = offset; i<offset+result.length; i++){
+            result[i-offset] = approvalList[i];
+        }
+        return result;
+    }
+
+    function getAuditorsPaginate(uint pageSize, uint pageNumber, StructLibrary.AuditorStruct[] storage auditorsList) external view returns(StructLibrary.AuditorStruct[] memory){
+        StructLibrary.AuditorStruct[] memory result;
+        uint offset = pageSize * pageNumber;
+        if (pageSize<=0 || pageNumber<0 || offset>=auditorsList.length){
+            return result;
+        }
+        result = new StructLibrary.AuditorStruct[](pageSize<(auditorsList.length-offset)? pageSize: (auditorsList.length-offset));
+        for (uint i = offset; i<offset+result.length; i++){
+            result[i-offset] = auditorsList[i];
+        }
+        return result;
+    }
 }

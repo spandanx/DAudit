@@ -21,4 +21,7 @@ contract Employee {
     // function getDepartment() public view returns(Department){
     //     return Department(employeeStruct.parentDepartmentAddress);
     // }
+    // function setParentDepartmentAddress (address parentDepartmentAddress) external {
+    //     employeeStruct.parentDepartmentAddress = parentDepartmentAddress;
+    // }
 }
