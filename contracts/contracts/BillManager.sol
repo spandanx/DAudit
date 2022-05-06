@@ -8,8 +8,6 @@ contract BillManager {
 
     AuditStorage auditStorage;
 
-    mapping (address => Bill[]) billMap;
-
     constructor (address auditStorageAddress){
         auditStorage = AuditStorage(auditStorageAddress);
     }
@@ -23,7 +21,8 @@ contract BillManager {
         uint _amount,
         address _fromBill,
         address _fromDepartment,
-        address _toDepartment
+        address _toDepartment,
+        address tokenAddress
     ) 
     public 
     {
@@ -40,6 +39,7 @@ contract BillManager {
         //     _fromDepartment: _fromDepartment,
         //     _toDepartment: _toDepartment
         // }));
+        DepartmentManager parentDep = DepartmentManager(_fromDepartment);
         Bill bill = new Bill({
             _name: _name,
             _description: _description,
@@ -51,28 +51,22 @@ contract BillManager {
             _fromDepartment: _fromDepartment,
             _toDepartment: _toDepartment
         });
-        pushBillMap(_fromBill, bill);
+        parentDep.createBill(bill, tokenAddress, _amount);
+        auditStorage.pushBillMap(_fromBill, bill);
+        auditStorage.addBill(bill);
     }
-    function pushBillMap(address parentBillAddress, Bill bill) public {
-        if (billMap[parentBillAddress].length==0){
-            billMap[parentBillAddress] = [bill];
-        }
-        else{
-            billMap[parentBillAddress].push(bill);
-        }
-    }
-    function _min(uint a, uint b) internal pure returns (uint){
-        return a<b? a : b;
-    }
-    function getBillFromMap(uint pageSize, uint pageNumber, address billAddress) public view returns(StructLibrary.BillStruct[] memory){
+    // function _min(uint a, uint b) internal pure returns (uint){
+    //     return a<b? a : b;
+    // }
+    function getBillsFromMap(uint pageSize, uint pageNumber, address billAddress) public view returns(StructLibrary.BillStruct[] memory){
         StructLibrary.BillStruct[] memory result;
         uint offset = pageSize * pageNumber;
-        if (pageSize<=0 || pageNumber<0 || offset>=billMap[billAddress].length){
+        if (pageSize<=0 || pageNumber<0 || offset>=auditStorage.getBillLength(billAddress)){
             return result;
         }
-        result = new StructLibrary.BillStruct[](_min(pageSize, billMap[billAddress].length-offset));
+        result = new StructLibrary.BillStruct[](pageSize<(auditStorage.getBillLength(billAddress)-offset)? pageSize : (auditStorage.getBillLength(billAddress)-offset));
         for (uint i = offset; i<offset+result.length; i++){
-            result[i-offset] = billMap[billAddress][i].getBillStruct();
+            result[i-offset] = auditStorage.getBillByIndex(billAddress, i).getBillStruct();
         }
         return result;
     }

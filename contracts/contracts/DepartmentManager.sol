@@ -1,36 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.7;
-import {StructLibrary} from "./StructLibrary.sol";
-import "./Employee.sol";
-import "./Bill.sol";
-import "./Auditor.sol";
+// import {StructLibrary} from "./StructLibrary.sol";
+// import "./Employee.sol";
+// import "./Bill.sol";
+// import "./Auditor.sol";
+import "./DepartmentStorage.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract DepartmentManager{
-
-    using StructLibrary for StructLibrary.DepartmentStruct;
-    // using StructLibrary for StructLibrary.EmployeeStruct;
-
-    StructLibrary.DepartmentStruct departmentStruct;
-
-    mapping (address => DepartmentManager) subDepartmentsMap;
-    StructLibrary.DepartmentStruct[] subDepartmentsList;
-
-    mapping (address => Employee) public employeeMap;
-    StructLibrary.EmployeeStruct[] employeeList;
-
-    StructLibrary.AuditorStruct[] auditorList;
-    mapping (address => Auditor) auditorMap;
-
-    // address department_EmployeeManager;
-
-    StructLibrary.BillStruct[] bills;
-    mapping (address => Bill) public billMap;
-
-    StructLibrary.BillStruct[] funds;
-    mapping (address => Bill) fundMap;
-
-    StructLibrary.ApprovalStruct[] approvals;
-    mapping (address => StructLibrary.ApprovalStruct) approvalMap;
+contract DepartmentManager is DepartmentStorage{
 
     constructor (string memory _name) {
         // name = _name;
@@ -42,13 +19,36 @@ contract DepartmentManager{
         });
         // department_EmployeeManager = address(new Department_EmployeeManager());
     }
-    // function setParentDepartmentAddress (address parentDepartmentAddress) external {
-    //     departmentStruct.parentDepartmentAddress = parentDepartmentAddress;
-    // }
     function addApproval(StructLibrary.ApprovalStruct memory approval) external {
-        approvals.push(approval);
+        approvalList.push(approval);
         approvalMap[approval.accountAddress] = approval;
     }
+    // function approve(address approvalAddress, StructLibrary.Action action) external {
+    //     StructLibrary.ApprovalStruct memory apr = approvalMap[approvalAddress];
+    //     if (action==StructLibrary.Action.REJECT){
+    //         apr.status = StructLibrary.Status.REJECTED;
+    //         return;
+    //     }
+    //     if (apr.accountType==StructLibrary.AccountType.EMPLOYEE){
+    //         Employee emp = Employee(apr.accountAddress);
+    //         employeeList.push(emp.getEmployeeStruct());
+    //         employeeMap[address(emp)] = emp;
+    //     }
+    //     else if (apr.accountType==StructLibrary.AccountType.DEPARTMENT){
+    //         DepartmentManager dep = DepartmentManager(apr.accountAddress);
+    //         subDepartmentsList.push(dep.getDepartmentStruct());
+    //         subDepartmentsMap[address(dep)] = dep;
+    //     }
+    //     else if (apr.accountType==StructLibrary.AccountType.AUDITOR) {
+    //         Auditor aud = Auditor(apr.accountAddress);
+    //         auditorList.push(aud.getAuditorStruct());
+    //         auditorMap[address(aud)] = aud;
+    //     }
+    //     else{
+    //         revert("Wrong account type!");
+    //     }
+    //     apr.status = StructLibrary.Status.ACCEPTED;
+    // }
     function approve(address approvalAddress, StructLibrary.Action action) external {
         StructLibrary.ApprovalStruct memory apr = approvalMap[approvalAddress];
         if (action==StructLibrary.Action.REJECT){
@@ -56,19 +56,18 @@ contract DepartmentManager{
             return;
         }
         if (apr.accountType==StructLibrary.AccountType.EMPLOYEE){
-            Employee emp = Employee(apr.accountAddress);
-            employeeList.push(emp.getEmployeeStruct());
-            employeeMap[address(emp)] = emp;
+            // Employee emp = Employee(apr.accountAddress);
+            employeeList.push(approvalAddress);
         }
         else if (apr.accountType==StructLibrary.AccountType.DEPARTMENT){
-            DepartmentManager dep = DepartmentManager(apr.accountAddress);
-            subDepartmentsList.push(dep.getDepartmentStruct());
-            subDepartmentsMap[address(dep)] = dep;
+            // DepartmentManager dep = DepartmentManager(apr.accountAddress);
+            subDepartmentsList.push(approvalAddress);
+            // subDepartmentsMap[address(dep)] = dep;
         }
         else if (apr.accountType==StructLibrary.AccountType.AUDITOR) {
-            Auditor aud = Auditor(apr.accountAddress);
-            auditorList.push(aud.getAuditorStruct());
-            auditorMap[address(aud)] = aud;
+            // Auditor aud = Auditor(apr.accountAddress);
+            auditorList.push(approvalAddress);
+            // auditorMap[address(aud)] = aud;
         }
         else{
             revert("Wrong account type!");
@@ -102,6 +101,11 @@ contract DepartmentManager{
     // function getEmployees() public view returns (StructLibrary.EmployeeStruct[] memory) {
     //     return employeeList;
     // }
+    function createBill(Bill bill, address tokenAddress, uint amount) external {
+        IERC20 token = IERC20(tokenAddress);
+        token.transfer(address(bill), amount);
+        bills.push(address(bill));
+    }
     // function createBill(
     //     string memory _name,
     //     string memory _description,
@@ -129,118 +133,55 @@ contract DepartmentManager{
     //         return address(bill);
     // }
     // return bill address
-    function pushBills(Bill bill) public {
-        bills.push(bill.getBillStruct());
-    }
+    // function pushBills(Bill bill) public {
+    //     bills.push(bill.getBillStruct());
+    // }
     // function getBillByAddress(uint index) public view returns (Bill){
     //     return Bill(bills[index].billOwnAddress);
     // }
-    function getFundLength(uint t) public view returns(uint) {
-        //0=bill, 1=funds, 2=employee, 3=subDepartments
-        if (t==0)
+    function getLength(StructLibrary.DepartmentArrayType arrayType) public view returns(uint) {
+        //0=bill, 1=funds, 2=subDepartments
+        if (arrayType==StructLibrary.DepartmentArrayType.BILLS)
             return bills.length;
-        else if (t==1)
+        else if (arrayType==StructLibrary.DepartmentArrayType.FUNDS)
             return funds.length;
-        else if (t==2)
-            return employeeList.length;
-        else if (t==3)
+        else if (arrayType==StructLibrary.DepartmentArrayType.SUBDEPARTMENTS)
             return subDepartmentsList.length;
+        else if (arrayType==StructLibrary.DepartmentArrayType.EMPLOYEES)
+            return employeeList.length;
         else
             return 0;
         // return funds.length;
     }
+    // function pushFund(Bill bill) public {
+    //     funds.push(bill.getBillStruct());
+    //     fundMap[address(bill)] = bill;
+    // }
     function pushFund(Bill bill) public {
-        funds.push(bill.getBillStruct());
-        fundMap[address(bill)] = bill;
+        funds.push(address(bill));
+        // fundMap[address(bill)] = bill;
     }
-    function getFunds(uint pageSize, uint pageNumber) external view returns(StructLibrary.BillStruct[] memory) {
-        return StructLibrary.getFunds(pageSize, pageNumber, funds);
-        // uint offset = pageNumber * pageSize;
-        // uint length = funds.length;
-        // StructLibrary.BillStruct[] memory toReturn;
-        // if (pageSize<=0 || pageNumber<0 || offset>=length){
-        //     return toReturn;
-        // }
-        // uint endIndex = length;
-        // if (length>=offset){
-        //     endIndex = length - offset;
-        // }
-        // uint startIndex = 0;
-        // if (endIndex>=pageSize){
-        //     startIndex = endIndex - pageSize;
-        // }
-        // toReturn = new StructLibrary.BillStruct[](endIndex - startIndex);
-        // for (uint i = 0; i<toReturn.length; i++){
-        //     toReturn[i] = funds[endIndex-i-1];
-        // }
-        // return toReturn;
-    }
-    // function getBillLength() public view returns(uint) {
-    //     return bills.length;
+    // function getFunds(uint pageSize, uint pageNumber) external view returns(StructLibrary.BillStruct[] memory) {
+    //     return StructLibrary.getFunds(pageSize, pageNumber, funds);
     // }
-    function getApprovals(uint pageSize, uint pageNumber) external view returns(StructLibrary.ApprovalStruct[] memory) {
-        return StructLibrary.getApprovalsPaginate(pageSize, pageNumber, approvals);
-    }
-    function getAuditors(uint pageSize, uint pageNumber) external view returns(StructLibrary.AuditorStruct[] memory) {
-        return StructLibrary.getAuditorsPaginate(pageSize, pageNumber, auditorList);
-    }
-    function getBills(uint pageSize, uint pageNumber) public view returns(StructLibrary.BillStruct[] memory) {
-        return StructLibrary.getFunds(pageSize, pageNumber, bills);
-        // uint offset = pageNumber * pageSize;
-        // uint length = bills.length;
-        // StructLibrary.BillStruct[] memory toReturn;
-        // if (pageSize<=0 || pageNumber<0 || offset>=length){
-        //     return toReturn;
-        // }
-        // uint endIndex = length;
-        // if (length>=offset){
-        //     endIndex = length - offset;
-        // }
-        // uint startIndex = 0;
-        // if (endIndex>=pageSize){
-        //     startIndex = endIndex - pageSize;
-        // }
-        // toReturn = new StructLibrary.BillStruct[](endIndex - startIndex);
-        // for (uint i = 0; i<toReturn.length; i++){
-        //     toReturn[i] = bills[endIndex-i-1];
-        // }
-        // return toReturn;
-    }
-    // function getSubDepartmentsLength() public view returns (uint) {
-    //     return subDepartmentsList.length;
+    // function getApprovals(uint pageSize, uint pageNumber) external view returns(StructLibrary.ApprovalStruct[] memory) {
+    //     return StructLibrary.getApprovalsPaginate(pageSize, pageNumber, approvals);
     // }
-    function getSubDepartments(uint pageSize, uint pageNumber) external view returns(StructLibrary.DepartmentStruct[] memory){
-        return StructLibrary.getSubDepartmentsPaginate(pageSize, pageNumber, subDepartmentsList);
-        // StructLibrary.DepartmentStruct[] memory result;
-        // uint offset = pageSize * pageNumber;
-        // if (pageSize<=0 || pageNumber<0 || offset>=subDepartmentsList.length){
-        //     return result;
-        // }
-        // result = new StructLibrary.DepartmentStruct[](_min(pageSize, subDepartmentsList.length-offset));
-        // for (uint i = offset; i<offset+result.length; i++){
-        //     result[i-offset] = subDepartmentsList[i];
-        // }
-        // return result;
-    }
-    // function getEmployeesLength() public view returns (uint) {
-    //     return employeeList.length;
+    // function getAuditors(uint pageSize, uint pageNumber) external view returns(StructLibrary.AuditorStruct[] memory) {
+    //     return StructLibrary.getAuditorsPaginate(pageSize, pageNumber, auditorList);
     // }
-    function getEmployees(uint pageSize, uint pageNumber) external view returns(StructLibrary.EmployeeStruct[] memory){
-        return StructLibrary.getEmployeesPaginate(pageSize, pageNumber, employeeList);
-        // StructLibrary.EmployeeStruct[] memory result;
-        // uint offset = pageSize * pageNumber;
-        // if (pageSize<=0 || pageNumber<0 || offset>=employeeList.length){
-        //     return result;
-        // }
-        // result = new StructLibrary.EmployeeStruct[](_min(pageSize, employeeList.length-offset));
-        // for (uint i = offset; i<offset+result.length; i++){
-        //     result[i-offset] = employeeList[i];
-        // }
-        // return result;
-    }
-    function _min(uint a, uint b) internal pure returns (uint){
-        return a<b? a : b;
-    }
+    // function getBills(uint pageSize, uint pageNumber) public view returns(StructLibrary.BillStruct[] memory) {
+    //     return StructLibrary.getFunds(pageSize, pageNumber, bills);
+    // }
+    // function getSubDepartments(uint pageSize, uint pageNumber) external view returns(StructLibrary.DepartmentStruct[] memory){
+    //     return StructLibrary.getSubDepartmentsPaginate(pageSize, pageNumber, subDepartmentsList);
+    // }
+    // function getEmployees(uint pageSize, uint pageNumber) external view returns(StructLibrary.EmployeeStruct[] memory){
+    //     return StructLibrary.getEmployeesPaginate(pageSize, pageNumber, employeeList);
+    // }
+    // function _min(uint a, uint b) internal pure returns (uint){
+    //     return a<b? a : b;
+    // }
     // function validateAddress(uint index) public view validateIndexModifier(index){
         // require(bills.length<=index, "Index is out of range");
         // require(bills[index].getBillStruct().status == StructLibrary.Status.OPEN, "Bill is closed");
@@ -250,11 +191,11 @@ contract DepartmentManager{
     //     require(bills[index].getBillStruct().status == StructLibrary.Status.OPEN, "Bill is closed");
     //     _;
     // }
-    function validateAddressModifier(address addr) internal view {
-        require(address(billMap[addr])!=address(0), "No bill at the address");
-        require(billMap[addr].getBillStruct().status == StructLibrary.Status.OPEN, "Bill is closed");
-        // _;
-    }
+    // function validateAddressModifier(address addr) internal view {
+    //     require(address(billMap[addr])!=address(0), "No bill at the address");
+    //     require(billMap[addr].getBillStruct().status == StructLibrary.Status.OPEN, "Bill is closed");
+    //     // _;
+    // }
     // function transferBill(Bill bill) internal {
         // address toDepAddress = bill.getBillStruct().toDepartment;
         // Department dep = Department(toDepAddress);

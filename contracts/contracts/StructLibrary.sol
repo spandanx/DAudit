@@ -12,6 +12,8 @@ library StructLibrary {
 
     enum AccountType{ EMPLOYEE, DEPARTMENT, AUDITOR }
 
+    enum DepartmentArrayType{ BILLS, FUNDS, SUBDEPARTMENTS, EMPLOYEES }
+
     struct BillStruct {
         string name;
         string description;
@@ -48,10 +50,43 @@ library StructLibrary {
         address departmentAddress;
         uint balance;
     }
-    function getFunds(uint pageSize, uint pageNumber, StructLibrary.BillStruct[] storage funds) external view returns(StructLibrary.BillStruct[] memory) {
+    // function getFunds(uint pageSize, uint pageNumber, StructLibrary.BillStruct[] storage funds) external view returns(StructLibrary.BillStruct[] memory) {
+    //     uint offset = pageNumber * pageSize;
+    //     uint length = funds.length;
+    //     StructLibrary.BillStruct[] memory toReturn;
+    //     if (pageSize<=0 || pageNumber<0 || offset>=length){
+    //         return toReturn;
+    //     }
+    //     uint endIndex = length;
+    //     if (length>=offset){
+    //         endIndex = length - offset;
+    //     }
+    //     uint startIndex = 0;
+    //     if (endIndex>=pageSize){
+    //         startIndex = endIndex - pageSize;
+    //     }
+    //     toReturn = new StructLibrary.BillStruct[](endIndex - startIndex);
+    //     for (uint i = 0; i<toReturn.length; i++){
+    //         toReturn[i] = funds[endIndex-i-1];
+    //     }
+    //     return toReturn;
+    // }
+    // function getSubDepartmentsPaginate(uint pageSize, uint pageNumber, StructLibrary.DepartmentStruct[] storage subDepartmentsList) external view returns(StructLibrary.DepartmentStruct[] memory){
+    //     StructLibrary.DepartmentStruct[] memory result;
+    //     uint offset = pageSize * pageNumber;
+    //     if (pageSize<=0 || pageNumber<0 || offset>=subDepartmentsList.length){
+    //         return result;
+    //     }
+    //     result = new StructLibrary.DepartmentStruct[](pageSize<(subDepartmentsList.length-offset)? pageSize: (subDepartmentsList.length-offset));
+    //     for (uint i = offset; i<offset+result.length; i++){
+    //         result[i-offset] = subDepartmentsList[i];
+    //     }
+    //     return result;
+    // }
+    function getArrayFromEnd(uint pageSize, uint pageNumber, address[] storage list) external view returns(address[] memory) {
         uint offset = pageNumber * pageSize;
-        uint length = funds.length;
-        StructLibrary.BillStruct[] memory toReturn;
+        uint length = list.length;
+        address[] memory toReturn;
         if (pageSize<=0 || pageNumber<0 || offset>=length){
             return toReturn;
         }
@@ -63,36 +98,36 @@ library StructLibrary {
         if (endIndex>=pageSize){
             startIndex = endIndex - pageSize;
         }
-        toReturn = new StructLibrary.BillStruct[](endIndex - startIndex);
+        toReturn = new address[](endIndex - startIndex);
         for (uint i = 0; i<toReturn.length; i++){
-            toReturn[i] = funds[endIndex-i-1];
+            toReturn[i] = list[endIndex-i-1];
         }
         return toReturn;
     }
-    function getSubDepartmentsPaginate(uint pageSize, uint pageNumber, StructLibrary.DepartmentStruct[] storage subDepartmentsList) external view returns(StructLibrary.DepartmentStruct[] memory){
-        StructLibrary.DepartmentStruct[] memory result;
+    function getArrayFromStart(uint pageSize, uint pageNumber, address[] storage list) external view returns(address[] memory){
+        address[] memory result;
         uint offset = pageSize * pageNumber;
-        if (pageSize<=0 || pageNumber<0 || offset>=subDepartmentsList.length){
+        if (pageSize<=0 || pageNumber<0 || offset>=list.length){
             return result;
         }
-        result = new StructLibrary.DepartmentStruct[](pageSize<(subDepartmentsList.length-offset)? pageSize: (subDepartmentsList.length-offset));
+        result = new address[](pageSize<(list.length-offset)? pageSize: (list.length-offset));
         for (uint i = offset; i<offset+result.length; i++){
-            result[i-offset] = subDepartmentsList[i];
+            result[i-offset] = list[i];
         }
         return result;
     }
-    function getEmployeesPaginate(uint pageSize, uint pageNumber, StructLibrary.EmployeeStruct[] storage employeeList) external view returns(StructLibrary.EmployeeStruct[] memory){
-        StructLibrary.EmployeeStruct[] memory result;
-        uint offset = pageSize * pageNumber;
-        if (pageSize<=0 || pageNumber<0 || offset>=employeeList.length){
-            return result;
-        }
-        result = new StructLibrary.EmployeeStruct[](pageSize<(employeeList.length-offset)? pageSize: (employeeList.length-offset));
-        for (uint i = offset; i<offset+result.length; i++){
-            result[i-offset] = employeeList[i];
-        }
-        return result;
-    }
+    // function getEmployeesPaginate(uint pageSize, uint pageNumber, StructLibrary.EmployeeStruct[] storage employeeList) external view returns(StructLibrary.EmployeeStruct[] memory){
+    //     StructLibrary.EmployeeStruct[] memory result;
+    //     uint offset = pageSize * pageNumber;
+    //     if (pageSize<=0 || pageNumber<0 || offset>=employeeList.length){
+    //         return result;
+    //     }
+    //     result = new StructLibrary.EmployeeStruct[](pageSize<(employeeList.length-offset)? pageSize: (employeeList.length-offset));
+    //     for (uint i = offset; i<offset+result.length; i++){
+    //         result[i-offset] = employeeList[i];
+    //     }
+    //     return result;
+    // }
     function getApprovalsPaginate(uint pageSize, uint pageNumber, StructLibrary.ApprovalStruct[] storage approvalList) external view returns(StructLibrary.ApprovalStruct[] memory){
         StructLibrary.ApprovalStruct[] memory result;
         uint offset = pageSize * pageNumber;
@@ -106,16 +141,16 @@ library StructLibrary {
         return result;
     }
 
-    function getAuditorsPaginate(uint pageSize, uint pageNumber, StructLibrary.AuditorStruct[] storage auditorsList) external view returns(StructLibrary.AuditorStruct[] memory){
-        StructLibrary.AuditorStruct[] memory result;
-        uint offset = pageSize * pageNumber;
-        if (pageSize<=0 || pageNumber<0 || offset>=auditorsList.length){
-            return result;
-        }
-        result = new StructLibrary.AuditorStruct[](pageSize<(auditorsList.length-offset)? pageSize: (auditorsList.length-offset));
-        for (uint i = offset; i<offset+result.length; i++){
-            result[i-offset] = auditorsList[i];
-        }
-        return result;
-    }
+    // function getAuditorsPaginate(uint pageSize, uint pageNumber, StructLibrary.AuditorStruct[] storage auditorsList) external view returns(StructLibrary.AuditorStruct[] memory){
+    //     StructLibrary.AuditorStruct[] memory result;
+    //     uint offset = pageSize * pageNumber;
+    //     if (pageSize<=0 || pageNumber<0 || offset>=auditorsList.length){
+    //         return result;
+    //     }
+    //     result = new StructLibrary.AuditorStruct[](pageSize<(auditorsList.length-offset)? pageSize: (auditorsList.length-offset));
+    //     for (uint i = offset; i<offset+result.length; i++){
+    //         result[i-offset] = auditorsList[i];
+    //     }
+    //     return result;
+    // }
 }

@@ -8,7 +8,27 @@ import "./Auditor.sol";
 contract AuditStorage {
 
     mapping (address => DepartmentManager) public departments;
-    mapping (address => Employee) public employees;
-    mapping (address => Auditor) public auditors;
-    mapping (address => bool) public approvedStatus;
+    mapping (address => Employee) employees;
+    mapping (address => Auditor) auditors;
+    mapping (address => bool) approvedStatus;
+    mapping (address => Bill) public bills;
+    mapping (address => Bill[]) billMap;
+    
+    function addBill(Bill bill) external {
+        bills[address(bill)] = bill;
+    }
+    function pushBillMap(address parentBillAddress, Bill bill) external {
+        if (billMap[parentBillAddress].length==0){
+            billMap[parentBillAddress] = [bill];
+        }
+        else{
+            billMap[parentBillAddress].push(bill);
+        }
+    }
+    function getBillLength(address billAddress) external view returns (uint){
+        return billMap[billAddress].length;
+    }
+    function getBillByIndex(address billAddress, uint index) external view returns (Bill){
+        return billMap[billAddress][index];
+    }
 }

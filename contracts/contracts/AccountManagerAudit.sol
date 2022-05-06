@@ -5,31 +5,38 @@ import "./AuditStorage.sol";
 import "./DepartmentManager.sol";
 import {StructLibrary} from "./StructLibrary.sol";
 
-import "hardhat/console.sol";
+// import "hardhat/console.sol";
 
 contract AccountManagerAudit is AuditStorage{
+    
     using StructLibrary for StructLibrary.Action;
     using StructLibrary for StructLibrary.ApprovalStruct;
 
-    string EMP_EXISTS = "Employee already assigned";
-    string DEP_EXISTS = "Departmemt already assigned";
-    string AUD_EXISTS = "Auditor already assigned";
+    // string EMP_EXISTS = "Employee already assigned";
+    // string DEP_EXISTS = "Departmemt already assigned";
+    // string AUD_EXISTS = "Auditor already assigned";
 
     constructor (string memory rootDepartmentName) {
         departments[msg.sender] = new DepartmentManager(rootDepartmentName);
         //create the token here
     }
-    modifier noAccountExists() {
-        require(address(employees[msg.sender])==address(0), EMP_EXISTS);
-        require(address(departments[msg.sender])==address(0), DEP_EXISTS);
-        require(address(auditors[msg.sender])==address(0), AUD_EXISTS);
-        _;
-    }
+    // modifier noAccountExists() {
+    //     require(address(employees[msg.sender])==address(0), EMP_EXISTS);
+    //     require(address(departments[msg.sender])==address(0), DEP_EXISTS);
+    //     require(address(auditors[msg.sender])==address(0), AUD_EXISTS);
+    //     _;
+    // }
     function register (address parentDepartMent, string memory name, StructLibrary.AccountType accType) external 
-    noAccountExists
      {
-        console.log("Calling Register()");
-        console.log("AccType:");
+        // string memory mssg = "address already assigned";
+        // require(address(employees[msg.sender])==address(0), mssg);
+        // require(address(departments[msg.sender])==address(0), mssg);
+        // require(address(auditors[msg.sender])==address(0), mssg);
+        require(address(employees[msg.sender])==address(0));
+        require(address(departments[msg.sender])==address(0));
+        require(address(auditors[msg.sender])==address(0));
+        // console.log("Calling Register()");
+        // console.log("AccType:");
         // console.log(accType);
         DepartmentManager rootDep = DepartmentManager(parentDepartMent);
         address addr;
@@ -46,7 +53,8 @@ contract AccountManagerAudit is AuditStorage{
             addr = address(auditors[msg.sender]);
         }
         else{
-            revert("Wrong account type!");
+            // revert("Wrong account type!");
+            revert();
         }
         StructLibrary.ApprovalStruct memory apr = StructLibrary.ApprovalStruct({
             accountType : accType,
@@ -101,5 +109,46 @@ contract AccountManagerAudit is AuditStorage{
     //     Auditor aud = new Auditor(parentDepartMent, audName);
     //     rootDep.addAuditor(address(aud));
     //     auditors[msg.sender] = aud;
+    // }
+    // function vote(address billAddress, StructLibrary.Action opinion, address departmentAddress, address employeeAddress, address tokenAddress) public {
+    //     // validateAddressModifier(billAddress);
+    //     //mark employee who have already voted
+    //     DepartmentManager dep = DepartmentManager(departmentAddress);
+    //     Employee emp = Employee(employeeAddress);
+    //     Bill bill = Bill(billAddress);
+        
+    //     // // require(address(bills[billAddress])!=address(0), "No bill at the address");
+    //     // require(bill.getBillStruct().fromDepartment==departmentAddress, "Department does not have the bill");
+    //     // require(bill.getBillStruct().status == StructLibrary.Status.OPEN, "Bill is closed");
+    //     // // require(address(employeeMap[msg.sender])!=address(0), "Employee is not eligible to vote");
+    //     // require(emp.getEmployeeStruct().parentDepartmentAddress==departmentAddress, "Employee is not part of the department");
+    //     // require(dep.getLength(StructLibrary.DepartmentArrayType.EMPLOYEES)>0, "There should be at least one approver");
+    //     // require(address(bills[billAddress])!=address(0), "No bill at the address");
+    //     require(bill.getBillStruct().fromDepartment==departmentAddress);
+    //     require(bill.getBillStruct().status == StructLibrary.Status.OPEN);
+    //     // require(address(employeeMap[msg.sender])!=address(0), "Employee is not eligible to vote");
+    //     require(emp.getEmployeeStruct().parentDepartmentAddress==departmentAddress);
+    //     require(dep.getLength(StructLibrary.DepartmentArrayType.EMPLOYEES)>0);
+    //     //should be msg.sender
+    //     // dep.validateIndex(index);
+    //     if (opinion==StructLibrary.Action.APPROVE){
+    //         bill.incrementPartiesAccepted();
+    //         if ((bill.getBillStruct().partiesAccepted/dep.getLength(StructLibrary.DepartmentArrayType.EMPLOYEES))*100>bill.getBillStruct().threshold){
+    //             // transferBill(billMap[billAddress]);
+    //             address toDepAddress = bill.getBillStruct().toDepartment;
+    //             DepartmentManager dep = DepartmentManager(toDepAddress);
+    //             bill.transferToken(bill.getBillStruct().toDepartment, tokenAddress);
+    //             dep.pushFund(bill);
+    //             bill.setStatus(StructLibrary.Status.ACCEPTED);
+    //         }
+    //     }
+    //     if (opinion==StructLibrary.Action.REJECT){
+    //         bill.incrementPartiesRejected();
+    //         if ((bill.getBillStruct().partiesRejected/dep.getLength(StructLibrary.DepartmentArrayType.EMPLOYEES))*100>100-bill.getBillStruct().threshold){
+    //             bill.transferToken(bill.getBillStruct().fromDepartment, tokenAddress);
+    //             bill.setStatus(StructLibrary.Status.REJECTED);
+    //         }
+    //     }
+    //     // handleApproval(billAddress);
     // }
 }

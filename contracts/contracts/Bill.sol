@@ -2,6 +2,7 @@
 pragma solidity ^0.8.7;
 import {StructLibrary} from "./StructLibrary.sol";
 import "./DepartmentManager.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract Bill {
     using StructLibrary for StructLibrary.BillStruct;
@@ -46,30 +47,39 @@ contract Bill {
     function incrementPartiesRejected() public {
         billStruct.partiesRejected++;
     }
-    function vote(StructLibrary.Action opinion) public {
-        // validateAddressModifier(billAddress);
-        DepartmentManager parentBill = DepartmentManager(billStruct.fromDepartment);
-        DepartmentManager childBill = DepartmentManager(billStruct.toDepartment);
-        require(address(parentBill.employeeMap(msg.sender))!=address(0), "Employee is not eligible to vote");
-        require(parentBill.getFundLength(2)!=0, "There should be at least one approver");
-        //should be msg.sender
-        // dep.validateIndex(index);
-        if (opinion==StructLibrary.Action.APPROVE){
-            parentBill.billMap(address(this)).incrementPartiesAccepted();
-            if ((parentBill.billMap(address(this)).getBillStruct().partiesAccepted/parentBill.getFundLength(2))*100>parentBill.billMap(address(this)).getBillStruct().threshold){
-                // transferBill(billMap[billAddress]);
-                // address toDepAddress = parentBill.billMap(address(this)).getBillStruct().toDepartment;
-                // DepartmentManager dep = DepartmentManager(toDepAddress);
-                childBill.pushFund(parentBill.billMap(address(this)));
-                //
-                parentBill.billMap(address(this)).setStatus(StructLibrary.Status.ACCEPTED);
-            }
-        }
-        if (opinion==StructLibrary.Action.REJECT){
-            parentBill.billMap(address(this)).incrementPartiesRejected();
-            if ((parentBill.billMap(address(this)).getBillStruct().partiesRejected/parentBill.getFundLength(2))*100>100-parentBill.billMap(address(this)).getBillStruct().threshold)
-                parentBill.billMap(address(this)).setStatus(StructLibrary.Status.REJECTED);
-        }
-        // handleApproval(billAddress);
+    function transferToken(address destination, address tokenAddress) external{
+        IERC20 token = IERC20(tokenAddress);
+        token.transfer(destination, billStruct.amount);
     }
+    // function vote(StructLibrary.Action opinion) public {
+    //     require(billStruct.status == StructLibrary.Status.OPEN, "Bill is closed");
+    //     DepartmentManager parentDepartment = DepartmentManager(billStruct.fromDepartment);
+    //     DepartmentManager childDepartment = DepartmentManager(billStruct.toDepartment);
+    //     require(address(parentDepartment.employeeMap(msg.sender))!=address(0), "Employee is not eligible to vote");
+    //     require(parentDepartment.getFundLength(2)!=0, "There should be at least one approver");
+    //     //should be msg.sender
+    //     // dep.validateIndex(index);
+    //     if (opinion==StructLibrary.Action.APPROVE){
+    //         // parentBill.billMap(address(this)).incrementPartiesAccepted();
+    //         incrementPartiesAccepted();
+    //         // if ((parentBill.billMap(address(this)).getBillStruct().partiesAccepted/parentBill.getFundLength(2))*100>parentBill.billMap(address(this)).getBillStruct().threshold){
+    //             if ((billStruct.partiesAccepted/parentDepartment.getFundLength(2))*100>billStruct.threshold){
+    //             // transferBill(billMap[billAddress]);
+    //             // address toDepAddress = parentBill.billMap(address(this)).getBillStruct().toDepartment;
+    //             // DepartmentManager dep = DepartmentManager(toDepAddress);
+    //             childDepartment.pushFund(this);
+    //             //
+    //             parentDepartment.billMap(address(this)).setStatus(StructLibrary.Status.ACCEPTED);
+    //         }
+    //     }
+    //     if (opinion==StructLibrary.Action.REJECT){
+    //         // parentBill.billMap(address(this)).incrementPartiesRejected();
+    //         incrementPartiesRejected();
+    //         // if ((parentBill.billMap(address(this)).getBillStruct().partiesRejected/parentBill.getFundLength(2))*100>100-parentBill.billMap(address(this)).getBillStruct().threshold)
+    //         //     parentBill.billMap(address(this)).setStatus(StructLibrary.Status.REJECTED);
+    //         if ((billStruct.partiesRejected/parentDepartment.getFundLength(2))*100>100-billStruct.threshold)
+    //             billStruct.status = StructLibrary.Status.REJECTED;
+    //     }
+    //     // handleApproval(billAddress);
+    // }
 }
