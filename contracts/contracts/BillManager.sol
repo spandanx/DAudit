@@ -27,6 +27,7 @@ contract BillManager {
     public 
     {
         require(address(auditStorage.departments(msg.sender))!=address(0), "Departmemt does not exists");
+        require(_threshold>=0 && _threshold<=100, "Threshold should be between 0 to 100");
         // Department dep = auditStorage.departments(msg.sender);
         // Bill bill = Bill(auditStorage.departments(msg.sender).createBill({
         //     _name: _name,
@@ -40,6 +41,8 @@ contract BillManager {
         //     _toDepartment: _toDepartment
         // }));
         DepartmentManager parentDep = DepartmentManager(_fromDepartment);
+        Bill parentBill = Bill(_fromBill);
+
         Bill bill = new Bill({
             _name: _name,
             _description: _description,
@@ -51,7 +54,8 @@ contract BillManager {
             _fromDepartment: _fromDepartment,
             _toDepartment: _toDepartment
         });
-        parentDep.createBill(bill, tokenAddress, _amount);
+        parentBill.transferToken(address(bill), tokenAddress, _amount);
+        parentDep.createBill(bill);
         auditStorage.pushBillMap(_fromBill, bill);
         auditStorage.addBill(bill);
     }

@@ -47,9 +47,9 @@ contract Bill {
     function incrementPartiesRejected() public {
         billStruct.partiesRejected++;
     }
-    function transferToken(address destination, address tokenAddress) external{
+    function transferToken(address destination, address tokenAddress, uint amount) external{
         IERC20 token = IERC20(tokenAddress);
-        token.transfer(destination, billStruct.amount);
+        token.transfer(destination, amount);
     }
     // function vote(StructLibrary.Action opinion) public {
     //     require(billStruct.status == StructLibrary.Status.OPEN, "Bill is closed");

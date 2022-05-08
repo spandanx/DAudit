@@ -4,6 +4,7 @@ pragma solidity ^0.8.7;
 import "./AuditStorage.sol";
 import "./DepartmentManager.sol";
 import {StructLibrary} from "./StructLibrary.sol";
+import "./BillCoin.sol";
 
 // import "hardhat/console.sol";
 
@@ -12,12 +13,31 @@ contract AccountManagerAudit is AuditStorage{
     using StructLibrary for StructLibrary.Action;
     using StructLibrary for StructLibrary.ApprovalStruct;
 
+    address public tokenAddress;
+    address public billAddress;
+
     // string EMP_EXISTS = "Employee already assigned";
     // string DEP_EXISTS = "Departmemt already assigned";
     // string AUD_EXISTS = "Auditor already assigned";
 
     constructor (string memory rootDepartmentName) {
         departments[msg.sender] = new DepartmentManager(rootDepartmentName);
+        BLT token = new BLT();
+        tokenAddress = address(token);
+        uint amount = token.totalSupply();
+        Bill bill = new Bill({
+            _name: "Goverment Fund",
+            _description:"Root fund",
+            _threshold:70,
+            _imagePath:"dummy",
+            _deadline:1651896709,
+            _amount: amount,
+            _fromBill: address(0),
+            _fromDepartment: address(0),
+            _toDepartment: address(departments[msg.sender])
+        });
+        token.transfer(address(bill), amount);
+        billAddress = address(bill);
         //create the token here
     }
     // modifier noAccountExists() {

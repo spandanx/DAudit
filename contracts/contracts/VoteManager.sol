@@ -9,6 +9,9 @@ contract VoteManager {
     constructor (address auditStorageAddress){
         auditStorage = AuditStorage(auditStorageAddress);
     }
+    // function setAuditStorage(address auditStorageAddress) external{
+    //     auditStorage = AuditStorage(auditStorageAddress);
+    // }
 
     function vote(address billAddress, StructLibrary.Action opinion, address departmentAddress, address employeeAddress, address tokenAddress) public {
         // validateAddressModifier(billAddress);
@@ -36,16 +39,16 @@ contract VoteManager {
             if ((bill.getBillStruct().partiesAccepted/dep.getLength(StructLibrary.DepartmentArrayType.EMPLOYEES))*100>bill.getBillStruct().threshold){
                 // transferBill(billMap[billAddress]);
                 address toDepAddress = bill.getBillStruct().toDepartment;
-                DepartmentManager dep = DepartmentManager(toDepAddress);
-                bill.transferToken(bill.getBillStruct().toDepartment, tokenAddress);
-                dep.pushFund(bill);
+                DepartmentManager childDep = DepartmentManager(toDepAddress);
+                // bill.transferToken(bill.getBillStruct().toDepartment, tokenAddress);
+                childDep.pushFund(bill);
                 bill.setStatus(StructLibrary.Status.ACCEPTED);
             }
         }
         if (opinion==StructLibrary.Action.REJECT){
             bill.incrementPartiesRejected();
             if ((bill.getBillStruct().partiesRejected/dep.getLength(StructLibrary.DepartmentArrayType.EMPLOYEES))*100>100-bill.getBillStruct().threshold){
-                bill.transferToken(bill.getBillStruct().fromDepartment, tokenAddress);
+                bill.transferToken(bill.getBillStruct().fromBill, tokenAddress, bill.getBillStruct().amount);
                 bill.setStatus(StructLibrary.Status.REJECTED);
             }
         }

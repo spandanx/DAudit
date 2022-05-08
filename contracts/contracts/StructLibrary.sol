@@ -12,7 +12,7 @@ library StructLibrary {
 
     enum AccountType{ EMPLOYEE, DEPARTMENT, AUDITOR }
 
-    enum DepartmentArrayType{ BILLS, FUNDS, SUBDEPARTMENTS, EMPLOYEES }
+    enum DepartmentArrayType{ BILLS, FUNDS, SUBDEPARTMENTS, EMPLOYEES, AUDITORS }
 
     struct BillStruct {
         string name;

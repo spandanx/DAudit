@@ -46,6 +46,10 @@ contract DepartmentStorage{
             return reverse? StructLibrary.getArrayFromEnd(pageSize, pageNumber, funds): StructLibrary.getArrayFromStart(pageSize, pageNumber, funds);
         else if (arrayType==StructLibrary.DepartmentArrayType.SUBDEPARTMENTS)
             return reverse? StructLibrary.getArrayFromEnd(pageSize, pageNumber, subDepartmentsList): StructLibrary.getArrayFromStart(pageSize, pageNumber, subDepartmentsList);
+        else if (arrayType==StructLibrary.DepartmentArrayType.EMPLOYEES)
+            return reverse? StructLibrary.getArrayFromEnd(pageSize, pageNumber, employeeList): StructLibrary.getArrayFromStart(pageSize, pageNumber, employeeList);
+        else if (arrayType==StructLibrary.DepartmentArrayType.AUDITORS)
+            return reverse? StructLibrary.getArrayFromEnd(pageSize, pageNumber, auditorList): StructLibrary.getArrayFromStart(pageSize, pageNumber, auditorList);
         else
             return new address[](0);
     }

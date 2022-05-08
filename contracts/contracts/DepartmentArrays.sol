@@ -4,9 +4,11 @@ import {StructLibrary} from "./StructLibrary.sol";
 import "./DepartmentStorage.sol";
 import "./AuditStorage.sol";
 
-contract DepartmentArrays {
+import "hardhat/console.sol";
 
-    function getFunds(uint pageSize, uint pageNumber, address depAddress, address auditStorage) external view returns(StructLibrary.BillStruct[] memory) {
+
+contract DepartmentArrays {
+    function getFunds(uint pageSize, uint pageNumber, address depAddress) external view returns(StructLibrary.BillStruct[] memory) {
         DepartmentStorage dep = DepartmentStorage(depAddress);
         AuditStorage aud = AuditStorage(depAddress);
         address[] memory addr = dep.getArray(pageSize, pageNumber, StructLibrary.DepartmentArrayType.FUNDS, true);
@@ -20,15 +22,15 @@ contract DepartmentArrays {
         DepartmentStorage dep = DepartmentStorage(depAddress);
         return dep.getApprovals(pageSize, pageNumber);
     }
-    // function getAuditors(uint pageSize, uint pageNumber, address depAddress) external view returns(StructLibrary.AuditorStruct[] memory) {
-    //     DepartmentStorage dep = DepartmentStorage(depAddress);
-    //     address[] memory addr = dep.getArray(pageSize, pageNumber, StructLibrary.DepartmentArrayType.FUNDS, true);
-    //     StructLibrary.AuditorStruct[] memory toReturn = new StructLibrary.AuditorStruct[](addr.length);
-    //     for (uint i = 0; i<addr.length; i++){
-    //         toReturn[i] = dep.auditors[addr[i]].getAuditorStruct();
-    //     }
-    //     return toReturn;
-    // }
+    function getAuditors(uint pageSize, uint pageNumber, address depAddress) external view returns(StructLibrary.AuditorStruct[] memory) {
+        DepartmentStorage dep = DepartmentStorage(depAddress);
+        address[] memory addr = dep.getArray(pageSize, pageNumber, StructLibrary.DepartmentArrayType.AUDITORS, true);
+        StructLibrary.AuditorStruct[] memory toReturn = new StructLibrary.AuditorStruct[](addr.length);
+        for (uint i = 0; i<addr.length; i++){
+            toReturn[i] = Auditor(addr[i]).getAuditorStruct();
+        }
+        return toReturn;
+    }
     function getBills(uint pageSize, uint pageNumber, address depAddress) public view returns(StructLibrary.BillStruct[] memory) {
         DepartmentStorage dep = DepartmentStorage(depAddress);
         AuditStorage aud = AuditStorage(depAddress);
@@ -41,15 +43,20 @@ contract DepartmentArrays {
     }
     function getSubDepartments(uint pageSize, uint pageNumber, address depAddress) external view returns(StructLibrary.DepartmentStruct[] memory){
         DepartmentStorage dep = DepartmentStorage(depAddress);
-        AuditStorage aud = AuditStorage(depAddress);
         address[] memory addr = dep.getArray(pageSize, pageNumber, StructLibrary.DepartmentArrayType.SUBDEPARTMENTS, true);
         StructLibrary.DepartmentStruct[] memory toReturn = new StructLibrary.DepartmentStruct[](addr.length);
         for (uint i = 0; i<addr.length; i++){
-            toReturn[i] = aud.departments(addr[i]).getDepartmentStruct();
+            toReturn[i] = DepartmentManager(addr[i]).getDepartmentStruct();
         }
         return toReturn;
     }
-    // function getEmployees(uint pageSize, uint pageNumber, address depAddress) external view returns(StructLibrary.EmployeeStruct[] memory){
-    //     // return StructLibrary.getEmployeesPaginate(pageSize, pageNumber, employeeList);
-    // }
+    function getEmployees(uint pageSize, uint pageNumber, address depAddress) external view returns(StructLibrary.EmployeeStruct[] memory){
+        DepartmentStorage dep = DepartmentStorage(depAddress);
+        address[] memory addr = dep.getArray(pageSize, pageNumber, StructLibrary.DepartmentArrayType.EMPLOYEES, true);
+        StructLibrary.EmployeeStruct[] memory toReturn = new StructLibrary.EmployeeStruct[](addr.length);
+        for (uint i = 0; i<addr.length; i++){
+            toReturn[i] = Employee(addr[i]).getEmployeeStruct();
+        }
+        return toReturn;
+    }
 }

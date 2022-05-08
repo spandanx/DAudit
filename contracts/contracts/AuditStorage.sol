@@ -10,13 +10,16 @@ contract AuditStorage {
     mapping (address => DepartmentManager) public departments;
     mapping (address => Employee) employees;
     mapping (address => Auditor) auditors;
-    mapping (address => bool) approvedStatus;
+    mapping (address => bool) public approvedStatus;
     mapping (address => Bill) public bills;
     mapping (address => Bill[]) billMap;
     
     function addBill(Bill bill) external {
         bills[address(bill)] = bill;
     }
+    // function getDepartmentsByAddress(address depAddress) view external returns(DepartmentManager){
+    //     return departments[depAddress];
+    // }
     function pushBillMap(address parentBillAddress, Bill bill) external {
         if (billMap[parentBillAddress].length==0){
             billMap[parentBillAddress] = [bill];

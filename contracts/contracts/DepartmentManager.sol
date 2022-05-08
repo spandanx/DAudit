@@ -5,7 +5,7 @@ pragma solidity ^0.8.7;
 // import "./Bill.sol";
 // import "./Auditor.sol";
 import "./DepartmentStorage.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+// import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract DepartmentManager is DepartmentStorage{
 
@@ -74,7 +74,7 @@ contract DepartmentManager is DepartmentStorage{
         }
         apr.status = StructLibrary.Status.ACCEPTED;
     }
-    function getDepartmentStruct() external view returns(StructLibrary.DepartmentStruct memory) {
+    function getDepartmentStruct() public view returns(StructLibrary.DepartmentStruct memory) {
         return departmentStruct;
     }
     // function addDepartment (address subDep) public {
@@ -101,9 +101,9 @@ contract DepartmentManager is DepartmentStorage{
     // function getEmployees() public view returns (StructLibrary.EmployeeStruct[] memory) {
     //     return employeeList;
     // }
-    function createBill(Bill bill, address tokenAddress, uint amount) external {
-        IERC20 token = IERC20(tokenAddress);
-        token.transfer(address(bill), amount);
+    function createBill(Bill bill) external {
+        // IERC20 token = IERC20(tokenAddress);
+        // token.transfer(address(bill), amount);
         bills.push(address(bill));
     }
     // function createBill(
@@ -149,6 +149,8 @@ contract DepartmentManager is DepartmentStorage{
             return subDepartmentsList.length;
         else if (arrayType==StructLibrary.DepartmentArrayType.EMPLOYEES)
             return employeeList.length;
+        else if (arrayType==StructLibrary.DepartmentArrayType.AUDITORS)
+            return auditorList.length;
         else
             return 0;
         // return funds.length;
