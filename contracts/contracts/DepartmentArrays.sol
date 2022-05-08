@@ -10,11 +10,11 @@ import "hardhat/console.sol";
 contract DepartmentArrays {
     function getFunds(uint pageSize, uint pageNumber, address depAddress) external view returns(StructLibrary.BillStruct[] memory) {
         DepartmentStorage dep = DepartmentStorage(depAddress);
-        AuditStorage aud = AuditStorage(depAddress);
+        // AuditStorage aud = AuditStorage(depAddress);
         address[] memory addr = dep.getArray(pageSize, pageNumber, StructLibrary.DepartmentArrayType.FUNDS, true);
         StructLibrary.BillStruct[] memory toReturn = new StructLibrary.BillStruct[](addr.length);
         for (uint i = 0; i<addr.length; i++){
-            toReturn[i] = aud.bills(addr[i]).getBillStruct();
+            toReturn[i] = Bill(addr[i]).getBillStruct();
         }
         return toReturn;
     }
@@ -33,11 +33,11 @@ contract DepartmentArrays {
     }
     function getBills(uint pageSize, uint pageNumber, address depAddress) public view returns(StructLibrary.BillStruct[] memory) {
         DepartmentStorage dep = DepartmentStorage(depAddress);
-        AuditStorage aud = AuditStorage(depAddress);
+        // AuditStorage aud = AuditStorage(depAddress);
         address[] memory addr = dep.getArray(pageSize, pageNumber, StructLibrary.DepartmentArrayType.BILLS, true);
         StructLibrary.BillStruct[] memory toReturn = new StructLibrary.BillStruct[](addr.length);
         for (uint i = 0; i<addr.length; i++){
-            toReturn[i] = aud.bills(addr[i]).getBillStruct();
+            toReturn[i] = Bill(addr[i]).getBillStruct();
         }
         return toReturn;
     }

@@ -8,7 +8,7 @@ import "./Auditor.sol";
 contract AuditStorage {
 
     mapping (address => DepartmentManager) public departments;
-    mapping (address => Employee) employees;
+    mapping (address => Employee) public employees;
     mapping (address => Auditor) auditors;
     mapping (address => bool) public approvedStatus;
     mapping (address => Bill) public bills;

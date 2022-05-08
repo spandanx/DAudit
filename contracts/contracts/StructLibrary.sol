@@ -13,6 +13,8 @@ library StructLibrary {
     enum AccountType{ EMPLOYEE, DEPARTMENT, AUDITOR }
 
     enum DepartmentArrayType{ BILLS, FUNDS, SUBDEPARTMENTS, EMPLOYEES, AUDITORS }
+    
+    enum Vote{ DID_NOT_VOTE, REJECTED, ACCEPTED }
 
     struct BillStruct {
         string name;

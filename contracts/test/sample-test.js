@@ -1,4 +1,4 @@
-const { expect } = require("chai");
+const { expect, assert } = require("chai");
 const { ethers } = require("hardhat");
 
 // describe("token transfer test", () => {
@@ -44,10 +44,16 @@ const { ethers } = require("hardhat");
 //   });
 // });
 describe("create bill", () => {
-  let govt, dep1, emp1;
-  let accountManagerAudit, billManager, billCoin, library;
+  let govt, dep1, emp1, emp2;
+  let accountManagerAudit, billManager, billCoin, library, voteManager, depArraysManager;
+  let accType,action,billAddress,rootDepartmentAddress,tokenAddress,initialbalance,department1Address;
+  let balanceAfterBill,bill1Address,balanceofBill1,diff,childFund,billSize;
   beforeEach(async()=>{
-    [govt, dep1, emp1, _] = await ethers.getSigners();
+    [govt, dep1, emp1, emp2, _] = await ethers.getSigners();
+
+    let blCoin = accountManagerAudit = await ethers.getContractFactory("BLT");
+    billCoin = await blCoin.deploy();
+    await billCoin.deployed();
 
     const Library = await ethers.getContractFactory("StructLibrary");
     library = await Library.deploy();
@@ -68,21 +74,26 @@ describe("create bill", () => {
     billManager = await billM.deploy(accountManagerAudit.address);
     await billManager.deployed();
     // console.log("TEST4");
+    let vm = await ethers.getContractFactory("VoteManager");
+    voteManager = await vm.deploy();
+    await voteManager.deployed();
 
-  });
-  it("Should approve vote", async()=>{
+    let depArrays = await ethers.getContractFactory("DepartmentArrays");
+    depArraysManager = await depArrays.deploy();
+    await depArraysManager.deployed();
 
-    let accType = {EMPLOYEE:0, DEPARTMENT:1, AUDITOR:2 };
+    accType = {EMPLOYEE:0, DEPARTMENT:1, AUDITOR:2 };
+    action = {REJECT:0, ACCEPT:1};
 
     // console.log("TEST");
-    let billAddress = await accountManagerAudit.billAddress();
+    billAddress = await accountManagerAudit.billAddress();
     // console.log(billAddress); 
-    let rootDepartmentAddress = await accountManagerAudit.departments(govt.address);
+    rootDepartmentAddress = await accountManagerAudit.departments(govt.address);
     // console.log("TEST2");
-    let tokenAddress = await accountManagerAudit.tokenAddress();
+    tokenAddress = await accountManagerAudit.tokenAddress();
 
-    let blCoin = await ethers.getContractFactory("BLT");
-    let initialbalance = await blCoin.attach( tokenAddress ).balanceOf(billAddress);
+    // let blCoin = await ethers.getContractFactory("BLT");
+    initialbalance = await blCoin.attach( tokenAddress ).balanceOf(billAddress);
 
     await accountManagerAudit.connect(dep1).register(
       rootDepartmentAddress,
@@ -90,30 +101,106 @@ describe("create bill", () => {
       accType.DEPARTMENT
     );
     // console.log("TEST3");
-    let department1Address = await accountManagerAudit.departments(dep1.address);
+    department1Address = await accountManagerAudit.departments(dep1.address);
     // console.log(accountManagerAudit.billAddress());
     // console.log("TEST4");
     // console.log(billManager);
-    let transferTokens = 200;
+    billSize = await depArraysManager.getBills(10,0,rootDepartmentAddress);
+    console.log("BillSize: "+billSize);
+    expect(billSize.length).to.equal(0);
+    let transferTokenAmount = 200;
     await billManager.createBill(
       "Bill1",
       "Bill description",
       70,
       "Dummy",
       1651895311,
-      transferTokens,
+      transferTokenAmount,
       billAddress,
       rootDepartmentAddress,
       department1Address,
       tokenAddress
     );
+    billSize = await depArraysManager.getBills(10,0,rootDepartmentAddress);
+    expect(billSize.length).to.equal(1);
     // console.log("TEST5");
-    console.log("Initial balance of govt BIll: "+initialbalance);
-    let balanceAfterBill  = await blCoin.attach( tokenAddress ).balanceOf(billAddress);
+    console.log("Initial balance of govt Bill: "+initialbalance);
+    balanceAfterBill  = await blCoin.attach( tokenAddress ).balanceOf(billAddress);
     console.log("balance of govt BIll after bill creation: "+balanceAfterBill);
-    let bill1Address = await accountManagerAudit.getBillByIndex(billAddress, 0);
-    let balanceofBill1  = await blCoin.attach( tokenAddress ).balanceOf(bill1Address);
+    bill1Address = await accountManagerAudit.getBillByIndex(billAddress, 0);
+    balanceofBill1  = await blCoin.attach( tokenAddress ).balanceOf(bill1Address);
     console.log("balance of bill1: "+balanceofBill1);
+    // console.log("This");
+    // console.log(initialbalance);
+    // console.log("- this");
+    // console.log(ethers.BigNumber.toNumber(balanceAfterBill));
+    // console.log("should be equal to");
+    // console.log(initialbalance.sub(balanceAfterBill));
+    // console.log("should be true");
+    diff = initialbalance.sub(balanceAfterBill);
+    // console.log(diff.eq(balanceofBill1));
+    expect(diff.eq(balanceofBill1)).to.be.true;
+    childFund = await depArraysManager.getFunds(10, 0, department1Address);
+    // console.log("childFunds");
+    // console.log(childFund);
+    expect(childFund.length).to.equal(0);
+    //Registering and approving employee
+    await accountManagerAudit.connect(emp1).register(
+      rootDepartmentAddress,
+      "Employee1",
+      accType.EMPLOYEE
+    );
+  });
+  it("Should approve vote", async()=>{
+    let employeeAddress = await accountManagerAudit.employees(emp1.address);
+    await accountManagerAudit.approve(rootDepartmentAddress, employeeAddress, action.ACCEPT);
+
+    await voteManager.vote(bill1Address, action.ACCEPT, rootDepartmentAddress, tokenAddress, employeeAddress);
+    childFund = await depArraysManager.getFunds(10, 0, department1Address);
+    console.log("childFunds");
+    console.log(childFund);
+    expect(childFund.length).to.equal(1);
+  });
+  it("Should reject vote with one employee", async()=>{
+    let employeeAddress = await accountManagerAudit.employees(emp1.address);
+    await accountManagerAudit.approve(rootDepartmentAddress, employeeAddress, action.ACCEPT);
+
+    await voteManager.vote(bill1Address, action.REJECT, rootDepartmentAddress, tokenAddress, employeeAddress);
+    childFund = await depArraysManager.getFunds(10, 0, department1Address);
+    console.log("childFunds");
+    console.log(childFund);
+    expect(childFund.length).to.equal(0);
+  });
+  it("Should not accept vote with two employee and one employee accepting", async()=>{
+    await accountManagerAudit.connect(emp2).register(
+      rootDepartmentAddress,
+      "Employee1",
+      accType.EMPLOYEE
+    );
+    let employeeAddress = await accountManagerAudit.employees(emp1.address);
+    let employeeAddress2 = await accountManagerAudit.employees(emp2.address);
+    await accountManagerAudit.approve(rootDepartmentAddress, employeeAddress, action.ACCEPT);
+    await accountManagerAudit.approve(rootDepartmentAddress, employeeAddress2, action.ACCEPT);
+
+    await voteManager.vote(bill1Address, action.ACCEPT, rootDepartmentAddress, tokenAddress, employeeAddress);
+    childFund = await depArraysManager.getFunds(10, 0, department1Address);
+    console.log("childFunds");
+    console.log(childFund);
+    expect(childFund.length).to.equal(0);
+  });
+  it("Same voter cannot vote again", async()=>{
+    await accountManagerAudit.connect(emp2).register(
+      rootDepartmentAddress,
+      "Employee1",
+      accType.EMPLOYEE
+    );
+    let employeeAddress = await accountManagerAudit.employees(emp1.address);
+    let employeeAddress2 = await accountManagerAudit.employees(emp2.address);
+    await accountManagerAudit.approve(rootDepartmentAddress, employeeAddress, action.ACCEPT);
+    await accountManagerAudit.approve(rootDepartmentAddress, employeeAddress2, action.ACCEPT);
+
+    await voteManager.vote(bill1Address, action.ACCEPT, rootDepartmentAddress, tokenAddress, employeeAddress);
+    await expect(voteManager.vote(bill1Address, action.ACCEPT, rootDepartmentAddress, tokenAddress, employeeAddress)).to.be.revertedWith("Already voted");
   });
 });
 

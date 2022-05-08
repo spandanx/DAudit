@@ -8,6 +8,8 @@ contract Bill {
     using StructLibrary for StructLibrary.BillStruct;
     
     StructLibrary.BillStruct billStruct;
+    mapping(address=>StructLibrary.Vote) public voteMapping;
+
     constructor(
         string memory _name,
         string memory _description,
@@ -34,6 +36,9 @@ contract Bill {
             toDepartment: _toDepartment,
             billOwnAddress: address(this)
         });
+    }
+    function setVoteMapping(address employeeAddress, StructLibrary.Vote action) public {
+        voteMapping[employeeAddress] = action;
     }
     function getBillStruct() public view returns (StructLibrary.BillStruct memory){
         return billStruct;
