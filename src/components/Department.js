@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import web3 from '../web3';
 import { useLocation } from "react-router-dom";
 
-import departmentABI from '../DepartmentABI';
+import departmentABI from '../ABIs/DepartmentABI';
 import DepartmentHierarchy from './DepartmentHierarchy';
 // import AccountManagerAudit from '../AccountManagerAudit';
 import { AiOutlineReload } from "react-icons/ai";

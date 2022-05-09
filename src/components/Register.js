@@ -1,12 +1,12 @@
 import React, {useState, useEffect} from 'react';
 import { TiTick } from "react-icons/ti";
 import { BsExclamation } from "react-icons/bs";
-import AccountManagerAudit from '../AccountManagerAudit';
+import AccountManagerAudit from '../CreatedContracts/AccountManagerAudit';
 import web3 from '../web3';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from "react-router-dom";
-import departmentABI from '../DepartmentABI';
+import departmentABI from '../ABIs/DepartmentABI';
 
 const Register = () => {
 

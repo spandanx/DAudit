@@ -1,4 +1,4 @@
-const employeeABI = 
+const auditorABI = 
 [
 	{
 		"inputs": [
@@ -18,20 +18,7 @@ const employeeABI =
 	},
 	{
 		"inputs": [],
-		"name": "getDepartment",
-		"outputs": [
-			{
-				"internalType": "contract Department",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getEmployeeStruct",
+		"name": "getAuditorStruct",
 		"outputs": [
 			{
 				"components": [
@@ -42,7 +29,7 @@ const employeeABI =
 					},
 					{
 						"internalType": "address",
-						"name": "employeeAddress",
+						"name": "auditorAddress",
 						"type": "address"
 					},
 					{
@@ -51,7 +38,7 @@ const employeeABI =
 						"type": "address"
 					}
 				],
-				"internalType": "struct StructLibrary.EmployeeStruct",
+				"internalType": "struct StructLibrary.AuditorStruct",
 				"name": "",
 				"type": "tuple"
 			}
@@ -60,5 +47,4 @@ const employeeABI =
 		"type": "function"
 	}
 ];
-
-export default employeeABI;
+export default auditorABI;

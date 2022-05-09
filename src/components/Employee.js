@@ -2,8 +2,8 @@ import React, {useState, useEffect} from 'react';
 import web3 from '../web3';
 import { useLocation } from "react-router-dom";
 
-import departmentABI from '../DepartmentABI';
-import employeeABI from '../EmployeeABI';
+import departmentABI from '../ABIs/DepartmentABI';
+import employeeABI from '../ABIs/EmployeeABI';
 // import AccountManagerAudit from '../AccountManagerAudit';
 
 const Employee = () => {

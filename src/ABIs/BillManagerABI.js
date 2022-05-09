@@ -1,12 +1,4 @@
-import web3 from './web3';
-// const { abi, evm } = require('./compile');
-
-const address = "0x2522d8A843057A4835f6F81b25EF509AE538d88B";
-//0x43F43B8206566D873856852FBf940E3b19766f1e
-
-console.log(address);
-
-const abi = 
+const BillManagerABI = 
 [
 	{
 		"inputs": [
@@ -65,6 +57,11 @@ const abi =
 				"internalType": "address",
 				"name": "_toDepartment",
 				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "tokenAddress",
+				"type": "address"
 			}
 		],
 		"name": "createBill",
@@ -90,7 +87,7 @@ const abi =
 				"type": "address"
 			}
 		],
-		"name": "getBillFromMap",
+		"name": "getBillsFromMap",
 		"outputs": [
 			{
 				"components": [
@@ -167,25 +164,6 @@ const abi =
 		],
 		"stateMutability": "view",
 		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "parentBillAddress",
-				"type": "address"
-			},
-			{
-				"internalType": "contract Bill",
-				"name": "bill",
-				"type": "address"
-			}
-		],
-		"name": "pushBillMap",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
 	}
-]
-
-export default new web3.eth.Contract(abi, address);
+];
+export default BillManagerABI;

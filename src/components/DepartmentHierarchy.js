@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import Tree from 'react-d3-tree';
 import './styles/DepartmentHierarchy.css';
 import web3 from '../web3';
-import departmentABI from '../DepartmentABI';
+import departmentABI from '../ABIs/DepartmentABI';
 
 // This is a simplified example of an org chart with a depth of 2.
 // Note how deeper levels are defined recursively via the `children` property.
