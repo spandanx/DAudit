@@ -24,6 +24,8 @@ library StructLibrary {
         uint partiesAccepted;
         uint partiesRejected;
         uint deadline;
+        uint createdOn;
+        uint acceptedOrRejectedOn;
         Status status;
         uint amount;
         address fromBill;

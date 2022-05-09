@@ -30,15 +30,16 @@ contract AccountManagerAudit is AuditStorage{
             _description:"Root fund",
             _threshold:70,
             _imagePath:"dummy",
-            _deadline:1651896709,
+            _deadline:block.timestamp,
+            _acceptedOrRejectedOn:block.timestamp,
             _amount: amount,
             _fromBill: address(0),
             _fromDepartment: address(0),
             _toDepartment: address(departments[msg.sender])
         });
         token.transfer(address(bill), amount);
-        billAddress = address(bill);
-        //create the token here
+        // billAddress = address(bill);
+        departments[msg.sender].pushFund(bill);
     }
     // modifier noAccountExists() {
     //     require(address(employees[msg.sender])==address(0), EMP_EXISTS);

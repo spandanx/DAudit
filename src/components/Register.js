@@ -7,6 +7,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from "react-router-dom";
 import departmentABI from '../ABIs/DepartmentABI';
+import AccountType from './Enums';
 
 const Register = () => {
 
@@ -175,7 +176,8 @@ const Register = () => {
         });
         console.log(accounts);
         try{
-      await AccountManagerAudit.methods.registerEmployee(emp_depAddress, emp_accountName).send({
+      // await AccountManagerAudit.methods.registerEmployee(emp_depAddress, emp_accountName).send({
+        await AccountManagerAudit.methods.register(emp_depAddress, emp_accountName, AccountType.EMPLOYEE).send({
         from: accounts[0]
       }).then((response)=>{
         toast.success('Registered as employee!', {
@@ -243,7 +245,8 @@ const Register = () => {
         });
         console.log(accounts);
         try{
-      await AccountManagerAudit.methods.registerDepartment(dep_depAddress, dep_accountName).send({
+      // await AccountManagerAudit.methods.registerDepartment(dep_depAddress, dep_accountName).send({
+      await AccountManagerAudit.methods.register(dep_depAddress, dep_accountName, AccountType.DEPARTMENT).send({
         from: accounts[0]
       }).then((response)=>{
         toast.success('Registered as departmnet!', {

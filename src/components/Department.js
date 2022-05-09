@@ -10,6 +10,7 @@ import { BsPlusCircle } from "react-icons/bs";
 // import {pointerHover} from './styles/cursor.js';
 import { Modal, Button } from "react-bootstrap";
 import Pagination from './Pagination';
+import DepartmentArrays from '../CreatedContracts/DepartmentArrays';
 
 const Department = () => {
 
@@ -17,6 +18,8 @@ const Department = () => {
   console.log("location department");
   console.log(location);
   const [bills, setBills] = useState([]);
+  const [funds, setFunds] = useState([]);
+  const [approvals, setApprovals] = useState([]);
   // const [depAddress, setDepAddress] = useState('');
   const [depContract, setDepContract] = useState('');
   const [selectedTab, setSelectedTab] = useState('bills');
@@ -29,16 +32,32 @@ const Department = () => {
 
   const pageSize = 10;
 
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPageBill, setCurrentPageBill] = useState(0);
+  const [currentPageFund, setCurrentPageBillFund] = useState(0);
+  const [currentPageApproval, setCurrentPageBillapproval] = useState(0);
 
-  let gdata = {
-    name: 'Parent',
-    children: [{
-      name: 'Child One'
-    }, {
-      name: 'Child Two'
-    }]
-  };
+  const [fundsCreateBill, setFundsCreateBill] = useState([]);
+  const [currentPageFundCreateBill, setCurrentPageFundCreateBill] = useState(0);
+
+  const [departmentsCreateBill, setDepartmentsCreateBill] = useState([]);
+  const [currentPageDepCreateBill, setCurrentPageDepCreateBill] = useState(0);
+
+  //create new bill form
+  const [fundAddress, setFundAddress] = useState('');
+  const [subDepAddress, setSubDepAddress] = useState('');
+  const [billName, setBillName] = useState('');
+  const [description, setDescription] = useState('');
+  const [amount, setAmount] = useState('');
+  const [toAddress, setToAddress] = useState('');
+
+  // let gdata = {
+  //   name: 'Parent',
+  //   children: [{
+  //     name: 'Child One'
+  //   }, {
+  //     name: 'Child Two'
+  //   }]
+  // };
 
   // useEffect(()=>{
   //   console.log("DEPARTMENT RELOADED");
@@ -51,7 +70,13 @@ const Department = () => {
   },[location.state.depAddress]);
   useEffect(()=>{
     console.log("FETCHING BILLS");
-    getBills(currentPage);
+    getBills(currentPageBill);
+    getFunds(currentPageFund);
+    getApprovals(currentPageApproval);
+    getFundsOfCreateBill(currentPageFundCreateBill);
+    getSubDeptsOfCreateBill(currentPageDepCreateBill);
+    
+
   },[depContract]);
 
   const generateContract = async (depAddress) => {
@@ -62,7 +87,8 @@ const Department = () => {
     if (!depContract){
       return;
     }
-    await depContract.methods.getBills(pageSize, pageNumber).call({
+    // await depContract.methods.getBills(pageSize, pageNumber).call({
+      await DepartmentArrays.methods.getBills(pageSize, pageNumber, location.state.depAddress).call({
       from: accounts[0]
     }).then((response)=>{
       console.log("Fetched Bills");
@@ -72,13 +98,91 @@ const Department = () => {
       console.log("error: "+error);
     });
   }
-
-  const refreshBills = async() => {
-    console.log("refreshing");
-    getBills(currentPage);
+  const getFunds = async(pageNumber) => {
+    let accounts = await web3.eth.getAccounts();
+    if (!depContract){
+      return;
+    }
+    // await depContract.methods.getBills(pageSize, pageNumber).call({
+      await DepartmentArrays.methods.getFunds(pageSize, pageNumber, location.state.depAddress).call({
+      from: accounts[0]
+    }).then((response)=>{
+      console.log("Fetched Funds");
+      console.log(response);
+      setFunds(response);
+    }).catch(error=>{
+      console.log("error: "+error);
+    });
+  }
+  const getApprovals = async(pageNumber) => {
+    let accounts = await web3.eth.getAccounts();
+    if (!depContract){
+      return;
+    }
+    // await depContract.methods.getBills(pageSize, pageNumber).call({
+      await DepartmentArrays.methods.getApprovals(pageSize, pageNumber, location.state.depAddress).call({
+      from: accounts[0]
+    }).then((response)=>{
+      console.log("Fetched Approvals");
+      console.log(response);
+      setApprovals(response);
+    }).catch(error=>{
+      console.log("error: "+error);
+    });
   }
 
-  const getTopBar = () => {
+
+  const getFundsOfCreateBill = async(pageNumber) => {
+    console.log("Called getFundsOfCreateBill()");
+    let accounts = await web3.eth.getAccounts();
+    if (!depContract){
+      return;
+    }
+    // await depContract.methods.getBills(pageSize, pageNumber).call({
+      await DepartmentArrays.methods.getFunds(pageSize, pageNumber, location.state.depAddress).call({
+      from: accounts[0]
+    }).then((response)=>{
+      console.log("Fetched Funds");
+      console.log(response);
+      setFundsCreateBill(response);
+    }).catch(error=>{
+      console.log("error: "+error);
+    });
+  }
+
+  const getSubDeptsOfCreateBill = async(pageNumber) => {
+    console.log("Called getFundsOfCreateBill()");
+    let accounts = await web3.eth.getAccounts();
+    if (!depContract){
+      return;
+    }
+    // await depContract.methods.getBills(pageSize, pageNumber).call({
+      await DepartmentArrays.methods.getSubDepartments(pageSize, pageNumber, location.state.depAddress).call({
+      from: accounts[0]
+    }).then((response)=>{
+      console.log("Fetched subDepartments");
+      console.log(response);
+      setDepartmentsCreateBill(response);
+    }).catch(error=>{
+      console.log("error: "+error);
+    });
+  }
+
+  const refreshBills = async() => {
+    console.log("refreshing bills");
+    getBills(currentPageBill);
+  }
+
+  const refreshFunds = async() => {
+    console.log("refreshing funds");
+    getFunds(currentPageFund);
+  }
+  const refreshApprovals = async() => {
+    console.log("refreshing approvals");
+    getApprovals(currentPageApproval);
+  }
+
+  const getTopBarBill = () => {
     return (
       <ul class="nav justify-content-between border-top border-bottom p-2 my-2">
           <li class="nav-item justify-content-between">
@@ -96,6 +200,34 @@ const Department = () => {
       </ul>
     );
   }
+  const getTopBarFund = () => {
+    return (
+      <ul class="nav justify-content-between border-top border-bottom p-2 my-2">
+          <li class="nav-item justify-content-between">
+            <button class="btn btn-none" onClick={()=>refreshFunds()}>
+              <AiOutlineReload/>
+            </button>
+          </li>
+          <li class="nav-item mx-2">
+            <Pagination pageEnd={8} pageTabs={3} function={(item)=>nestedFunc(item)}/>
+          </li>
+      </ul>
+    );
+  }
+  const getTopBarApprovals = () => {
+    return (
+      <ul class="nav justify-content-between border-top border-bottom p-2 my-2">
+          <li class="nav-item justify-content-between">
+            <button class="btn btn-none" onClick={()=>refreshApprovals()}>
+              <AiOutlineReload/>
+            </button>
+          </li>
+          <li class="nav-item mx-2">
+            <Pagination pageEnd={8} pageTabs={3} function={(item)=>nestedFunc(item)}/>
+          </li>
+      </ul>
+    );
+  }
 
   const nestedFunc = (num) => {
     console.log("Calling nestedFunc()");
@@ -103,6 +235,7 @@ const Department = () => {
   }
   
   const getModal = () => {
+    // getFundsOfCreateBill(currentPageFundCreateBill);
     return (
       <Modal show={showModal} onHide={handleClose}>
         <Modal.Header closeButton>
@@ -111,11 +244,11 @@ const Department = () => {
         <Modal.Body>
           <div class="row">
             <div class="col-md-7">
-              <select class="form-select form-select-sm my-2" aria-label=".form-select-sm example">
-                <option selected>Select fund</option>
-                <option value="1">One</option>
-                <option value="2">Two</option>
-                <option value="3">Three</option>
+              <select class="form-select form-select-sm my-2" aria-label=".form-select-sm example" onChange={(event)=>setFundAddress(event.target.value)}>
+                <option defaultValue>Select fund</option>
+                {fundsCreateBill.map((fund)=>(
+                  <option value={fund.billOwnAddress}>{fund.name}</option>
+                ))}
               </select>
             </div>
             <div class="col-md-3 py-1">
@@ -125,20 +258,34 @@ const Department = () => {
           <div class="row">
             <div class="col-md-7">
               <select class="form-select form-select-sm my-2" aria-label=".form-select-sm example">
-                <option selected>Select Department</option>
-                <option value="1">One</option>
-                <option value="2">Two</option>
-                <option value="3">Three</option>
+                <option defaultValue>Select Department</option>
+                {/* {departmentsCreateBill.map((dept)=>(
+                  <option value={fund.billOwnAddress}>{fund.name}</option>
+                ))} */}
               </select>
               </div>
               <div class="col-md-3 py-1">
                 <Pagination pageEnd={8} pageTabs={3} function={(item)=>nestedFunc(item)}/>
               </div>
             </div>
-          <input type="text" class="form-control select2-offscreen" id="accountName" placeholder="Department name" tabIndex="-1"
-                      // value={dep_accountName} 
-                      // onChange={(event) => setDep_accountName(event.target.value)}
-                  />
+            <div class="row my-3">
+                <input type="text" class="form-control select2-offscreen" id="accountName" placeholder="Bill name" tabIndex="-1"
+                      value={billName} 
+                      onChange={(event) => setBillName(event.target.value)}
+                />
+            </div>
+            <div class="row my-3">
+                <textarea class="form-control" id="message" name="body" rows="3" placeholder="Description"
+                    value={description} 
+                    onChange={(event) => setDescription(event.target.value)}
+                ></textarea>
+            </div>
+            <div class="row my-3">
+                <input type="text" class="form-control select2-offscreen" id="accountName" placeholder="Amount" tabIndex="-1"
+                      value={amount}
+                      onChange={(event) => setAmount(event.target.value)}
+                />
+            </div>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
@@ -155,7 +302,7 @@ const Department = () => {
   const billList = () => {
     return (
       <div class="col-md-11">
-        {getTopBar()}
+        {getTopBarBill()}
         {getModal()}
         {bills.map((bill)=> (
           <div>
@@ -171,8 +318,42 @@ const Department = () => {
     );
   }
 
+  const fundList = () => {
+    return (
+      <div class="col-md-11">
+        {getTopBarFund()}
+        {getModal()}
+        {funds.map((fund)=> (
+          <div>
+            <h5 class="card-header">{fund.name}</h5>
+            <div class="card-body">
+              <h5 class="card-title">{fund.description}</h5>
+              <p class="card-text">{fund.imagePath}</p>
+              <a href="#" class="btn btn-primary">{fund.amount}</a>
+            </div>
+          </div>
+        ))}
+        </div>
+    );
+  }
+
   const approvalList = () => {
-    return (<></>);
+    return (
+      <div class="col-md-11">
+        {getTopBarApprovals()}
+        {getModal()}
+        {approvals.map((appr)=> (
+          <div>
+            <h5 class="card-header">{appr.accountAddress}</h5>
+            <div class="card-body">
+              <h5 class="card-title">{appr.accountType}</h5>
+              <p class="card-text">{appr.status}</p>
+              {/* <a href="#" class="btn btn-primary">{fund.amount}</a> */}
+            </div>
+          </div>
+        ))}
+        </div>
+    );
   }
   const getHierarchy = () => {
     return (<DepartmentHierarchy depAddress = {location.state.depAddress}/>);
@@ -184,6 +365,7 @@ const Department = () => {
         <div class="col-md-1">
         <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
           <button onClick={()=>setSelectedTab("approvals")} class={'nav-link'+ (selectedTab=="approvals"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Approvals</button>
+          <button onClick={()=>setSelectedTab("funds")} class={'nav-link'+ (selectedTab=="funds"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Funds</button>
           <button onClick={()=>setSelectedTab("bills")} class={'nav-link'+ (selectedTab=="bills"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Bills</button>
           <button onClick={()=>setSelectedTab("hierarchy")} class={'nav-link'+ (selectedTab=="hierarchy"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Hierarchy</button>
         </div>
@@ -199,7 +381,8 @@ const Department = () => {
             </li>
           </ul> */}
         </div>
-        {selectedTab=="bills"? billList() : selectedTab=="approvals"? approvalList() : selectedTab=="hierarchy"? getHierarchy() : <></>}
+
+        {selectedTab=="bills"? billList() : selectedTab=="funds"? fundList() : selectedTab=="approvals"? approvalList() : selectedTab=="hierarchy"? getHierarchy() : <></>}
       </div>
   </div>
   )

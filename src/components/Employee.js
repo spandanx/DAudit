@@ -5,6 +5,7 @@ import { useLocation } from "react-router-dom";
 import departmentABI from '../ABIs/DepartmentABI';
 import employeeABI from '../ABIs/EmployeeABI';
 // import AccountManagerAudit from '../AccountManagerAudit';
+import DepartmentArrays from '../CreatedContracts/DepartmentArrays';
 
 const Employee = () => {
 
@@ -14,8 +15,9 @@ const Employee = () => {
   console.log("location employee");
   console.log(location);
   const [bills, setBills] = useState([]);
-  // const [depAddress, setDepAddress] = useState('');
-  const [depContract, setDepContract] = useState('');
+  const [depAddress, setDepAddress] = useState('');
+  // const [depContract, setDepContract] = useState('');
+  // const [depContract, setDepContract] = useState('');
   // const [bill1, setBill1] = useState([]);
 
   const pageSize = 10;
@@ -34,23 +36,31 @@ const Employee = () => {
   useEffect(()=>{
     console.log("FETCHING BILLS");
     getBills(0);
-  },[depContract]);
+  },[depAddress]);
 
   const generateContract = async (empAddress) => {
     // console.log("EMP ADDRESS");
     // console.log(empAddress);
     let empContract = new web3.eth.Contract(employeeABI, empAddress);
-    let depAddress = '';
+    let dAddress = '';
     await empContract.methods.getEmployeeStruct().call().then((item)=>{
-      depAddress = item['parentDepartmentAddress'];
+      dAddress = item['parentDepartmentAddress'];
+      console.log("EMPLOYEE STRUCT: ");
+      console.log(item);
     });
     console.log("EXTRACTED EMP STRUCT:");
-    console.log(depAddress);
-    setDepContract(new web3.eth.Contract(departmentABI, depAddress));
+    console.log(dAddress);
+    setDepAddress(dAddress);
+    // setDepContract(new web3.eth.Contract(departmentABI, depAddress));
   }
   const getBills = async(pageNumber) => {
     let accounts = await web3.eth.getAccounts();
-    await depContract.methods.getBills(pageSize, pageNumber).call({
+    console.log("Called getBills()");
+    //DepartmentArrays
+    if (!depAddress)
+      return;
+    // await depContract.methods.getBills(pageSize, pageNumber).call({
+    await DepartmentArrays.methods.getBills(pageSize, pageNumber, depAddress).call({
       from: accounts[0]
     }).then((response)=>{
       console.log("Fetched Bills");

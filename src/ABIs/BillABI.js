@@ -29,6 +29,11 @@ const billABI =
 			},
 			{
 				"internalType": "uint256",
+				"name": "_acceptedOrRejectedOn",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
 				"name": "_amount",
 				"type": "uint256"
 			},
@@ -90,6 +95,16 @@ const billABI =
 					{
 						"internalType": "uint256",
 						"name": "deadline",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "createdOn",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "acceptedOrRejectedOn",
 						"type": "uint256"
 					},
 					{

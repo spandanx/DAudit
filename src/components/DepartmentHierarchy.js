@@ -3,6 +3,7 @@ import Tree from 'react-d3-tree';
 import './styles/DepartmentHierarchy.css';
 import web3 from '../web3';
 import departmentABI from '../ABIs/DepartmentABI';
+import DepartmentArrays from '../CreatedContracts/DepartmentArrays';
 
 // This is a simplified example of an org chart with a depth of 2.
 // Note how deeper levels are defined recursively via the `children` property.
@@ -124,8 +125,9 @@ const DepartmentHierarchy = (props) => {
     // dataMap[depAddress] = true;
     // console.log("FIRST TIME CLICKED");
     //----------
-    let contract = new web3.eth.Contract(departmentABI, depAddress);
-    await contract.methods.getSubDepartmentsPaginate(10, 0).call().then((response)=>{
+    // let contract = new web3.eth.Contract(departmentABI, depAddress);
+    // await contract.methods.getSubDepartmentsPaginate(10, 0).call().then((response)=>{
+      await DepartmentArrays.methods.getSubDepartments(10, 0, depAddress).call().then((response)=>{
       console.log("Data for "+depAddress);
       console.log(response);
       let newNodes = response.map((item)=>{

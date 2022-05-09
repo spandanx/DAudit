@@ -1,74 +1,51 @@
 const DepartmentArraysABI = 
 [
 	{
-		"anonymous": false,
 		"inputs": [
 			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "spender",
-				"type": "address"
-			},
-			{
-				"indexed": false,
 				"internalType": "uint256",
-				"name": "value",
+				"name": "pageSize",
 				"type": "uint256"
-			}
-		],
-		"name": "Approval",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "from",
-				"type": "address"
 			},
 			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "to",
-				"type": "address"
-			},
-			{
-				"indexed": false,
 				"internalType": "uint256",
-				"name": "value",
+				"name": "pageNumber",
 				"type": "uint256"
-			}
-		],
-		"name": "Transfer",
-		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "owner",
-				"type": "address"
 			},
 			{
 				"internalType": "address",
-				"name": "spender",
+				"name": "depAddress",
 				"type": "address"
 			}
 		],
-		"name": "allowance",
+		"name": "getApprovals",
 		"outputs": [
 			{
-				"internalType": "uint256",
+				"components": [
+					{
+						"internalType": "enum StructLibrary.AccountType",
+						"name": "accountType",
+						"type": "uint8"
+					},
+					{
+						"internalType": "address",
+						"name": "accountAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "parentDepartmentAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "enum StructLibrary.Status",
+						"name": "status",
+						"type": "uint8"
+					}
+				],
+				"internalType": "struct StructLibrary.ApprovalStruct[]",
 				"name": "",
-				"type": "uint256"
+				"type": "tuple[]"
 			}
 		],
 		"stateMutability": "view",
@@ -77,54 +54,44 @@ const DepartmentArraysABI =
 	{
 		"inputs": [
 			{
-				"internalType": "address",
-				"name": "spender",
-				"type": "address"
+				"internalType": "uint256",
+				"name": "pageSize",
+				"type": "uint256"
 			},
 			{
 				"internalType": "uint256",
-				"name": "amount",
+				"name": "pageNumber",
 				"type": "uint256"
-			}
-		],
-		"name": "approve",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
+			},
 			{
 				"internalType": "address",
-				"name": "account",
+				"name": "depAddress",
 				"type": "address"
 			}
 		],
-		"name": "balanceOf",
+		"name": "getAuditors",
 		"outputs": [
 			{
-				"internalType": "uint256",
+				"components": [
+					{
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"internalType": "address",
+						"name": "auditorAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "parentDepartmentAddress",
+						"type": "address"
+					}
+				],
+				"internalType": "struct StructLibrary.AuditorStruct[]",
 				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "totalSupply",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
+				"type": "tuple[]"
 			}
 		],
 		"stateMutability": "view",
@@ -133,54 +100,305 @@ const DepartmentArraysABI =
 	{
 		"inputs": [
 			{
-				"internalType": "address",
-				"name": "to",
-				"type": "address"
+				"internalType": "uint256",
+				"name": "pageSize",
+				"type": "uint256"
 			},
 			{
 				"internalType": "uint256",
-				"name": "amount",
+				"name": "pageNumber",
 				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "depAddress",
+				"type": "address"
 			}
 		],
-		"name": "transfer",
+		"name": "getBills",
 		"outputs": [
 			{
-				"internalType": "bool",
+				"components": [
+					{
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "description",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "threshold",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "imagePath",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "partiesAccepted",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "partiesRejected",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "deadline",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "createdOn",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "acceptedOrRejectedOn",
+						"type": "uint256"
+					},
+					{
+						"internalType": "enum StructLibrary.Status",
+						"name": "status",
+						"type": "uint8"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "fromBill",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "fromDepartment",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "toDepartment",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "billOwnAddress",
+						"type": "address"
+					}
+				],
+				"internalType": "struct StructLibrary.BillStruct[]",
 				"name": "",
-				"type": "bool"
+				"type": "tuple[]"
 			}
 		],
-		"stateMutability": "nonpayable",
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
 		"inputs": [
 			{
-				"internalType": "address",
-				"name": "from",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "to",
-				"type": "address"
+				"internalType": "uint256",
+				"name": "pageSize",
+				"type": "uint256"
 			},
 			{
 				"internalType": "uint256",
-				"name": "amount",
+				"name": "pageNumber",
 				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "depAddress",
+				"type": "address"
 			}
 		],
-		"name": "transferFrom",
+		"name": "getEmployees",
 		"outputs": [
 			{
-				"internalType": "bool",
+				"components": [
+					{
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"internalType": "address",
+						"name": "employeeAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "parentDepartmentAddress",
+						"type": "address"
+					}
+				],
+				"internalType": "struct StructLibrary.EmployeeStruct[]",
 				"name": "",
-				"type": "bool"
+				"type": "tuple[]"
 			}
 		],
-		"stateMutability": "nonpayable",
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "pageSize",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "pageNumber",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "depAddress",
+				"type": "address"
+			}
+		],
+		"name": "getFunds",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "description",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "threshold",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "imagePath",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "partiesAccepted",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "partiesRejected",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "deadline",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "createdOn",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "acceptedOrRejectedOn",
+						"type": "uint256"
+					},
+					{
+						"internalType": "enum StructLibrary.Status",
+						"name": "status",
+						"type": "uint8"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "fromBill",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "fromDepartment",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "toDepartment",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "billOwnAddress",
+						"type": "address"
+					}
+				],
+				"internalType": "struct StructLibrary.BillStruct[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "pageSize",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "pageNumber",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "depAddress",
+				"type": "address"
+			}
+		],
+		"name": "getSubDepartments",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"internalType": "address",
+						"name": "departmentAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "balance",
+						"type": "uint256"
+					}
+				],
+				"internalType": "struct StructLibrary.DepartmentStruct[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
 		"type": "function"
 	}
 ];
