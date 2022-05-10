@@ -3,6 +3,7 @@ pragma solidity ^0.8.7;
 import "./AuditStorage.sol";
 import "./Bill.sol";
 // import "./Department.sol";
+// import "hardhat/console.sol";
 
 contract BillManager {
 
@@ -27,6 +28,7 @@ contract BillManager {
     ) 
     public 
     {
+        // console.log("CreateBill() called");
         require(address(auditStorage.departments(msg.sender))!=address(0), "Departmemt does not exists");
         require(_threshold>=0 && _threshold<=100, "Threshold should be between 0 to 100");
         // Department dep = auditStorage.departments(msg.sender);
@@ -43,6 +45,8 @@ contract BillManager {
         // }));
         DepartmentManager parentDep = DepartmentManager(_fromDepartment);
         Bill parentBill = Bill(_fromBill);
+        // console.log("parentBill and parentDep instance created");
+        // console.log(_fromBill);
 
         Bill bill = new Bill({
             _name: _name,

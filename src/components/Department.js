@@ -2,7 +2,8 @@ import React, {useState, useEffect} from 'react';
 import web3 from '../web3';
 import { useLocation } from "react-router-dom";
 
-import departmentABI from '../ABIs/DepartmentABI';
+// import departmentABI from '../ABIs/DepartmentABI';
+import departmentManagerABI from '../ABIs/DepartmentManagerABI';
 import DepartmentHierarchy from './DepartmentHierarchy';
 // import AccountManagerAudit from '../AccountManagerAudit';
 import { AiOutlineReload } from "react-icons/ai";
@@ -11,6 +12,15 @@ import { BsPlusCircle } from "react-icons/bs";
 import { Modal, Button } from "react-bootstrap";
 import Pagination from './Pagination';
 import DepartmentArrays from '../CreatedContracts/DepartmentArrays';
+import Status from './Enums';
+import accountType from './Enums';
+import {Action} from './Enums';
+import {AccountTypeReverse} from './Enums';
+import {StatusReverse} from './Enums';
+// import {ActionReverse} from './Enums';
+import AccountManagerAudit from '../CreatedContracts/AccountManagerAudit';
+import {toast } from 'react-toastify';
+
 
 const Department = () => {
 
@@ -80,7 +90,7 @@ const Department = () => {
   },[depContract]);
 
   const generateContract = async (depAddress) => {
-    setDepContract(new web3.eth.Contract(departmentABI, depAddress));
+    setDepContract(new web3.eth.Contract(departmentManagerABI, depAddress));
   }
   const getBills = async(pageNumber) => {
     let accounts = await web3.eth.getAccounts();
@@ -337,6 +347,61 @@ const Department = () => {
     );
   }
 
+  const approve = async(parentDepartmentAddress, accountAddress, action) => {
+    let accounts = await web3.eth.getAccounts();
+    let msg = '';
+    let successMsg = '';
+    let errorMsg = '';
+    console.log("action");
+    console.log(action);
+    if (action==Action.REJECT){
+      msg = "Rejecting request";
+      successMsg = "Rejected account";
+      errorMsg = "Could not reject account";
+    }
+    else {
+      msg = "Accepting request";
+      successMsg = "Accepted account";
+      errorMsg = "Could not accept account";
+    }
+    toast.info(msg, {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      pauseOnFocusLoss: false,
+      draggable: true,
+      progress: undefined,
+      });
+    await AccountManagerAudit.methods.approve(parentDepartmentAddress, accountAddress, action).send({
+      from: accounts[0]
+    }).then((response)=>{
+      toast.success(successMsg, {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        pauseOnFocusLoss: false,
+        draggable: true,
+        progress: undefined,
+        });
+        refreshApprovals();
+    }).catch((error)=>{
+      toast.error(errorMsg, {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        pauseOnFocusLoss: false,
+        draggable: true,
+        progress: undefined,
+        });
+    });
+
+  }
   const approvalList = () => {
     return (
       <div class="col-md-11">
@@ -344,10 +409,23 @@ const Department = () => {
         {getModal()}
         {approvals.map((appr)=> (
           <div>
-            <h5 class="card-header">{appr.accountAddress}</h5>
+            <h5 class="card-header">{AccountTypeReverse[appr.accountType]}</h5>
             <div class="card-body">
-              <h5 class="card-title">{appr.accountType}</h5>
-              <p class="card-text">{appr.status}</p>
+              <h5 class="card-title">Address: {appr.accountAddress}</h5>
+              {StatusReverse[appr.status]=="OPEN" &&  
+              <>
+                <button type="button" class="btn btn-success mx-1" onClick={()=>approve(appr.parentDepartmentAddress, appr.accountAddress, Action.APPROVE)}>Accept</button>
+                <button type="button" class="btn btn-danger mx-1" onClick={()=>approve(appr.parentDepartmentAddress, appr.accountAddress, Action.REJECT)}>Reject</button>
+              </>
+              }
+              {StatusReverse[appr.status]=="ACCEPTED" &&  
+              <>
+                <button type="button" class="btn btn-success mx-1" disabled>Accepted</button>
+              </>}
+              {StatusReverse[appr.status]=="REJECTED" &&  
+              <>
+                <button type="button" class="btn btn-danger mx-1" disabled>Rejected</button>
+              </>}
               {/* <a href="#" class="btn btn-primary">{fund.amount}</a> */}
             </div>
           </div>

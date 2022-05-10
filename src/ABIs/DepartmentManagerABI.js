@@ -34,6 +34,11 @@ const departmentManagerABI =
 						"internalType": "enum StructLibrary.Status",
 						"name": "status",
 						"type": "uint8"
+					},
+					{
+						"internalType": "uint256",
+						"name": "index",
+						"type": "uint256"
 					}
 				],
 				"internalType": "struct StructLibrary.ApprovalStruct",
@@ -75,6 +80,11 @@ const departmentManagerABI =
 				"internalType": "enum StructLibrary.Status",
 				"name": "status",
 				"type": "uint8"
+			},
+			{
+				"internalType": "uint256",
+				"name": "index",
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -223,6 +233,11 @@ const departmentManagerABI =
 						"internalType": "enum StructLibrary.Status",
 						"name": "status",
 						"type": "uint8"
+					},
+					{
+						"internalType": "uint256",
+						"name": "index",
+						"type": "uint256"
 					}
 				],
 				"internalType": "struct StructLibrary.ApprovalStruct[]",

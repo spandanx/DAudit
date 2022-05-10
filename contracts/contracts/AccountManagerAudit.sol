@@ -4,7 +4,7 @@ pragma solidity ^0.8.7;
 import "./AuditStorage.sol";
 import "./DepartmentManager.sol";
 import {StructLibrary} from "./StructLibrary.sol";
-import "./BillCoin.sol";
+import "./BLT.sol";
 
 // import "hardhat/console.sol";
 
@@ -37,8 +37,9 @@ contract AccountManagerAudit is AuditStorage{
             _fromDepartment: address(0),
             _toDepartment: address(departments[msg.sender])
         });
+        approvedStatus[address(departments[msg.sender])] = StructLibrary.ApprovalStatus.ACCEPTED;
         token.transfer(address(bill), amount);
-        // billAddress = address(bill);
+        billAddress = address(bill);
         departments[msg.sender].pushFund(bill);
     }
     // modifier noAccountExists() {
@@ -74,25 +75,29 @@ contract AccountManagerAudit is AuditStorage{
             addr = address(auditors[msg.sender]);
         }
         else{
-            // revert("Wrong account type!");
-            revert();
+            revert("Wrong account type!");
+            // revert();
         }
         StructLibrary.ApprovalStruct memory apr = StructLibrary.ApprovalStruct({
             accountType : accType,
             accountAddress: addr,
             parentDepartmentAddress: parentDepartMent,
-            status: StructLibrary.Status.OPEN
+            status: StructLibrary.Status.OPEN,
+            index: 0
         });
         // rootDep.addEmployee(address(subEmp));
         rootDep.addApproval(apr);
-        approvedStatus[addr] = false;
+        approvedStatus[addr] = StructLibrary.ApprovalStatus.EXISTS;
         // employees[msg.sender] = subEmp;
     }
     function approve(address departmentAddress, address approvalAddress, StructLibrary.Action action) external {
         DepartmentManager parentDep = DepartmentManager(departmentAddress);
         parentDep.approve(approvalAddress, action);
         if (action==StructLibrary.Action.APPROVE){
-            approvedStatus[approvalAddress] = true;
+            approvedStatus[approvalAddress] = StructLibrary.ApprovalStatus.ACCEPTED;
+        }
+        else if (action==StructLibrary.Action.REJECT){
+            approvedStatus[approvalAddress] = StructLibrary.ApprovalStatus.REJECTED;
         }
         // if (apr.accountType==StructLibrary.AccountType.EMPLOYEE){
         //     Employee emp = Employee(apr.accountAddress);

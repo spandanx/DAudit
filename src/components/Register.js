@@ -6,8 +6,9 @@ import web3 from '../web3';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from "react-router-dom";
-import departmentABI from '../ABIs/DepartmentABI';
-import AccountType from './Enums';
+// import departmentABI from '../ABIs/DepartmentABI';
+import departmentManagerABI from '../ABIs/DepartmentManagerABI';
+import {AccountType} from './Enums';
 
 const Register = () => {
 
@@ -56,7 +57,7 @@ const Register = () => {
 
     const validateDepartmentAddressEmpForm = async() => {
       try{
-        let testContract = new web3.eth.Contract(departmentABI, emp_depAddress);
+        let testContract = new web3.eth.Contract(departmentManagerABI, emp_depAddress);
         let testresponse = await testContract.methods.getDepartmentStruct().call();
         //checking if it is the instance of department by calling a function that is only present in department contract.
         console.log("VALID, NO ERROR");
@@ -68,7 +69,7 @@ const Register = () => {
     }
     const validateDepartmentAddressDeptForm = async() => {
       try{
-        let testContract = new web3.eth.Contract(departmentABI, dep_depAddress);
+        let testContract = new web3.eth.Contract(departmentManagerABI, dep_depAddress);
         let testresponse = await testContract.methods.getDepartmentStruct().call();
         //checking if it is the instance of department by calling a function that is only present in department contract.
         console.log("VALID, NO ERROR");
@@ -161,7 +162,7 @@ const Register = () => {
       //emp_depAddress, emp_accountName
       event.preventDefault();
       let accounts = await web3.eth.getAccounts();
-
+      console.log("Calling registerEmployee()");
       let errorMessage = '';
 
       toast.info('Registering as employee', {
@@ -176,6 +177,9 @@ const Register = () => {
         });
         console.log(accounts);
         try{
+          console.log("Here 1");
+          console.log(AccountType.EMPLOYEE);
+          console.log(AccountType.DEPARTMENT);
       // await AccountManagerAudit.methods.registerEmployee(emp_depAddress, emp_accountName).send({
         await AccountManagerAudit.methods.register(emp_depAddress, emp_accountName, AccountType.EMPLOYEE).send({
         from: accounts[0]
@@ -190,7 +194,8 @@ const Register = () => {
           draggable: true,
           progress: undefined,
           });
-          navigate('/');
+          // navigate('/');
+          window.location.reload();
       }).catch((error)=>{
         console.log("ERROR:");
         console.log(error);
@@ -208,11 +213,11 @@ const Register = () => {
       });
     }
     catch(error) {
-      // console.log("error: ");
-      // console.log(error);
+      console.log("error: ");
+      console.log(error);
       // console.log("errormessage: ");
       // console.log(error.message);
-      console.log("ERROR: "+error);
+      // console.log("ERROR: "+error);
         toast.error('Cound not register!', {
           position: "bottom-right",
           autoClose: 5000,
@@ -257,9 +262,10 @@ const Register = () => {
           pauseOnHover: true,
           pauseOnFocusLoss: false,
           draggable: true,
-          progress: undefined,
+          progress: 100,
           });
-          navigate('/');
+          // navigate('/');
+          window.location.reload();
       }).catch((error)=>{
         console.log("ERROR:");
         console.log(error);
@@ -279,11 +285,11 @@ const Register = () => {
       // console.log(errorMessage);
     }
     catch(error) {
-      // console.log("error: ");
-      // console.log(error);
+      console.log("error: ");
+      console.log(error);
       // console.log("errormessage: ");
       // console.log(error.message);
-      console.log("ERROR: "+error);
+      // console.log("ERROR: "+error);
         toast.error('Cound not register!', {
           position: "bottom-right",
           autoClose: 5000,

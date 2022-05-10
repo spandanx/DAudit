@@ -16,6 +16,8 @@ library StructLibrary {
     
     enum Vote{ DID_NOT_VOTE, REJECTED, ACCEPTED }
 
+    enum ApprovalStatus {DOES_NOT_EXISTS, EXISTS, ACCEPTED, REJECTED}
+
     struct BillStruct {
         string name;
         string description;
@@ -43,6 +45,7 @@ library StructLibrary {
         address accountAddress;
         address parentDepartmentAddress;
         Status status;
+        uint index;
     }
     struct AuditorStruct {
         string name;

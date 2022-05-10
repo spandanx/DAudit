@@ -10,7 +10,7 @@ contract AuditStorage {
     mapping (address => DepartmentManager) public departments;
     mapping (address => Employee) public employees;
     mapping (address => Auditor) auditors;
-    mapping (address => bool) public approvedStatus;
+    mapping (address => StructLibrary.ApprovalStatus) public approvedStatus;
     mapping (address => Bill) public bills;
     mapping (address => Bill[]) billMap;
     

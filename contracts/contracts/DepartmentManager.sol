@@ -6,6 +6,7 @@ pragma solidity ^0.8.7;
 // import "./Auditor.sol";
 import "./DepartmentStorage.sol";
 // import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "hardhat/console.sol";
 
 contract DepartmentManager is DepartmentStorage{
 
@@ -20,6 +21,7 @@ contract DepartmentManager is DepartmentStorage{
         // department_EmployeeManager = address(new Department_EmployeeManager());
     }
     function addApproval(StructLibrary.ApprovalStruct memory approval) external {
+        approval.index = approvalList.length;
         approvalList.push(approval);
         approvalMap[approval.accountAddress] = approval;
     }
@@ -50,11 +52,16 @@ contract DepartmentManager is DepartmentStorage{
     //     apr.status = StructLibrary.Status.ACCEPTED;
     // }
     function approve(address approvalAddress, StructLibrary.Action action) external {
+        console.log("Called approve()");
+        console.log("action: ");
         StructLibrary.ApprovalStruct memory apr = approvalMap[approvalAddress];
         if (action==StructLibrary.Action.REJECT){
-            apr.status = StructLibrary.Status.REJECTED;
+            console.log("Rejecting");
+            approvalList[apr.index].status = StructLibrary.Status.REJECTED;
+            // apr.status = StructLibrary.Status.REJECTED;
             return;
         }
+        console.log("Accepting");
         if (apr.accountType==StructLibrary.AccountType.EMPLOYEE){
             // Employee emp = Employee(apr.accountAddress);
             employeeList.push(approvalAddress);
@@ -72,7 +79,8 @@ contract DepartmentManager is DepartmentStorage{
         else{
             revert("Wrong account type!");
         }
-        apr.status = StructLibrary.Status.ACCEPTED;
+        approvalList[apr.index].status = StructLibrary.Status.ACCEPTED;
+        // apr.status = StructLibrary.Status.ACCEPTED;
     }
     function getDepartmentStruct() public view returns(StructLibrary.DepartmentStruct memory) {
         return departmentStruct;

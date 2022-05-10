@@ -20,7 +20,7 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 module.exports = {
   networks: {
     ganache: {
-        url: "HTTP://127.0.0.1:7545",
+        url: "HTTP://127.0.0.1:6545",
         // accounts: [privateKey1, privateKey2, ...]
     }
   },

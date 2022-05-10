@@ -87,14 +87,15 @@ describe("create bill", () => {
 
     // console.log("TEST");
     billAddress = await accountManagerAudit.billAddress();
-    // console.log(billAddress); 
+    // console.log("billAddress: "+billAddress);
     rootDepartmentAddress = await accountManagerAudit.departments(govt.address);
     // console.log("TEST2");
     tokenAddress = await accountManagerAudit.tokenAddress();
+    // console.log("TokenAddress: "+tokenAddress);
 
     // let blCoin = await ethers.getContractFactory("BLT");
     initialbalance = await blCoin.attach( tokenAddress ).balanceOf(billAddress);
-
+    // console.log("bananceOf: "+initialbalance);
     await accountManagerAudit.connect(dep1).register(
       rootDepartmentAddress,
       "Department1",
@@ -106,14 +107,16 @@ describe("create bill", () => {
     // console.log("TEST4");
     // console.log(billManager);
     billSize = await depArraysManager.getBills(10,0,rootDepartmentAddress);
-    console.log("BillSize: "+billSize);
+    // console.log("BillSize: "+billSize);
     expect(billSize.length).to.equal(0);
     let transferTokenAmount = 200;
+
     await billManager.createBill(
       "Bill1",
       "Bill description",
       70,
       "Dummy",
+      1651895311,
       1651895311,
       transferTokenAmount,
       billAddress,
@@ -124,12 +127,12 @@ describe("create bill", () => {
     billSize = await depArraysManager.getBills(10,0,rootDepartmentAddress);
     expect(billSize.length).to.equal(1);
     // console.log("TEST5");
-    console.log("Initial balance of govt Bill: "+initialbalance);
+    // console.log("Initial balance of govt Bill: "+initialbalance);
     balanceAfterBill  = await blCoin.attach( tokenAddress ).balanceOf(billAddress);
-    console.log("balance of govt BIll after bill creation: "+balanceAfterBill);
+    // console.log("balance of govt BIll after bill creation: "+balanceAfterBill);
     bill1Address = await accountManagerAudit.getBillByIndex(billAddress, 0);
     balanceofBill1  = await blCoin.attach( tokenAddress ).balanceOf(bill1Address);
-    console.log("balance of bill1: "+balanceofBill1);
+    // console.log("balance of bill1: "+balanceofBill1);
     // console.log("This");
     // console.log(initialbalance);
     // console.log("- this");
@@ -211,6 +214,8 @@ describe("approval test", function() {
   // let depManagerContract;
   const AccountType = { EMPLOYEE:0, DEPARTMENT:1, AUDITOR:2 };
   const Action = { REJECT:0, APPROVE:1 };
+  const Status = { OPEN:0, ACCEPTED:1, REJECTED:2 };
+  const ApprovalStatus = {DOES_NOT_EXISTS:0, EXISTS:1, ACCEPTED:2, REJECTED:3};
 
   beforeEach (async function () {
     [admin, employee, auditor, department,_] = await ethers.getSigners();
@@ -263,7 +268,7 @@ describe("approval test", function() {
     expect(approvals[0].accountType).to.equal(AccountType.AUDITOR);
     let approvalStatus = await accountManagerAudit.approvedStatus(approvals[0].accountAddress);
     // console.log(approvalStatus);
-    expect(approvalStatus).to.be.false;
+    expect(approvalStatus==ApprovalStatus.EXISTS).to.be.true;
     // console.log("ALPHA3");
 
     // let auditors = await depManager.attach( depAddress ).getAuditors(10, 0);
@@ -274,7 +279,7 @@ describe("approval test", function() {
     await accountManagerAudit.approve(approvals[0].parentDepartmentAddress, approvals[0].accountAddress, Action.APPROVE);
     approvalStatus = await accountManagerAudit.approvedStatus(approvals[0].accountAddress);
     // console.log(approvalStatus);
-    expect(approvalStatus).to.be.true;
+    expect(approvalStatus==ApprovalStatus.ACCEPTED).to.be.true;
     // console.log("ALPHA5");
     auditors = await depArraysManager.getAuditors(10, 0, depAddress);
     expect(auditors.length).to.equal(1);// after approving employee should be pushed to the employee array
@@ -292,7 +297,7 @@ describe("approval test", function() {
     expect(approvals[0].accountType).to.equal(AccountType.DEPARTMENT);
     let approvalStatus = await accountManagerAudit.approvedStatus(approvals[0].accountAddress);
     // console.log(approvalStatus);
-    expect(approvalStatus).to.be.false;//Before approving
+    expect(approvalStatus==ApprovalStatus.EXISTS).to.be.true;//Before approving
     // console.log("ALPHA3");
     // let departments = await depManager.attach( depAddress ).getSubDepartments(10, 0);
     let departments = await depArraysManager.getSubDepartments(10, 0, depAddress);
@@ -301,7 +306,7 @@ describe("approval test", function() {
     await accountManagerAudit.approve(approvals[0].parentDepartmentAddress, approvals[0].accountAddress, Action.APPROVE);
     approvalStatus = await accountManagerAudit.approvedStatus(approvals[0].accountAddress);
     console.log(approvalStatus);
-    expect(approvalStatus).to.be.true;//After approving
+    expect(approvalStatus==ApprovalStatus.ACCEPTED).to.be.true;//After approving
     // console.log("ALPHA4");
     // console.log(depManager);
     departments = await depArraysManager.getSubDepartments(10, 0, depAddress);
@@ -317,47 +322,63 @@ describe("approval test", function() {
     await accountManagerAudit.connect(employee).register(depAddress, "Auditor 1", AccountType.EMPLOYEE);
 
     let approvals = await depArraysManager.getApprovals(10, 0, depAddress);
-    // console.log(approvals);
+    console.log("approvals before accepting");
+    console.log(approvals);
     expect(approvals.length).to.greaterThan(0);
     expect(approvals[0].accountType).to.equal(AccountType.EMPLOYEE);
     let approvalStatus = await accountManagerAudit.approvedStatus(approvals[0].accountAddress);
     // console.log(approvalStatus);
-    expect(approvalStatus).to.be.false;
+    expect(approvalStatus==ApprovalStatus.EXISTS).to.be.true;
 
     let employees = await depArraysManager.getEmployees(10, 0, depAddress);
     expect(employees.length).to.equal(0);// before approving employee should not be pushed to the employee array
 
     await accountManagerAudit.approve(approvals[0].parentDepartmentAddress, approvals[0].accountAddress, Action.APPROVE);
+
+    approvals = await depArraysManager.getApprovals(10, 0, depAddress);
+    console.log("approvals After accepting");
+    console.log(approvals);
+    expect(approvals[0].status==Status.ACCEPTED).to.be.true;
+
     approvalStatus = await accountManagerAudit.approvedStatus(approvals[0].accountAddress);
     // console.log(approvalStatus);
-    expect(approvalStatus).to.be.true;
+    expect(approvalStatus==ApprovalStatus.ACCEPTED).to.be.true;
 
     employees = await depArraysManager.getEmployees(10, 0, depAddress);
     expect(employees.length).to.equal(1);// after approving employee should be pushed to the employee array
   });
 
-  it("Should reject department registraction", async function () {
+  it("Should reject department registration", async function () {
     let depAddress = await accountManagerAudit.departments(admin.address);
     await accountManagerAudit.connect(department).register(depAddress, "Department1", AccountType.DEPARTMENT);
     // console.log("ALPHA1");
 
+    console.log("Approvals before rejecting");
     let approvals = await depArraysManager.getApprovals(10, 0, depAddress);
     // console.log("ALPHA2");
-    // console.log(approvals);
+    console.log(approvals);
+
     expect(approvals.length).to.greaterThan(0);// as approval pushed into approvals array
     expect(approvals[0].accountType).to.equal(AccountType.DEPARTMENT);
     let approvalStatus = await accountManagerAudit.approvedStatus(approvals[0].accountAddress);
     // console.log(approvalStatus);
-    expect(approvalStatus).to.be.false;//Before approving
+    expect(approvalStatus==ApprovalStatus.EXISTS).to.be.true;//Before approving
     // console.log("ALPHA3");
     // let departments = await depManager.attach( depAddress ).getSubDepartments(10, 0);
     let departments = await depArraysManager.getSubDepartments(10, 0, depAddress);
     expect(departments.length).to.equal(0);// before approving department should not be pushed to the department array
 
     await accountManagerAudit.approve(approvals[0].parentDepartmentAddress, approvals[0].accountAddress, Action.REJECT);
+    
+    approvals = await depArraysManager.getApprovals(10, 0, depAddress);
+    console.log("approvals After rejecting");
+    console.log(approvals);
+
+    expect(approvals[0].status==Status.REJECTED).to.be.true;
+
     approvalStatus = await accountManagerAudit.approvedStatus(approvals[0].accountAddress);
     // console.log(approvalStatus);
-    expect(approvalStatus).to.be.false;//After rejecting
+    expect(approvalStatus==ApprovalStatus.REJECTED).to.be.true;//After rejecting
     // console.log("ALPHA4");
     // console.log(depManager);
     departments = await depArraysManager.getSubDepartments(10, 0, depAddress);

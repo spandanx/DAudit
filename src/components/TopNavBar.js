@@ -6,8 +6,10 @@ import {ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { MdAccountCircle, MdContentCopy } from "react-icons/md";
-import departmentABI from '../ABIs/DepartmentABI';
+// import departmentABI from '../ABIs/DepartmentABI';
+import departmentManagerABI from '../ABIs/DepartmentManagerABI';
 import employeeABI from '../ABIs/EmployeeABI';
+import {ApprovalStatusReverse} from "./Enums";
 
 import {pointerHover} from './styles/cursor.js';
 
@@ -19,6 +21,7 @@ const TopNavBar = () => {
   // const [accountType, setAccountType] = useState('');
   const [accountName, setAccountName] = useState('');
   const [accountAddress, setAccountAddress] = useState('');
+  // const [errorCount, setErrorCount] = useState(0);
 
   // const employeeString = "Employee";
   // const departmentString = "Department";
@@ -62,6 +65,31 @@ const TopNavBar = () => {
   //     progress: undefined,
   //     });
   // }
+  const checkAprroval = async(address, path, args) => {
+    // let accounts = await web3.eth.getAccounts();
+    console.log("Calling checkAprroval()");
+    await AccountManagerAudit.methods.approvedStatus(address).call().then((res)=>{
+      // console.log("approvedStatus: ");
+      // console.log(res);
+      // console.log(ApprovalStatusReverse[res]);
+      if (ApprovalStatusReverse[res]=="ACCEPTED"){
+        navigate(path, args);
+        // navigate("/to-be-approved");
+      }
+      else if (ApprovalStatusReverse[res]=="EXISTS"){
+        setAccountName('');
+        setAccountAddress('');
+        navigate("/to-be-approved");
+      }
+      else if (ApprovalStatusReverse[res]=="REJECTED"){
+        setAccountName('');
+        setAccountAddress('');
+        navigate("/rejected");
+      }
+    }).catch((err)=>{
+
+    });
+  }
 
   const checkIfAccountsExists = async() => {
     console.log("Calling checkIfAccountsExists()");
@@ -72,6 +100,7 @@ const TopNavBar = () => {
       navigate("/not-found");
       return;
     }
+    let accountApproved = false;
     let errors = 0;
     // try{
       await AccountManagerAudit.methods.departments(accounts[0]).call().then(async function(response) {
@@ -79,12 +108,13 @@ const TopNavBar = () => {
         console.log("Department found");
         console.log(response);
         if (response!=address0){
-          let depContract = new web3.eth.Contract(departmentABI, response);
+          let depContract = new web3.eth.Contract(departmentManagerABI, response);
           await depContract.methods.getDepartmentStruct().call().then((depstruct)=>{
             setAccountName(depstruct.name);
             setAccountAddress(response);
           });
-          navigate('/department', {state: {depAddress:response}});
+          await checkAprroval(response, '/department', {state: {depAddress:response}});
+          // navigate('/department', {state: {depAddress:response}});
         }
         else{
           errors++;
@@ -102,7 +132,8 @@ const TopNavBar = () => {
             setAccountName(empStruct.name);
             setAccountAddress(response);
           });
-          navigate('/employee', {state: {empAddress:response}});
+          await checkAprroval(response, '/employee', {state: {empAddress:response}});
+          // navigate('/employee', {state: {empAddress:response}});
         }
         else{
           errors++;

@@ -58,9 +58,9 @@ const AccountManagerABI =
 		"name": "approvedStatus",
 		"outputs": [
 			{
-				"internalType": "bool",
+				"internalType": "enum StructLibrary.ApprovalStatus",
 				"name": "",
-				"type": "bool"
+				"type": "uint8"
 			}
 		],
 		"stateMutability": "view",

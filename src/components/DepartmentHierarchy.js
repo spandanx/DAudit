@@ -2,7 +2,8 @@ import React, {useState, useEffect} from 'react';
 import Tree from 'react-d3-tree';
 import './styles/DepartmentHierarchy.css';
 import web3 from '../web3';
-import departmentABI from '../ABIs/DepartmentABI';
+// import departmentABI from '../ABIs/DepartmentABI';
+import departmentManagerABI from '../ABIs/DepartmentManagerABI';
 import DepartmentArrays from '../CreatedContracts/DepartmentArrays';
 
 // This is a simplified example of an org chart with a depth of 2.
@@ -38,7 +39,7 @@ const DepartmentHierarchy = (props) => {
 
   const getDepartmentData = async(depAddress, isRoot) => {
     console.log("getDepartmentData() Start "+depAddress);
-    let contract = new web3.eth.Contract(departmentABI, depAddress);
+    let contract = new web3.eth.Contract(departmentManagerABI, depAddress);
     await contract.methods.getDepartmentStruct().call().then((response)=>{
       console.log("Data for "+depAddress);
       console.log(response);
