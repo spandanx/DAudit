@@ -19,6 +19,7 @@ import {AccountTypeReverse} from './Enums';
 import {StatusReverse} from './Enums';
 // import {ActionReverse} from './Enums';
 import AccountManagerAudit from '../CreatedContracts/AccountManagerAudit';
+import BillManager from '../CreatedContracts/BillManager';
 import {toast } from 'react-toastify';
 
 
@@ -57,8 +58,9 @@ const Department = () => {
   const [subDepAddress, setSubDepAddress] = useState('');
   const [billName, setBillName] = useState('');
   const [description, setDescription] = useState('');
+  const [threshold, setThreshold] = useState('');
   const [amount, setAmount] = useState('');
-  const [toAddress, setToAddress] = useState('');
+  // const [toAddress, setToAddress] = useState('');
 
   // let gdata = {
   //   name: 'Parent',
@@ -243,13 +245,93 @@ const Department = () => {
     console.log("Calling nestedFunc()");
     console.log(num);
   }
+
+  const createBill = async() => {
+    handleClose();
+
+    let accounts = await web3.eth.getAccounts();
+    toast.info("Creating bill", {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      pauseOnFocusLoss: false,
+      draggable: true,
+      progress: undefined,
+      });
+      // const [fundAddress, setFundAddress] = useState('');
+      // const [subDepAddress, setSubDepAddress] = useState('');
+      // const [billName, setBillName] = useState('');
+      // const [description, setDescription] = useState('');
+      // const [amount, setAmount] = useState('');
+      // const [toAddress, setToAddress] = useState('');
+      let date = (new Date()).getTime();
+      let currentTimestamp = date;
+
+      let tokenAddress;
+      await AccountManagerAudit.methods.tokenAddress().call().then((res)=>{
+        tokenAddress = res;
+      }).catch((err)=>{
+
+      });
+      console.log("_name: "+billName);
+      console.log("_description: "+description);
+      console.log("_threshold: "+threshold);
+      console.log("_imagePath: ");
+      console.log("_deadline: "+currentTimestamp);
+      console.log("_acceptedOrRejectedOn: "+currentTimestamp);
+      console.log("_amount: "+amount);
+      console.log("_fromBill: "+fundAddress);
+      console.log("_fromDepartment: "+location.state.depAddress);
+      console.log("_toDepartment: "+subDepAddress);
+      console.log("tokenAddress: "+tokenAddress);
+      await BillManager.methods.createBill(
+        billName,
+        description,
+        threshold,
+        "Dummy",
+        currentTimestamp,
+        currentTimestamp,
+        amount,
+        fundAddress,
+        location.state.depAddress,
+        subDepAddress,
+        tokenAddress
+    ).send({
+      from: accounts[0]
+    }).then((res)=>{
+      toast.success("bill created", {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        pauseOnFocusLoss: false,
+        draggable: true,
+        progress: undefined,
+        });
+        refreshBills();
+    }).catch((err)=>{
+      toast.error("could not create bill!", {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        pauseOnFocusLoss: false,
+        draggable: true,
+        progress: undefined,
+        });
+    });
+  }
   
   const getModal = () => {
     // getFundsOfCreateBill(currentPageFundCreateBill);
     return (
       <Modal show={showModal} onHide={handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Create New Bill</Modal.Title>
+          <Modal.Title>Create new bill</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div class="row">
@@ -267,11 +349,11 @@ const Department = () => {
           </div>
           <div class="row">
             <div class="col-md-7">
-              <select class="form-select form-select-sm my-2" aria-label=".form-select-sm example">
+              <select class="form-select form-select-sm my-2" aria-label=".form-select-sm example" onChange={(event)=>setSubDepAddress(event.target.value)}>
                 <option defaultValue>Select Department</option>
-                {/* {departmentsCreateBill.map((dept)=>(
-                  <option value={fund.billOwnAddress}>{fund.name}</option>
-                ))} */}
+                {departmentsCreateBill.map((dept)=>(
+                  <option value={dept.departmentAddress}>{dept.name}</option>
+                ))}
               </select>
               </div>
               <div class="col-md-3 py-1">
@@ -296,12 +378,22 @@ const Department = () => {
                       onChange={(event) => setAmount(event.target.value)}
                 />
             </div>
+            <div class="row my-3">
+                <input type="text" class="form-control select2-offscreen" id="accountName" placeholder="Threshold" tabIndex="-1"
+                          value={threshold}
+                          onChange={(event) => setThreshold(event.target.value)}
+                    />
+                {/* <textarea class="form-control" id="message" name="body" rows="3" placeholder="Threshold"
+                    value={threshold} 
+                    onChange={(event) => setThreshold(event.target.value)}
+                ></textarea> */}
+            </div>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>
-          <Button variant="primary" onClick={handleClose}>
+          <Button variant="primary" onClick={()=>createBill()}>
             Create Bill
           </Button>
         </Modal.Footer>

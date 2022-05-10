@@ -135,18 +135,39 @@ library StructLibrary {
     //     }
     //     return result;
     // }
-    function getApprovalsPaginate(uint pageSize, uint pageNumber, StructLibrary.ApprovalStruct[] storage approvalList) external view returns(StructLibrary.ApprovalStruct[] memory){
-        StructLibrary.ApprovalStruct[] memory result;
-        uint offset = pageSize * pageNumber;
-        if (pageSize<=0 || pageNumber<0 || offset>=approvalList.length){
-            return result;
+    function getApprovalsPaginate(uint pageSize, uint pageNumber, StructLibrary.ApprovalStruct[] storage approvalList) external view returns(StructLibrary.ApprovalStruct[] memory) {
+        uint offset = pageNumber * pageSize;
+        uint length = approvalList.length;
+        StructLibrary.ApprovalStruct[] memory toReturn;
+        if (pageSize<=0 || pageNumber<0 || offset>=length){
+            return toReturn;
         }
-        result = new StructLibrary.ApprovalStruct[](pageSize<(approvalList.length-offset)? pageSize: (approvalList.length-offset));
-        for (uint i = offset; i<offset+result.length; i++){
-            result[i-offset] = approvalList[i];
+        uint endIndex = length;
+        if (length>=offset){
+            endIndex = length - offset;
         }
-        return result;
+        uint startIndex = 0;
+        if (endIndex>=pageSize){
+            startIndex = endIndex - pageSize;
+        }
+        toReturn = new StructLibrary.ApprovalStruct[](endIndex - startIndex);
+        for (uint i = 0; i<toReturn.length; i++){
+            toReturn[i] = approvalList[endIndex-i-1];
+        }
+        return toReturn;
     }
+    // function getApprovalsPaginate(uint pageSize, uint pageNumber, StructLibrary.ApprovalStruct[] storage approvalList) external view returns(StructLibrary.ApprovalStruct[] memory){
+    //     StructLibrary.ApprovalStruct[] memory result;
+    //     uint offset = pageSize * pageNumber;
+    //     if (pageSize<=0 || pageNumber<0 || offset>=approvalList.length){
+    //         return result;
+    //     }
+    //     result = new StructLibrary.ApprovalStruct[](pageSize<(approvalList.length-offset)? pageSize: (approvalList.length-offset));
+    //     for (uint i = offset; i<offset+result.length; i++){
+    //         result[i-offset] = approvalList[i];
+    //     }
+    //     return result;
+    // }
 
     // function getAuditorsPaginate(uint pageSize, uint pageNumber, StructLibrary.AuditorStruct[] storage auditorsList) external view returns(StructLibrary.AuditorStruct[] memory){
     //     StructLibrary.AuditorStruct[] memory result;
