@@ -407,12 +407,57 @@ const Department = () => {
         {getTopBarBill()}
         {getModal()}
         {bills.map((bill)=> (
-          <div>
-            <h5 class="card-header">{bill.name}</h5>
+          <div class="border-1">
+            
+            <div class="accordion px-2" id="accordionExample">
+              <div class="card">
+                <div class="card-header collapsed" id="headingOne" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                  <div class="row">
+                    <h5 class="mb-0">
+                      {bill.name}
+                    </h5>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-3">
+                      {/* <a class="btn btn-primary">{bill.amount}</a> */}
+                    </div>
+                    <div class="col-md-3 px-5">
+                      <p class="card-text text-center py-1 border border-light rounded-2 bg-secondary text-white">Acceptance threshold: {bill.threshold} %</p>
+                    </div>
+                    <div class="col-md-2 px-2">
+                      <p class="card-text text-center py-1 border border-light rounded-2 bg-secondary text-white">Votes in favor: {bill.partiesAccepted}</p>
+                    </div>
+                    <div class="col-md-2 px-2">
+                      <p class="card-text text-center py-1 border border-light rounded-2 bg-secondary text-white">Votes against: {bill.partiesRejected}</p>
+                    </div>
+                    {StatusReverse[bill.status]=="OPEN" && 
+                    <div class="col-md-2">
+                      <button type="button" class="btn btn-primary mx-1" disabled>Open</button>
+                    </div>
+                    }
+                    {StatusReverse[bill.status]=="ACCEPTED" && 
+                    <div class="col-md-2">
+                      <button type="button" class="btn btn-success mx-1" disabled>Accepted</button>
+                    </div>
+                    }
+                    {StatusReverse[bill.status]=="REJECTED" && 
+                    <div class="col-md-2">
+                      <button type="button" class="btn btn-danger mx-1">Rejected</button>
+                    </div>
+                    }
+                  </div>
+                </div>
+
+                <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+                  <div class="card-body">
+                  {bill.description}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="card-body">
-              <h5 class="card-title">{bill.description}</h5>
-              <p class="card-text">{bill.imagePath}</p>
-              <a href="#" class="btn btn-primary">{bill.amount}</a>
+              
             </div>
           </div>
         ))}

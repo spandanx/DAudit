@@ -5,6 +5,14 @@ import { useLocation } from "react-router-dom";
 import employeeABI from '../ABIs/EmployeeABI';
 // import AccountManagerAudit from '../AccountManagerAudit';
 import DepartmentArrays from '../CreatedContracts/DepartmentArrays';
+import { AiOutlineReload } from "react-icons/ai";
+import Pagination from './Pagination';
+
+import VoteManager from '../CreatedContracts/VoteManager';
+import AccountManagerAudit from '../CreatedContracts/AccountManagerAudit';
+import {Action} from './Enums';
+import {StatusReverse} from './Enums';
+import {toast } from 'react-toastify';
 
 const Employee = () => {
 
@@ -15,6 +23,8 @@ const Employee = () => {
   console.log(location);
   const [bills, setBills] = useState([]);
   const [depAddress, setDepAddress] = useState('');
+
+  const [pageNumber, setPageNUmber] = useState(0);
   // const [depContract, setDepContract] = useState('');
   // const [depContract, setDepContract] = useState('');
   // const [bill1, setBill1] = useState([]);
@@ -34,7 +44,7 @@ const Employee = () => {
   },[location.state.empAddress]);
   useEffect(()=>{
     console.log("FETCHING BILLS");
-    getBills(0);
+    getBills(pageNumber);
   },[depAddress]);
 
   const generateContract = async (empAddress) => {
@@ -81,28 +91,135 @@ const Employee = () => {
   //     console.log("Error occured: "+err);
   //   });
   // }
+  const nestedFunc = async() => {
+
+  }
+  const getTopBarBills = () => {
+    return (
+      <ul class="nav justify-content-between border-top border-bottom p-2 my-2">
+          <li class="nav-item justify-content-between">
+            <button class="btn btn-none" onClick={()=>getBills(pageNumber)}>
+              <AiOutlineReload/>
+            </button>
+          </li>
+          <li class="nav-item mx-2">
+            <Pagination pageEnd={8} pageTabs={3} function={(item)=>nestedFunc(item)}/>
+          </li>
+      </ul>
+    );
+  }
+
+  const vote= async(billAddress, action) => {
+    let accounts = await web3.eth.getAccounts();
+
+    toast.info("Submitting vote", {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      pauseOnFocusLoss: false,
+      draggable: true,
+      progress: undefined,
+      });
+    
+      let tokenAddress;
+      await AccountManagerAudit.methods.tokenAddress().call().then((res)=>{
+        tokenAddress = res;
+      }).catch((err)=>{
+      });
+
+    await VoteManager.methods.vote(billAddress, action, depAddress, tokenAddress, location.state.empAddress).send({
+      from: accounts[0]
+    }).then((res)=>{
+      toast.success("Submitted vote", {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        pauseOnFocusLoss: false,
+        draggable: true,
+        progress: undefined,
+        });
+        getBills(pageNumber);
+    }).catch((err)=>{
+      toast.error("Error while submitting vote", {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        pauseOnFocusLoss: false,
+        draggable: true,
+        progress: undefined,
+        });
+    });
+  }
 
   return (
     <div class="col-md-12">
       <div class="row">
-        {/* <div class="col-md-1">
-          <ul class="nav flex-column">
-            <li class="nav-item">
-              <a class="nav-link" href="#">Approvals</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Bills</a>
-            </li>
-          </ul>
-        </div> */}
+        <div class="col-md-1">
+          <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+            <button class={"nav-link approval active"} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Bills</button>
+          </div>
+        </div>
         <div class="col-md-11">
+        {getTopBarBills()}
         {bills.map((bill)=> (
-          <div>
-            <h5 class="card-header">{bill.name}</h5>
+          <div class="border-1">
+            
+            <div class="accordion px-2" id="accordionExample">
+              <div class="card">
+                <div class="card-header collapsed" id="headingOne" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                  <div class="row">
+                    <h5 class="mb-0">
+                      {bill.name}
+                    </h5>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-3">
+                      {/* <a class="btn btn-primary">{bill.amount}</a> */}
+                    </div>
+                    <div class="col-md-3 px-5">
+                      <p class="card-text text-center py-1 border border-light rounded-2 bg-secondary text-white">Acceptance threshold: {bill.threshold} %</p>
+                    </div>
+                    <div class="col-md-2 px-2">
+                      <p class="card-text text-center py-1 border border-light rounded-2 bg-secondary text-white">Votes in favor: {bill.partiesAccepted}</p>
+                    </div>
+                    <div class="col-md-2 px-2">
+                      <p class="card-text text-center py-1 border border-light rounded-2 bg-secondary text-white">Votes against: {bill.partiesRejected}</p>
+                    </div>
+                    {StatusReverse[bill.status]=="OPEN" && 
+                    <div class="col-md-2">
+                      <button type="button" class="btn btn-success mx-1" onClick={()=>vote(bill.billOwnAddress, Action.APPROVE)}>Accept</button>
+                      <button type="button" class="btn btn-danger mx-1" onClick={()=>vote(bill.billOwnAddress, Action.REJECT)}>Reject</button>
+                    </div>
+                    }
+                    {StatusReverse[bill.status]=="ACCEPTED" && 
+                    <div class="col-md-2">
+                      <button type="button" class="btn btn-success mx-1" disabled>Accepted</button>
+                    </div>
+                    }
+                    {StatusReverse[bill.status]=="REJECTED" && 
+                    <div class="col-md-2">
+                      <button type="button" class="btn btn-danger mx-1">Rejected</button>
+                    </div>
+                    }
+                  </div>
+                </div>
+
+                <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+                  <div class="card-body">
+                  {bill.description}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="card-body">
-              <h5 class="card-title">{bill.description}</h5>
-              <p class="card-text">{bill.imagePath}</p>
-              <a href="#" class="btn btn-primary">{bill.amount}</a>
+              
             </div>
           </div>
         ))}

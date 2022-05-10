@@ -1,4 +1,4 @@
-const voteManagerABI = 
+const VoteManagerABI = 
 [
 	{
 		"inputs": [
@@ -34,4 +34,4 @@ const voteManagerABI =
 		"type": "function"
 	}
 ];
-export default voteManagerABI;
+export default VoteManagerABI;

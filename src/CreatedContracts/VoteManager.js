@@ -1,5 +1,5 @@
 import web3 from '../web3';
-import voteManagerABI from '../ABIs/voteManagerABI';
+import voteManagerABI from '../ABIs/VoteManagerABI';
 
 const address = "0x9A41fA0a8221e8d5330C96461545ff3BE1e6eeb4";
 //0x67C5B903120b4AA260E16D670DA5Bd1eD2EBB3a6
