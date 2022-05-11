@@ -4,11 +4,13 @@ import { useLocation } from "react-router-dom";
 
 // import departmentABI from '../ABIs/DepartmentABI';
 import departmentManagerABI from '../ABIs/DepartmentManagerABI';
+import BLTABI from '../ABIs/BLTABI';
 import DepartmentHierarchy from './DepartmentHierarchy';
 // import AccountManagerAudit from '../AccountManagerAudit';
 import { AiOutlineReload } from "react-icons/ai";
 import { BsPlusCircle } from "react-icons/bs";
-// import {pointerHover} from './styles/cursor.js';
+import { MdRefresh } from "react-icons/md";
+import {pointerHover} from './styles/cursor.js';
 import { Modal, Button } from "react-bootstrap";
 import Pagination from './Pagination';
 import DepartmentArrays from '../CreatedContracts/DepartmentArrays';
@@ -17,9 +19,12 @@ import accountType from './Enums';
 import {Action} from './Enums';
 import {AccountTypeReverse} from './Enums';
 import {StatusReverse} from './Enums';
+import {DepartmentArrayType} from './Enums';
+import {tokenName} from './Enums';
 // import {ActionReverse} from './Enums';
 import AccountManagerAudit from '../CreatedContracts/AccountManagerAudit';
 import BillManager from '../CreatedContracts/BillManager';
+
 import {toast } from 'react-toastify';
 
 
@@ -31,8 +36,15 @@ const Department = () => {
   const [bills, setBills] = useState([]);
   const [funds, setFunds] = useState([]);
   const [approvals, setApprovals] = useState([]);
+  //BALANCE MAPS
+  const [fundBalanceMap, setFundBalanceMap] = useState(new Map());
+
   // const [depAddress, setDepAddress] = useState('');
   const [depContract, setDepContract] = useState('');
+  const [tokenAddress, setTokenAddress] = useState('');
+  const [tokenContract, setTokenContract] = useState('');
+  const [employeeCount, setEmployeeCount] = useState(0);
+
   const [selectedTab, setSelectedTab] = useState('bills');
   // const [bill1, setBill1] = useState([]);
 
@@ -87,18 +99,34 @@ const Department = () => {
     getApprovals(currentPageApproval);
     getFundsOfCreateBill(currentPageFundCreateBill);
     getSubDeptsOfCreateBill(currentPageDepCreateBill);
-    
-
   },[depContract]);
+
+  useEffect(()=>{
+    setTokenContract(new web3.eth.Contract(BLTABI, tokenAddress));
+    console.log("Token CONTRACT created");
+  },[tokenAddress]);
+
+  const fetchEmployeeCount = async() => {
+    await depContract.methods.getLength(DepartmentArrayType.EMPLOYEES).call().then((res)=>{
+      setEmployeeCount(res);
+      console.log("EMPLOYEE COUNT: "+res);
+    }).catch((err)=>{});
+  }
 
   const generateContract = async (depAddress) => {
     setDepContract(new web3.eth.Contract(departmentManagerABI, depAddress));
+
+      await AccountManagerAudit.methods.tokenAddress().call().then((res)=>{
+        setTokenAddress(res);
+      }).catch((err)=>{});
+      console.log("Token address fetched: "+tokenAddress);
   }
   const getBills = async(pageNumber) => {
     let accounts = await web3.eth.getAccounts();
     if (!depContract){
       return;
     }
+    fetchEmployeeCount();
     // await depContract.methods.getBills(pageSize, pageNumber).call({
       await DepartmentArrays.methods.getBills(pageSize, pageNumber, location.state.depAddress).call({
       from: accounts[0]
@@ -269,12 +297,12 @@ const Department = () => {
       let date = (new Date()).getTime();
       let currentTimestamp = date;
 
-      let tokenAddress;
-      await AccountManagerAudit.methods.tokenAddress().call().then((res)=>{
-        tokenAddress = res;
-      }).catch((err)=>{
+      // let tokenAddress;
+      // await AccountManagerAudit.methods.tokenAddress().call().then((res)=>{
+      //   tokenAddress = res;
+      // }).catch((err)=>{
 
-      });
+      // });
       console.log("_name: "+billName);
       console.log("_description: "+description);
       console.log("_threshold: "+threshold);
@@ -400,6 +428,34 @@ const Department = () => {
       </Modal>
     );
   }
+
+  const getParcentage = (num) => {
+    if (employeeCount==0)
+      return "N/A";
+    return (num*100/employeeCount).toFixed(2);
+  }
+  const getTime = (timestamp) => {
+    
+    if (timestamp.length==10){
+      timestamp += "000";
+    }
+    let d = new Date(parseInt(timestamp));
+    console.log("Date: "+timestamp);
+    let datestring = "";
+    let hour = ""+d.getHours();
+    let minute = ""+d.getMinutes();
+    if (hour.length==1){
+        hour = "0"+hour;
+    }
+    if (minute.length==1){
+        minute = "0"+minute;
+    }
+    datestring = d.getDate()  + "-" + (d.getMonth()+1) + "-" + d.getFullYear() + " " +
+        hour + ":" + minute;
+    //.toString().substring(2)
+    // 16-5-2015 9:50
+    return datestring;
+  }
   
   const billList = () => {
     return (
@@ -411,25 +467,36 @@ const Department = () => {
             
             <div class="accordion px-2" id="accordionExample">
               <div class="card">
-                <div class="card-header collapsed" id="headingOne" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+              <div class="card-header collapsed" id={"heading"+bill.billOwnAddress} type="button" data-toggle="collapse" data-target={"#collapse"+bill.billOwnAddress} aria-expanded="true" aria-controls={"collapse"+bill.billOwnAddress}>
                   <div class="row">
-                    <h5 class="mb-0">
+                    <h5 class="col-md-9">
                       {bill.name}
                     </h5>
+                    <div class="col-md-3">
+                      <p class="card-text text-center">Created on: {getTime(bill.createdOn)}</p>
+                    </div>
                   </div>
                   <div class="row">
                     <div class="col-md-3">
-                      {/* <a class="btn btn-primary">{bill.amount}</a> */}
+                      <p class="card-text py-1 border border-light rounded-2">Amount: {bill.amount + " "+tokenName}</p>
                     </div>
-                    <div class="col-md-3 px-5">
-                      <p class="card-text text-center py-1 border border-light rounded-2 bg-secondary text-white">Acceptance threshold: {bill.threshold} %</p>
-                    </div>
-                    <div class="col-md-2 px-2">
-                      <p class="card-text text-center py-1 border border-light rounded-2 bg-secondary text-white">Votes in favor: {bill.partiesAccepted}</p>
-                    </div>
-                    <div class="col-md-2 px-2">
-                      <p class="card-text text-center py-1 border border-light rounded-2 bg-secondary text-white">Votes against: {bill.partiesRejected}</p>
-                    </div>
+                    {StatusReverse[bill.status]=="OPEN" && 
+                    <>
+                      <div class="col-md-3 px-5">
+                        <p class="card-text text-center py-1 border border-light rounded-2 bg-white">Acceptance threshold: <span class="text-primary">{bill.threshold} %</span></p>
+                      </div>
+                      <br/>
+                      <div class="col-md-2 px-2">
+                        <p class="card-text text-center py-1 border border-light rounded-2 bg-white">Votes in favor: <span class="text-success">{getParcentage(bill.partiesAccepted)} %</span></p>
+                      </div>
+                      <div class="col-md-2 px-2">
+                        <p class="card-text text-center py-1 border border-light rounded-2 bg-white">Votes against: <span class="text-danger">{getParcentage(bill.partiesRejected)} %</span></p>
+                      </div>
+                    </>
+                    }
+                    {StatusReverse[bill.status]!="OPEN" &&
+                    <div class="col-md-7"></div>
+                    }
                     {StatusReverse[bill.status]=="OPEN" && 
                     <div class="col-md-2">
                       <button type="button" class="btn btn-primary mx-1" disabled>Open</button>
@@ -448,7 +515,7 @@ const Department = () => {
                   </div>
                 </div>
 
-                <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+                <div id={"collapse"+bill.billOwnAddress} class="collapse" aria-labelledby={"heading"+bill.billOwnAddress} data-parent={"#example"+bill.billOwnAddress}>
                   <div class="card-body">
                   {bill.description}
                   </div>
@@ -464,19 +531,61 @@ const Department = () => {
         </div>
     );
   }
+  const showBalance = (address) => {
+    if (fundBalanceMap.has(address))
+      return fundBalanceMap.get(address);
+    return 0;
+  }
+  const fetchBalance = async(address) => {
+    console.log("Balance fetched");
+    if (!tokenContract)
+      return;
+    await tokenContract.methods.balanceOf(address).call().then((res)=>{
+      fundBalanceMap.set(address, res);
+      refreshFunds();
+    }).catch((err)=>{
+
+    });
+  }
 
   const fundList = () => {
     return (
       <div class="col-md-11">
         {getTopBarFund()}
-        {getModal()}
-        {funds.map((fund)=> (
-          <div>
-            <h5 class="card-header">{fund.name}</h5>
+        {funds.map((bill)=> (
+          <div class="border-1">
+            
+            <div class="accordion px-2" id="accordionExample">
+              <div class="card">
+              <div class="card-header collapsed">
+                  <div class="row" id={"heading"+bill.billOwnAddress} type="button" data-toggle="collapse" data-target={"#collapse"+bill.billOwnAddress} aria-expanded="true" aria-controls={"collapse"+bill.billOwnAddress}>
+                    <h5 class="col-md-9">
+                      {bill.name}
+                    </h5>
+                    <div class="col-md-3">
+                      <p class="card-text text-center">Created on: {getTime(bill.createdOn)}</p>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4">
+                    <p><MdRefresh onClick={()=>fetchBalance(bill.billOwnAddress)} style={pointerHover}/>  Current balance: {showBalance(bill.billOwnAddress)+" "+tokenName}</p>
+                    </div>
+                    <div class="col-md-8">
+                      {/* <button type="button" class="btn btn-none mx-1" disabled></button> */}
+                    </div>
+                  </div>
+                </div>
+
+                <div id={"collapse"+bill.billOwnAddress} class="collapse" aria-labelledby={"heading"+bill.billOwnAddress} data-parent={"#example"+bill.billOwnAddress}>
+                  <div class="card-body">
+                  {bill.description}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="card-body">
-              <h5 class="card-title">{fund.description}</h5>
-              <p class="card-text">{fund.imagePath}</p>
-              <a href="#" class="btn btn-primary">{fund.amount}</a>
+              
             </div>
           </div>
         ))}

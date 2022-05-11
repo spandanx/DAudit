@@ -3,17 +3,6 @@ const AccountManagerABI =
 	{
 		"inputs": [
 			{
-				"internalType": "string",
-				"name": "rootDepartmentName",
-				"type": "string"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
-		"inputs": [
-			{
 				"internalType": "contract Bill",
 				"name": "bill",
 				"type": "address"
@@ -51,6 +40,58 @@ const AccountManagerABI =
 		"inputs": [
 			{
 				"internalType": "address",
+				"name": "parentBillAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "contract Bill",
+				"name": "bill",
+				"type": "address"
+			}
+		],
+		"name": "pushBillMap",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "parentDepartMent",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "enum StructLibrary.AccountType",
+				"name": "accType",
+				"type": "uint8"
+			}
+		],
+		"name": "register",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "rootDepartmentName",
+				"type": "string"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
 				"name": "",
 				"type": "address"
 			}
@@ -61,6 +102,25 @@ const AccountManagerABI =
 				"internalType": "enum StructLibrary.ApprovalStatus",
 				"name": "",
 				"type": "uint8"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "auditors",
+		"outputs": [
+			{
+				"internalType": "contract Auditor",
+				"name": "",
+				"type": "address"
 			}
 		],
 		"stateMutability": "view",
@@ -177,47 +237,6 @@ const AccountManagerABI =
 			}
 		],
 		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "parentBillAddress",
-				"type": "address"
-			},
-			{
-				"internalType": "contract Bill",
-				"name": "bill",
-				"type": "address"
-			}
-		],
-		"name": "pushBillMap",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "parentDepartMent",
-				"type": "address"
-			},
-			{
-				"internalType": "string",
-				"name": "name",
-				"type": "string"
-			},
-			{
-				"internalType": "enum StructLibrary.AccountType",
-				"name": "accType",
-				"type": "uint8"
-			}
-		],
-		"name": "register",
-		"outputs": [],
-		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{

@@ -3,15 +3,22 @@ import web3 from '../web3';
 import { useLocation } from "react-router-dom";
 
 import employeeABI from '../ABIs/EmployeeABI';
+import BLTABI from '../ABIs/BLTABI';
+import {pointerHover} from './styles/cursor.js';
 // import AccountManagerAudit from '../AccountManagerAudit';
 import DepartmentArrays from '../CreatedContracts/DepartmentArrays';
 import { AiOutlineReload } from "react-icons/ai";
+import { MdRefresh } from "react-icons/md";
 import Pagination from './Pagination';
 
 import VoteManager from '../CreatedContracts/VoteManager';
 import AccountManagerAudit from '../CreatedContracts/AccountManagerAudit';
+import departmentManagerABI from '../ABIs/DepartmentManagerABI';
 import {Action} from './Enums';
 import {StatusReverse} from './Enums';
+import {DepartmentArrayType} from './Enums';
+import {tokenName} from './Enums';
+
 import {toast } from 'react-toastify';
 
 const Employee = () => {
@@ -25,9 +32,13 @@ const Employee = () => {
   const [depAddress, setDepAddress] = useState('');
 
   const [pageNumber, setPageNUmber] = useState(0);
-  // const [depContract, setDepContract] = useState('');
-  // const [depContract, setDepContract] = useState('');
+  const [employeeCount, setEmployeeCount] = useState(0);
+  const [depContract, setDepContract] = useState('');
+  
+  const [tokenAddress, setTokenAddress] = useState('');
+  const [tokenContract, setTokenContract] = useState('');
   // const [bill1, setBill1] = useState([]);
+  const [fundBalanceMap, setFundBalanceMap] = useState(new Map());
 
   const pageSize = 10;
 
@@ -40,13 +51,25 @@ const Employee = () => {
     console.log("ADDRESS CHANGED, GENERATING NEW CONTRACT");
     // console.log("given emp address");
     // console.log("given emp address");
+    getTokenContract();
     generateContract(location.state.empAddress);
   },[location.state.empAddress]);
   useEffect(()=>{
     console.log("FETCHING BILLS");
-    getBills(pageNumber);
+    setDepContract(new web3.eth.Contract(departmentManagerABI, depAddress));
   },[depAddress]);
+  useEffect(()=>{
+    console.log("FETCHING BILLS");
+    getBills(pageNumber);
+  },[depContract]);
 
+  const getTokenContract = async() => {
+      await AccountManagerAudit.methods.tokenAddress().call().then((res)=>{
+        setTokenAddress(res);
+        setTokenContract(new web3.eth.Contract(BLTABI, res));
+      }).catch((err)=>{
+      });
+  }
   const generateContract = async (empAddress) => {
     // console.log("EMP ADDRESS");
     // console.log(empAddress);
@@ -69,6 +92,11 @@ const Employee = () => {
     if (!depAddress)
       return;
     // await depContract.methods.getBills(pageSize, pageNumber).call({
+    await depContract.methods.getLength(DepartmentArrayType.EMPLOYEES).call().then((res)=>{
+      setEmployeeCount(res);
+      console.log("EMPLOYEE COUNT: "+res);
+    }).catch((err)=>{});
+
     await DepartmentArrays.methods.getBills(pageSize, pageNumber, depAddress).call({
       from: accounts[0]
     }).then((response)=>{
@@ -91,6 +119,11 @@ const Employee = () => {
   //     console.log("Error occured: "+err);
   //   });
   // }
+  const getParcentage = (num) => {
+    if (employeeCount==0)
+      return "N/A";
+    return (num*100/employeeCount).toFixed(2);
+  }
   const nestedFunc = async() => {
 
   }
@@ -122,12 +155,6 @@ const Employee = () => {
       draggable: true,
       progress: undefined,
       });
-    
-      let tokenAddress;
-      await AccountManagerAudit.methods.tokenAddress().call().then((res)=>{
-        tokenAddress = res;
-      }).catch((err)=>{
-      });
 
     await VoteManager.methods.vote(billAddress, action, depAddress, tokenAddress, location.state.empAddress).send({
       from: accounts[0]
@@ -156,6 +183,45 @@ const Employee = () => {
         });
     });
   }
+  const getTime = (timestamp) => {
+
+    if (timestamp.length==10){
+      timestamp += "000";
+    }
+    let d = new Date(parseInt(timestamp));
+    console.log("Date: "+timestamp);
+    let datestring = "";
+    let hour = ""+d.getHours();
+    let minute = ""+d.getMinutes();
+    if (hour.length==1){
+        hour = "0"+hour;
+    }
+    if (minute.length==1){
+        minute = "0"+minute;
+    }
+    datestring = d.getDate()  + "-" + (d.getMonth()+1) + "-" + d.getFullYear() + " " +
+        hour + ":" + minute;
+    //.toString().substring(2)
+    // 16-5-2015 9:50
+    return datestring;
+  }
+
+  // const fetchBalance = async(address) => {
+  //   console.log("Balance fetching");
+  //   if (!tokenContract)
+  //     return;
+  //   await tokenContract.methods.balanceOf(address).call().then((res)=>{
+  //     fundBalanceMap.set(address, res);
+  //     getBills(pageNumber);
+  //   }).catch((err)=>{
+
+  //   });
+  // }
+  // const showBalance = (address) => {
+  //   if (fundBalanceMap.has(address))
+  //     return fundBalanceMap.get(address);
+  //   return 0;
+  // }
 
   return (
     <div class="col-md-12">
@@ -170,27 +236,38 @@ const Employee = () => {
         {bills.map((bill)=> (
           <div class="border-1">
             
-            <div class="accordion px-2" id="accordionExample">
+            <div class="accordion px-2" id={"example"+bill.billOwnAddress}>
               <div class="card">
-                <div class="card-header collapsed" id="headingOne" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                  <div class="row">
-                    <h5 class="mb-0">
+                <div class="card-header collapsed">
+                  <div class="row" id={"heading"+bill.billOwnAddress} type="button" data-toggle="collapse" data-target={"#collapse"+bill.billOwnAddress} aria-expanded="true" aria-controls={"collapse"+bill.billOwnAddress}>
+                  <h5 class="col-md-9">
                       {bill.name}
                     </h5>
+                    <div class="col-md-3">
+                      <p class="card-text text-center">Created on: {getTime(bill.createdOn)}</p>
+                    </div>
                   </div>
                   <div class="row">
                     <div class="col-md-3">
-                      {/* <a class="btn btn-primary">{bill.amount}</a> */}
+                      <p class="card-text py-1 border border-light rounded-2">Amount: {bill.amount + " "+tokenName}</p>
                     </div>
-                    <div class="col-md-3 px-5">
-                      <p class="card-text text-center py-1 border border-light rounded-2 bg-secondary text-white">Acceptance threshold: {bill.threshold} %</p>
-                    </div>
-                    <div class="col-md-2 px-2">
-                      <p class="card-text text-center py-1 border border-light rounded-2 bg-secondary text-white">Votes in favor: {bill.partiesAccepted}</p>
-                    </div>
-                    <div class="col-md-2 px-2">
-                      <p class="card-text text-center py-1 border border-light rounded-2 bg-secondary text-white">Votes against: {bill.partiesRejected}</p>
-                    </div>
+                    {StatusReverse[bill.status]=="OPEN" && 
+                      <>
+                        <div class="col-md-3 px-5">
+                          <p class="card-text text-center py-1 border border-light rounded-2 bg-white">Acceptance threshold: <span class="text-primary">{bill.threshold} %</span></p>
+                        </div>
+                        <br/>
+                        <div class="col-md-2 px-2">
+                          <p class="card-text text-center py-1 border border-light rounded-2 bg-white">Votes in favor: <span class="text-success">{getParcentage(bill.partiesAccepted)} %</span></p>
+                        </div>
+                        <div class="col-md-2 px-2">
+                          <p class="card-text text-center py-1 border border-light rounded-2 bg-white">Votes against: <span class="text-danger">{getParcentage(bill.partiesRejected)} %</span></p>
+                        </div>
+                      </>
+                    }
+                    {StatusReverse[bill.status]!="OPEN" && 
+                    <div class="col-md-7"></div>
+                    }
                     {StatusReverse[bill.status]=="OPEN" && 
                     <div class="col-md-2">
                       <button type="button" class="btn btn-success mx-1" onClick={()=>vote(bill.billOwnAddress, Action.APPROVE)}>Accept</button>
@@ -210,7 +287,7 @@ const Employee = () => {
                   </div>
                 </div>
 
-                <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+                <div id={"collapse"+bill.billOwnAddress} class="collapse" aria-labelledby={"heading"+bill.billOwnAddress} data-parent={"#example"+bill.billOwnAddress}>
                   <div class="card-body">
                   {bill.description}
                   </div>

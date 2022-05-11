@@ -8,6 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { MdAccountCircle, MdContentCopy } from "react-icons/md";
 // import departmentABI from '../ABIs/DepartmentABI';
 import departmentManagerABI from '../ABIs/DepartmentManagerABI';
+import auditorABI from '../ABIs/AuditorABI';
 import employeeABI from '../ABIs/EmployeeABI';
 import {ApprovalStatusReverse} from "./Enums";
 
@@ -69,8 +70,8 @@ const TopNavBar = () => {
     // let accounts = await web3.eth.getAccounts();
     console.log("Calling checkAprroval()");
     await AccountManagerAudit.methods.approvedStatus(address).call().then((res)=>{
-      // console.log("approvedStatus: ");
-      // console.log(res);
+      console.log("approvedStatus: ");
+      console.log(res);
       // console.log(ApprovalStatusReverse[res]);
       if (ApprovalStatusReverse[res]=="ACCEPTED"){
         navigate(path, args);
@@ -142,6 +143,25 @@ const TopNavBar = () => {
         // console.log("Employee not found!");
         // errors++;
       });
+      await AccountManagerAudit.methods.auditors(accounts[0]).call().then(async function(response) {
+        // setAccountType(departmentString);
+        // console.log("Employee found!");
+        if (response!=address0){
+          let empContract = new web3.eth.Contract(auditorABI, response);
+          await empContract.methods.getAuditorStruct().call().then((audStruct)=>{
+            setAccountName(audStruct.name);
+            setAccountAddress(response);
+          });
+          await checkAprroval(response, '/auditor', {state: {audAddress:response}});
+          // navigate('/employee', {state: {empAddress:response}});
+        }
+        else{
+          errors++;
+        }
+      }).catch((err) => {
+        // console.log("Employee not found!");
+        // errors++;
+      });
       // console.log("accountType: "+accountType);
     // }
     // catch (e) {
@@ -149,7 +169,7 @@ const TopNavBar = () => {
       console.log("errors: "+errors);
     // }
     
-    if (errors == 2){
+    if (errors == 3){
       setAccountName('');
       setAccountAddress('');
       navigate('/register');
@@ -185,7 +205,7 @@ const TopNavBar = () => {
   return (
     <ul class="nav justify-content-between">
       <li class="nav-item">
-        <a class="nav-link active">DAudit</a>
+        <a class="nav-link active">D-AUDIT</a>
         <ToastContainer/>
       </li>
       {accountAddress && 
