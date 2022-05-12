@@ -2,14 +2,24 @@ import React, {useState, useEffect} from 'react';
 import Tree from 'react-d3-tree';
 import '../styles/DepartmentHierarchy.css';
 import web3 from '../../web3';
+import Popover from "react-bootstrap/Popover"
+import OverlayTrigger from "react-bootstrap/OverlayTrigger"
+import Button from "react-bootstrap/Button"
+import Tooltip from "react-bootstrap/Tooltip"
+// import { useCenteredTree } from "./helpers";
 // import departmentABI from '../ABIs/DepartmentABI';
-import departmentManagerABI from '../../ABIs/DepartmentManagerABI';
-import DepartmentArrays from '../../CreatedContracts/DepartmentArrays';
+// import departmentManagerABI from '../../ABIs/DepartmentManagerABI';
+// import DepartmentArrays from '../../CreatedContracts/DepartmentArrays';
+
+import Pagination from '../Pagination';
 
 import BillABI from '../../ABIs/BillABI';
 import BillManager from '../../CreatedContracts/BillManager';
+import AccountManagerAudit from '../../CreatedContracts/AccountManagerAudit';
 
 const TrackBills = (props) => {
+
+  const pageSize = 5;
   let rootNode = {};
 
   const [chartData, setChartData] = useState({
@@ -34,6 +44,11 @@ const TrackBills = (props) => {
 
   const getBillData = async(billAddress, isRoot) => {
     console.log("getDepartmentData() Start "+billAddress);
+    let size = 0;
+    await AccountManagerAudit.methods.getBillLength(billAddress).call().then((res)=>{
+      size = Math.ceil(res/pageSize);
+    }).catch((err)=>{});
+
     let contract = new web3.eth.Contract(BillABI, billAddress);
     await contract.methods.getBillStruct().call().then((response)=>{
       console.log("Data for "+billAddress);
@@ -43,6 +58,7 @@ const TrackBills = (props) => {
         attributes: {
           billOwnAddress: response?.billOwnAddress,
           amount: response?.amount,
+          size: size
         },
         children: [],
       };
@@ -90,6 +106,10 @@ const TrackBills = (props) => {
     console.log(event);
     let billAddr = event.data.attributes.billOwnAddress;
     console.log("Address: "+billAddr);
+    let size = 0;
+    await AccountManagerAudit.methods.getBillLength(billAddr).call().then((res)=>{
+      size = Math.ceil(res/pageSize);
+    }).catch((err)=>{});
     //----------
     // let contract = new web3.eth.Contract(departmentABI, depAddress);
     // await contract.methods.getSubDepartmentsPaginate(10, 0).call().then((response)=>{
@@ -103,6 +123,7 @@ const TrackBills = (props) => {
           attributes: {
             billOwnAddress: item?.billOwnAddress,
             amount: item?.amount,
+            size: size
           },
           children: [],
       }
@@ -120,8 +141,65 @@ const TrackBills = (props) => {
     });
     console.log("getDepartmentData() End");
   }
+  const renderTooltip = (props, msg) => (
+    <Tooltip id="button-tooltip" {...props}>
+      {msg}
+    </Tooltip>
+  );
+  const nestedFunc = (item, args) => {
+    console.log("Called nestedFunc()");
+    console.log(item);
+    console.log(args);
+    clicked(args);
+  }
+  // const popover = () => (
+  //   <Popover id="popover-basic">
+  //     <Popover.Title as="h3">Popover right</Popover.Title>
+  //     <Popover.Content>
+  //       And here's some <strong>amazing</strong> content. It's very engaging.
+  //       right?
+  //     </Popover.Content>
+  //   </Popover>
+  // );
+  const renderForeignObjectNode = ({
+    nodeDatum,
+    toggleNode,
+    foreignObjectProps
+  }) => (
+    <g>
+      <circle  onClick={()=>clicked({data: nodeDatum})} r={15}></circle>
+      {/* {console.log("nodeDatum")} */}
+      {/* `foreignObject` requires width & height to be explicitly set. */}
+      <foreignObject {...foreignObjectProps}>
+      <OverlayTrigger
+            placement="right"
+            delay={{ show: 250, hide: 400 }}
+            overlay={(event)=>renderTooltip(event, "Amount: "+ nodeDatum.attributes.amount)}
+          >
+          <div style={{ border: "1px solid black", backgroundColor: "white" }}>
+            <p style={{ textAlign: "center" }} onClick={toggleNode}>{nodeDatum.name}</p>
+            {nodeDatum.children && (
+              // <button style={{ width: "100%" }} onClick={()=>clicked({data: nodeDatum})}>
+              //   Fetch
+              // </button>
+                <Pagination pageEnd={nodeDatum.attributes.size} pageTabs={3} function={(item)=>nestedFunc(item, {data: nodeDatum})}/>
+            )}
+          </div>
+        </OverlayTrigger>
+      </foreignObject>
+    </g>
+  );
+  
+  let translate = {x: 500, y: 100};
+  const nodeSize = { x: 200, y: 200 };
+  const foreignObjectProps = { width: nodeSize.x, height: nodeSize.y, x: 20 };
+  // const [translate, containerRef] = useCenteredTree();
+  const containerStyles = {
+    width: "100vw",
+    height: "100vh"
+  };
+  const separation = { nonSiblings: 2, siblings: 2 };
 
-  let translate = {x: 100, y: 100};
   return (
     // `<Tree />` will fill width/height of its container; in this case `#treeWrapper`.
     <div id="treeWrapper" style={{ width: '60em', height: '50em' }}>
@@ -132,7 +210,11 @@ const TrackBills = (props) => {
       pathFunc="step"
       orientation="vertical"
       translate={translate}
+      separation={separation}
       onNodeClick = {(event)=>clicked(event)}
+      renderCustomNodeElement={(rd3tProps) =>
+        renderForeignObjectNode({ ...rd3tProps, foreignObjectProps })
+      }
       />
     </div>
   );

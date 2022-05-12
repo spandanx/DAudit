@@ -27,6 +27,7 @@ const Employee = () => {
   console.log("location employee");
   console.log(location);
   const [bills, setBills] = useState([]);
+  const [list, setList] = useState([]);
   const [depAddress, setDepAddress] = useState('');
 
   const [pageNumber, setPageNUmber] = useState(0);
@@ -64,6 +65,13 @@ const Employee = () => {
     getBills(pageNumber);
   },[depContract, location.state.empAddress]);
 
+  useEffect(()=>{
+    checkIfVoted(list);
+  },[list]);
+
+  // const setBillArray = async()=>{
+
+  // }
   const getTokenContract = async() => {
       await AccountManagerAudit.methods.tokenAddress().call().then((res)=>{
         setTokenAddress(res);
@@ -89,13 +97,20 @@ const Employee = () => {
   const checkIfVoted = async(billArray) => {
     let billContract;
     let map = voteMap;
-    billArray.map(async(b)=>{
-      billContract = new web3.eth.Contract(billABI, b.billOwnAddress);
+    for (let i = 0; i<billArray.length; i++){
+      billContract = new web3.eth.Contract(billABI, billArray[i].billOwnAddress);
       await billContract.methods.voteMapping(location.state.empAddress).call().then((res)=>{
-        map.set(b.billOwnAddress, res);
+        map.set(billArray[i].billOwnAddress, res);
       }).catch((err)=>{});
-    });
-    setVoteMap(map);
+    }
+    // billArray.map(async(b)=>{
+    //   billContract = new web3.eth.Contract(billABI, b.billOwnAddress);
+    //   await billContract.methods.voteMapping(location.state.empAddress).call().then((res)=>{
+    //     map.set(b.billOwnAddress, res);
+    //   }).catch((err)=>{});
+    // });
+    // setVoteMap(map);
+    setBills(billArray);
   }
   const checkVoteType = (billOwnAddress)=>{
     if (voteMap.has(billOwnAddress)){
@@ -117,11 +132,10 @@ const Employee = () => {
 
     await DepartmentArrays.methods.getBills(pageSize, pageNumber, depAddress).call({
       from: accounts[0]
-    }).then((response)=>{
+    }).then(async(response)=>{
       console.log("Fetched Bills");
       console.log(response);
-      setBills(response);
-      checkIfVoted(response);
+      setList(response);
     }).catch(error=>{
       console.log("error: "+error);
     });
