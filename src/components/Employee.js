@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 
 import employeeABI from '../ABIs/EmployeeABI';
 import BLTABI from '../ABIs/BLTABI';
+import billABI from '../ABIs/BillABI';
 import {pointerHover} from './styles/cursor.js';
 // import AccountManagerAudit from '../AccountManagerAudit';
 import DepartmentArrays from '../CreatedContracts/DepartmentArrays';
@@ -14,10 +15,7 @@ import Pagination from './Pagination';
 import VoteManager from '../CreatedContracts/VoteManager';
 import AccountManagerAudit from '../CreatedContracts/AccountManagerAudit';
 import departmentManagerABI from '../ABIs/DepartmentManagerABI';
-import {Action} from './Enums';
-import {StatusReverse} from './Enums';
-import {DepartmentArrayType} from './Enums';
-import {tokenName} from './Enums';
+import {Action, VoteReverse, Vote, StatusReverse, DepartmentArrayType, tokenName} from './Enums';
 
 import {toast } from 'react-toastify';
 
@@ -39,6 +37,8 @@ const Employee = () => {
   const [tokenContract, setTokenContract] = useState('');
   // const [bill1, setBill1] = useState([]);
   const [fundBalanceMap, setFundBalanceMap] = useState(new Map());
+  const [activeTab, setActiveTab] = useState('bills');
+  const [voteMap, setVoteMap] = useState(new Map());
 
   const pageSize = 10;
 
@@ -51,17 +51,18 @@ const Employee = () => {
     console.log("ADDRESS CHANGED, GENERATING NEW CONTRACT");
     // console.log("given emp address");
     // console.log("given emp address");
+    setVoteMap(new Map());
     getTokenContract();
     generateContract(location.state.empAddress);
   },[location.state.empAddress]);
   useEffect(()=>{
     console.log("FETCHING BILLS");
     setDepContract(new web3.eth.Contract(departmentManagerABI, depAddress));
-  },[depAddress]);
+  },[depAddress, location.state.empAddress]);
   useEffect(()=>{
     console.log("FETCHING BILLS");
     getBills(pageNumber);
-  },[depContract]);
+  },[depContract, location.state.empAddress]);
 
   const getTokenContract = async() => {
       await AccountManagerAudit.methods.tokenAddress().call().then((res)=>{
@@ -85,6 +86,23 @@ const Employee = () => {
     setDepAddress(dAddress);
     // setDepContract(new web3.eth.Contract(departmentABI, depAddress));
   }
+  const checkIfVoted = async(billArray) => {
+    let billContract;
+    let map = voteMap;
+    billArray.map(async(b)=>{
+      billContract = new web3.eth.Contract(billABI, b.billOwnAddress);
+      await billContract.methods.voteMapping(location.state.empAddress).call().then((res)=>{
+        map.set(b.billOwnAddress, res);
+      }).catch((err)=>{});
+    });
+    setVoteMap(map);
+  }
+  const checkVoteType = (billOwnAddress)=>{
+    if (voteMap.has(billOwnAddress)){
+      return voteMap.get(billOwnAddress);
+    }
+    return -1;
+  }
   const getBills = async(pageNumber) => {
     let accounts = await web3.eth.getAccounts();
     console.log("Called getBills()");
@@ -103,6 +121,7 @@ const Employee = () => {
       console.log("Fetched Bills");
       console.log(response);
       setBills(response);
+      checkIfVoted(response);
     }).catch(error=>{
       console.log("error: "+error);
     });
@@ -206,101 +225,100 @@ const Employee = () => {
     return datestring;
   }
 
-  // const fetchBalance = async(address) => {
-  //   console.log("Balance fetching");
-  //   if (!tokenContract)
-  //     return;
-  //   await tokenContract.methods.balanceOf(address).call().then((res)=>{
-  //     fundBalanceMap.set(address, res);
-  //     getBills(pageNumber);
-  //   }).catch((err)=>{
+  const BillList = () => {
+    return(
+      <div class="col-md-11">
+      {getTopBarBills()}
+      {bills.map((bill)=> (
+        <div class="border-1">
+          
+          <div class="accordion px-2" id={"example"+bill.billOwnAddress}>
+            <div class="card">
+              <div class="card-header collapsed">
+                <div class="row" id={"heading"+bill.billOwnAddress} type="button" data-toggle="collapse" data-target={"#collapse"+bill.billOwnAddress} aria-expanded="true" aria-controls={"collapse"+bill.billOwnAddress}>
+                <h5 class="col-md-9">
+                    {bill.name}
+                  </h5>
+                  <div class="col-md-3">
+                    <p class="card-text text-center">Created on: {getTime(bill.createdOn)}</p>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-3">
+                    <p class="card-text py-1 border border-light rounded-2">Amount: {bill.amount + " "+tokenName}</p>
+                  </div>
+                  {StatusReverse[bill.status]=="OPEN" && 
+                    <>
+                      <div class="col-md-3 px-5">
+                        <p class="card-text text-center py-1 border border-light rounded-2 bg-white">Acceptance threshold: <span class="text-primary">{bill.threshold} %</span></p>
+                      </div>
+                      <br/>
+                      <div class="col-md-2 px-2">
+                        <p class="card-text text-center py-1 border border-light rounded-2 bg-white">Votes in favor: <span class="text-success">{getParcentage(bill.partiesAccepted)} %</span></p>
+                      </div>
+                      <div class="col-md-2 px-2">
+                        <p class="card-text text-center py-1 border border-light rounded-2 bg-white">Votes against: <span class="text-danger">{getParcentage(bill.partiesRejected)} %</span></p>
+                      </div>
+                    </>
+                  }
+                  {StatusReverse[bill.status]!="OPEN" && 
+                  <div class="col-md-7"></div>
+                  }
+                  {StatusReverse[bill.status]=="OPEN" && checkVoteType(bill.billOwnAddress)==Vote.DID_NOT_VOTE &&
+                  <div class="col-md-2">
+                    <button type="button" class="btn btn-success mx-1" onClick={()=>vote(bill.billOwnAddress, Action.APPROVE)}>Accept</button>
+                    <button type="button" class="btn btn-danger mx-1" onClick={()=>vote(bill.billOwnAddress, Action.REJECT)}>Reject</button>
+                  </div>
+                  }
+                  {StatusReverse[bill.status]=="OPEN" && checkVoteType(bill.billOwnAddress)==Vote.ACCEPTED &&
+                  <div class="col-md-2">
+                    <button type="button" class="btn btn-success mx-1" disabled>Voted: Accept</button>
+                  </div>
+                  }
+                  {StatusReverse[bill.status]=="OPEN" && checkVoteType(bill.billOwnAddress)==Vote.REJECTED &&
+                  <div class="col-md-2">
+                    <button type="button" class="btn btn-danger mx-1" disabled>Voted: Reject</button>
+                  </div>
+                  }
+                  {StatusReverse[bill.status]=="ACCEPTED" && 
+                  <div class="col-md-2">
+                    <button type="button" class="btn btn-success mx-1" disabled>Accepted</button>
+                  </div>
+                  }
+                  {StatusReverse[bill.status]=="REJECTED" && 
+                  <div class="col-md-2">
+                    <button type="button" class="btn btn-danger mx-1">Rejected</button>
+                  </div>
+                  }
+                </div>
+              </div>
 
-  //   });
-  // }
-  // const showBalance = (address) => {
-  //   if (fundBalanceMap.has(address))
-  //     return fundBalanceMap.get(address);
-  //   return 0;
-  // }
+              <div id={"collapse"+bill.billOwnAddress} class="collapse" aria-labelledby={"heading"+bill.billOwnAddress} data-parent={"#example"+bill.billOwnAddress}>
+                <div class="card-body">
+                {bill.description}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body">
+            
+          </div>
+        </div>
+      ))}
+      </div>
+    );
+  }
 
   return (
     <div class="col-md-12">
       <div class="row">
         <div class="col-md-1">
           <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-            <button class={"nav-link approval active"} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Bills</button>
+            <button onClick={()=>setActiveTab('bills')} class={"nav-link"+(activeTab=='bills'? " active": "")} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Bills</button>
           </div>
         </div>
-        <div class="col-md-11">
-        {getTopBarBills()}
-        {bills.map((bill)=> (
-          <div class="border-1">
-            
-            <div class="accordion px-2" id={"example"+bill.billOwnAddress}>
-              <div class="card">
-                <div class="card-header collapsed">
-                  <div class="row" id={"heading"+bill.billOwnAddress} type="button" data-toggle="collapse" data-target={"#collapse"+bill.billOwnAddress} aria-expanded="true" aria-controls={"collapse"+bill.billOwnAddress}>
-                  <h5 class="col-md-9">
-                      {bill.name}
-                    </h5>
-                    <div class="col-md-3">
-                      <p class="card-text text-center">Created on: {getTime(bill.createdOn)}</p>
-                    </div>
-                  </div>
-                  <div class="row">
-                    <div class="col-md-3">
-                      <p class="card-text py-1 border border-light rounded-2">Amount: {bill.amount + " "+tokenName}</p>
-                    </div>
-                    {StatusReverse[bill.status]=="OPEN" && 
-                      <>
-                        <div class="col-md-3 px-5">
-                          <p class="card-text text-center py-1 border border-light rounded-2 bg-white">Acceptance threshold: <span class="text-primary">{bill.threshold} %</span></p>
-                        </div>
-                        <br/>
-                        <div class="col-md-2 px-2">
-                          <p class="card-text text-center py-1 border border-light rounded-2 bg-white">Votes in favor: <span class="text-success">{getParcentage(bill.partiesAccepted)} %</span></p>
-                        </div>
-                        <div class="col-md-2 px-2">
-                          <p class="card-text text-center py-1 border border-light rounded-2 bg-white">Votes against: <span class="text-danger">{getParcentage(bill.partiesRejected)} %</span></p>
-                        </div>
-                      </>
-                    }
-                    {StatusReverse[bill.status]!="OPEN" && 
-                    <div class="col-md-7"></div>
-                    }
-                    {StatusReverse[bill.status]=="OPEN" && 
-                    <div class="col-md-2">
-                      <button type="button" class="btn btn-success mx-1" onClick={()=>vote(bill.billOwnAddress, Action.APPROVE)}>Accept</button>
-                      <button type="button" class="btn btn-danger mx-1" onClick={()=>vote(bill.billOwnAddress, Action.REJECT)}>Reject</button>
-                    </div>
-                    }
-                    {StatusReverse[bill.status]=="ACCEPTED" && 
-                    <div class="col-md-2">
-                      <button type="button" class="btn btn-success mx-1" disabled>Accepted</button>
-                    </div>
-                    }
-                    {StatusReverse[bill.status]=="REJECTED" && 
-                    <div class="col-md-2">
-                      <button type="button" class="btn btn-danger mx-1">Rejected</button>
-                    </div>
-                    }
-                  </div>
-                </div>
-
-                <div id={"collapse"+bill.billOwnAddress} class="collapse" aria-labelledby={"heading"+bill.billOwnAddress} data-parent={"#example"+bill.billOwnAddress}>
-                  <div class="card-body">
-                  {bill.description}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="card-body">
-              
-            </div>
-          </div>
-        ))}
-        </div>
+        {activeTab=='bills'? BillList(): <></>}
       </div>
   </div>
   )

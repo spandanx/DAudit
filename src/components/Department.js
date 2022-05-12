@@ -5,7 +5,7 @@ import { useLocation } from "react-router-dom";
 // import departmentABI from '../ABIs/DepartmentABI';
 import departmentManagerABI from '../ABIs/DepartmentManagerABI';
 import BLTABI from '../ABIs/BLTABI';
-import DepartmentHierarchy from './DepartmentHierarchy';
+import DepartmentHierarchy from './Charts/DepartmentHierarchy';
 // import AccountManagerAudit from '../AccountManagerAudit';
 import { AiOutlineReload } from "react-icons/ai";
 import { BsPlusCircle } from "react-icons/bs";
@@ -499,7 +499,7 @@ const Department = () => {
                     }
                     {StatusReverse[bill.status]=="OPEN" && 
                     <div class="col-md-2">
-                      <button type="button" class="btn btn-primary mx-1" disabled>Open</button>
+                      <button type="button" class="btn btn-primary mx-1" disabled>Active</button>
                     </div>
                     }
                     {StatusReverse[bill.status]=="ACCEPTED" && 
