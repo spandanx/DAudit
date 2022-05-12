@@ -14,7 +14,7 @@ const Pagination = (props) => {
     const getPages = () => {
         let pages = [];
         for (let i = pageOffset; i<getMin(pageEnd, pageOffset+maxPagesToDisplay); i++){
-            pages.push(<li class="page-item" onClick={()=>props.function(i)}><a class="page-link" style={pointerHover}>{i+1}</a></li>);
+            pages.push(<li class="page-item" key={i} onClick={()=>props.function(i)}><a class="page-link" style={pointerHover}>{i+1}</a></li>);
         }
         return pages;
     }
@@ -41,13 +41,13 @@ const Pagination = (props) => {
 
   return (
     <ul class="pagination">
-      <li class={"page-item" + (!prevPossible()? ' disabled': '')} onClick={()=>prevSetOfPages()} style={(!prevPossible()? {}: pointerHover)}>
+      <li key={"prev"} class={"page-item" + (!prevPossible()? ' disabled': '')} onClick={()=>prevSetOfPages()} style={(!prevPossible()? {}: pointerHover)}>
         <a class="page-link" aria-label="Previous">
           <span aria-hidden="true">&laquo;</span>
         </a>
       </li>
       {getPages()}
-      <li class={"page-item" + (!nextPossible()? ' disabled': '')} onClick={()=>nextSetOfPages()} style={(!nextPossible()? {}: pointerHover)}>
+      <li key={"next"} class={"page-item" + (!nextPossible()? ' disabled': '')} onClick={()=>nextSetOfPages()} style={(!nextPossible()? {}: pointerHover)}>
         <a class="page-link" aria-label="Next">
           <span aria-hidden="true">&raquo;</span>
         </a>

@@ -5,7 +5,8 @@ import web3 from '../../web3';
 import Popover from "react-bootstrap/Popover"
 import OverlayTrigger from "react-bootstrap/OverlayTrigger"
 import Button from "react-bootstrap/Button"
-import Tooltip from "react-bootstrap/Tooltip"
+import Tooltip from "react-bootstrap/Tooltip";
+import ReactCSSTransitionGroup from 'react-transition-group';
 // import { useCenteredTree } from "./helpers";
 // import departmentABI from '../ABIs/DepartmentABI';
 // import departmentManagerABI from '../../ABIs/DepartmentManagerABI';
@@ -28,6 +29,7 @@ const TrackBills = (props) => {
     },
     children: [],
   });
+  const [hoverItem, setHoverItem] = useState('');
   // const [data, setData] = useState(chartData);
 
   //root node not setting---------------------////////////////////@@@@@@@@@@@
@@ -101,33 +103,37 @@ const TrackBills = (props) => {
     return newData;
   }
 
-  const clicked = async(event) => {
+  const clicked = async(event, pageNumber) => {
     console.log("clicked");
     console.log(event);
     let billAddr = event.data.attributes.billOwnAddress;
     console.log("Address: "+billAddr);
-    let size = 0;
-    await AccountManagerAudit.methods.getBillLength(billAddr).call().then((res)=>{
-      size = Math.ceil(res/pageSize);
-    }).catch((err)=>{});
     //----------
     // let contract = new web3.eth.Contract(departmentABI, depAddress);
     // await contract.methods.getSubDepartmentsPaginate(10, 0).call().then((response)=>{
-      await BillManager.methods.getBillsFromMap(10, 0, billAddr).call().then((response)=>{
+      await BillManager.methods.getBillsFromMap(pageSize, pageNumber, billAddr).call().then((response)=>{
       // await DepartmentArrays.methods.getSubDepartments(10, 0, billAddr).call().then((response)=>{
       console.log("Data for "+billAddr);
       console.log(response);
-      let newNodes = response.map((item)=>{
-        return {
-          name: item?.name,
-          attributes: {
-            billOwnAddress: item?.billOwnAddress,
-            amount: item?.amount,
-            size: size
-          },
-          children: [],
-      }
-      });
+      let item;
+      let newNodes = [];
+      for (let i = 0; i< response.length; i++){
+        // let newNodes = response.map((item)=>{
+          let size = 0;
+          item = response[i];
+          AccountManagerAudit.methods.getBillLength(billAddr).call().then((res)=>{
+            size = Math.ceil(res/pageSize);
+          }).catch((err)=>{});
+          newNodes.push({
+            name: item?.name,
+            attributes: {
+              billOwnAddress: item?.billOwnAddress,
+              amount: item?.amount,
+              size: size
+            },
+            children: [],
+          });
+        }
       console.log("New Nodes defined");
       console.log(newNodes);
       let modifiedTree = addNode(chartData, newNodes, billAddr, true);
@@ -150,7 +156,7 @@ const TrackBills = (props) => {
     console.log("Called nestedFunc()");
     console.log(item);
     console.log(args);
-    clicked(args);
+    clicked(args, item);
   }
   // const popover = () => (
   //   <Popover id="popover-basic">
@@ -167,25 +173,31 @@ const TrackBills = (props) => {
     foreignObjectProps
   }) => (
     <g>
-      <circle  onClick={()=>clicked({data: nodeDatum})} r={15}></circle>
+      <circle r={15}></circle>
       {/* {console.log("nodeDatum")} */}
       {/* `foreignObject` requires width & height to be explicitly set. */}
-      <foreignObject {...foreignObjectProps}>
-      <OverlayTrigger
+      <foreignObject {...foreignObjectProps} onMouseOver={()=>setHoverItem(nodeDatum.attributes.billOwnAddress)} onMouseOut={()=>setHoverItem('')}>
+      {/* <OverlayTrigger
             placement="right"
             delay={{ show: 250, hide: 400 }}
             overlay={(event)=>renderTooltip(event, "Amount: "+ nodeDatum.attributes.amount)}
-          >
-          <div style={{ border: "1px solid black", backgroundColor: "white" }}>
+          > */}
+          <div style={{ border: "1px solid black", backgroundColor: "white"}}>
             <p style={{ textAlign: "center" }} onClick={toggleNode}>{nodeDatum.name}</p>
-            {nodeDatum.children && (
-              // <button style={{ width: "100%" }} onClick={()=>clicked({data: nodeDatum})}>
-              //   Fetch
-              // </button>
-                <Pagination pageEnd={nodeDatum.attributes.size} pageTabs={3} function={(item)=>nestedFunc(item, {data: nodeDatum})}/>
-            )}
+            {nodeDatum.attributes.billOwnAddress==hoverItem &&
+            <>
+              <p style={{ textAlign: "center" }} onClick={toggleNode}>Amount: {nodeDatum.attributes.amount}</p>
+            
+              {nodeDatum.attributes.size>0 && (
+                // <button style={{ width: "100%" }} onClick={()=>clicked({data: nodeDatum})}>
+                //   Fetch
+                // </button>
+                  <Pagination pageEnd={nodeDatum.attributes.size} pageTabs={3} function={(item)=>nestedFunc(item, {data: nodeDatum})}/>
+              )}
+            </>
+          }
           </div>
-        </OverlayTrigger>
+        {/* </OverlayTrigger> */}
       </foreignObject>
     </g>
   );
