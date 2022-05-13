@@ -37,10 +37,12 @@ contract AccountManagerAudit is AuditStorage{
             _fromDepartment: address(0),
             _toDepartment: address(departments[msg.sender])
         });
+        bill.setStatus(StructLibrary.Status.ACCEPTED);
         approvedStatus[address(departments[msg.sender])] = StructLibrary.ApprovalStatus.ACCEPTED;
         token.transfer(address(bill), amount);
         billAddress = address(bill);
         departments[msg.sender].pushFund(bill);
+        bills[address(bill)] = bill;
     }
     // modifier noAccountExists() {
     //     require(address(employees[msg.sender])==address(0), EMP_EXISTS);

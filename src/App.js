@@ -9,6 +9,7 @@ import AccountNotFound from './components/AccountNotFound';
 import AccountYetToApprove from './components/AccountYetToApprove';
 import AccountRejected from './components/AccountRejected';
 import Auditor from './components/Auditor';
+// import TrackBills from './components/Charts/TrackBills';
 
 import {
   BrowserRouter as Router,
@@ -31,6 +32,7 @@ function App() {
             <Route path="/to-be-approved" element={<AccountYetToApprove/>}/>
             <Route path="/rejected" element={<AccountRejected/>}/>
             <Route path="/auditor" element={<Auditor/>}/>
+            {/* <Route path="/auditor/track" element={<TrackBills/>}/> */}
             <Route path="/department" element={<Department/>}/>
             <Route path="/employee" element={<Employee/>}/>
             <Route path="/not-found" element={<AccountNotFound/>}/>

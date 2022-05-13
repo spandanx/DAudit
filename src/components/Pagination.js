@@ -9,12 +9,17 @@ const Pagination = (props) => {
     const maxPagesToDisplay =  props.pageTabs;
 
     const [pageOffset, setPageOffset] = useState(0);
-    const [currentPage, setCurrentPage] = useState(0);
+    const [currentPage, setCurrentPage] = useState(props.activePage==undefined? -1 : props.activePage);
+
+    const goToPage = (pageNumber) => {
+      setCurrentPage(pageNumber);
+      props.function(pageNumber);
+    }
 
     const getPages = () => {
         let pages = [];
         for (let i = pageOffset; i<getMin(pageEnd, pageOffset+maxPagesToDisplay); i++){
-            pages.push(<li class="page-item" key={i} onClick={()=>props.function(i)}><a class="page-link" style={pointerHover}>{i+1}</a></li>);
+            pages.push(<li class={"page-item"+(currentPage==i? " active":"")} key={i} onClick={()=>goToPage(i)}><a class="page-link" style={pointerHover}>{i+1}</a></li>);
         }
         return pages;
     }

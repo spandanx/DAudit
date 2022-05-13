@@ -1,11 +1,16 @@
 import React, {useState, useEffect} from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import Pagination from './Pagination';
 import TrackBills from './Charts/TrackBills';
 import DepartmentHierarchy from './Charts/DepartmentHierarchy';
 
-import { MdRefresh } from "react-icons/md";
+import {toast } from 'react-toastify';
+
+import { MdRefresh, MdContentCopy } from "react-icons/md";
+import { IoCaretForwardOutline } from "react-icons/io5";
+import { AiOutlineReload } from "react-icons/ai";
+
 import {pointerHover} from './styles/cursor.js';
 import {tokenName, DepartmentArrayType, StatusReverse} from './Enums';
 import DepartmentArrays from '../CreatedContracts/DepartmentArrays';
@@ -17,14 +22,18 @@ import web3 from '../web3';
 
 const Auditor = () => {
 
+    const navigate = useNavigate();
+
     const location = useLocation();
-    const [selectedTab, setSelectedTab] = useState("track");
+    const [selectedTab, setSelectedTab] = useState("bills");
     const [audContract, setAudContract] = useState('');
     const [depContract, setDepContract] = useState('');
     const [depAddress, setDepAddress] = useState('');
 
     const [bills, setBills] = useState([]);
     const [funds, setFunds] = useState([]);
+    const [billLength, setBillLength] = useState(0);
+    const [fundLength, setFundLength] = useState(0);
 
     const [employeeCount, setEmployeeCount] = useState(0);
     const [currentPageFund, setCurrentPageFund] = useState(0);
@@ -34,7 +43,9 @@ const Auditor = () => {
     const [tokenContract, setTokenContract] = useState('');
     const [tokenAddress, setTokenAddress] = useState('');
 
-    const pageSize = 10;
+    const [navigateBillAddress, setNavigateBillAddress] = useState('');
+
+    const pageSize = 5;
 
     useEffect(()=>{
       console.log("ADDRESS CHANGED, GENERATING NEW CONTRACT");
@@ -71,9 +82,13 @@ const Auditor = () => {
       }).catch((err)=>{});
       console.log("Token address fetched: "+tokenAddress);
     }
-
-    const nestedFunc = (item) => {
-
+    const nestedFuncBill = (pageNumber) => {
+      setCurrentPageBill(pageNumber);
+      refreshBills();
+    }
+    const nestedFuncFund = (pageNumber) => {
+      setCurrentPageFund(pageNumber);
+      refreshFunds();
     }
     const getParcentage = (num) => {
         if (employeeCount==0)
@@ -84,9 +99,12 @@ const Auditor = () => {
         return (
           <ul class="nav justify-content-between border-top border-bottom p-2 my-2">
               <li class="nav-item justify-content-between">
+                <button class="btn btn-none" onClick={()=>refreshBills()}>
+                  <AiOutlineReload/>
+                </button>
               </li>
               <li class="nav-item mx-2">
-                <Pagination pageEnd={8} pageTabs={3} function={(item)=>nestedFunc(item)}/>
+                <Pagination activePage={currentPageBill} pageEnd={Math.ceil(billLength/pageSize)} pageTabs={3} function={(item)=>nestedFuncBill(item)}/>
               </li>
           </ul>
         );
@@ -95,9 +113,12 @@ const Auditor = () => {
         return (
           <ul class="nav justify-content-between border-top border-bottom p-2 my-2">
               <li class="nav-item justify-content-between">
+                <button class="btn btn-none" onClick={()=>refreshFunds()}>
+                <AiOutlineReload/>
+              </button>
               </li>
               <li class="nav-item mx-2">
-                <Pagination pageEnd={8} pageTabs={3} function={(item)=>nestedFunc(item)}/>
+                <Pagination activePage={currentPageFund} pageEnd={Math.ceil(fundLength/pageSize)} pageTabs={3} function={(item)=>nestedFuncFund(item)}/>
               </li>
           </ul>
         );
@@ -130,11 +151,24 @@ const Auditor = () => {
           console.log("EMPLOYEE COUNT: "+res);
         }).catch((err)=>{});
       }
+      const fetchBillCount = async() => {
+        await depContract.methods.getLength(DepartmentArrayType.BILLS).call().then((res)=>{
+          setBillLength(res);
+          console.log("Bill COUNT: "+res);
+        }).catch((err)=>{});
+      }
+      const fetchFundCount = async() => {
+        await depContract.methods.getLength(DepartmentArrayType.FUNDS).call().then((res)=>{
+          setFundLength(res);
+          console.log("Bill COUNT: "+res);
+        }).catch((err)=>{});
+      }
       const getBills = async(pageNumber) => {
         let accounts = await web3.eth.getAccounts();
         if (!depContract){
           return;
         }
+        fetchBillCount();
         fetchEmployeeCount();
         // await depContract.methods.getBills(pageSize, pageNumber).call({
           await DepartmentArrays.methods.getBills(pageSize, pageNumber, depAddress).call({
@@ -152,6 +186,7 @@ const Auditor = () => {
         if (!depContract){
           return;
         }
+        fetchFundCount();
         // await depContract.methods.getBills(pageSize, pageNumber).call({
           await DepartmentArrays.methods.getFunds(pageSize, pageNumber, depAddress).call({
           from: accounts[0]
@@ -166,6 +201,10 @@ const Auditor = () => {
       const refreshFunds = async() => {
         console.log("refreshing funds");
         getFunds(currentPageFund);
+      }
+      const refreshBills = async() => {
+        console.log("refreshing bills");
+        getBills(currentPageBill);
       }
       const showBalance = (address) => {
         if (fundBalanceMap.has(address))
@@ -183,6 +222,25 @@ const Auditor = () => {
     
         });
       }
+      const copyText = (text) => {
+        console.log("Copied");
+        navigator.clipboard.writeText(text);
+        toast.info('Address Copied', {
+          position: "bottom-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          pauseOnFocusLoss: false,
+          draggable: true,
+          progress: undefined,
+          });
+      }
+      const navigateToTrack = (billAddress) => {
+        setNavigateBillAddress(billAddress);
+        setSelectedTab('track');
+        // navigate('/auditor/track', {state: {billAddress :billAddress}});
+      }
       const billList = () => {
         return (
           <div class="col-md-11">
@@ -192,8 +250,8 @@ const Auditor = () => {
                 
                 <div class="accordion px-2" id="accordionExample">
                   <div class="card">
-                  <div class="card-header collapsed" id={"heading"+bill.billOwnAddress} type="button" data-toggle="collapse" data-target={"#collapse"+bill.billOwnAddress} aria-expanded="true" aria-controls={"collapse"+bill.billOwnAddress}>
-                      <div class="row">
+                  <div class="card-header collapsed">
+                      <div class="row" id={"heading"+bill.billOwnAddress} type="button" data-toggle="collapse" data-target={"#collapse"+bill.billOwnAddress} aria-expanded="true" aria-controls={"collapse"+bill.billOwnAddress}>
                         <h5 class="col-md-9">
                           {bill.name}
                         </h5>
@@ -237,6 +295,12 @@ const Auditor = () => {
                           <button type="button" class="btn btn-danger mx-1">Rejected</button>
                         </div>
                         }
+                      </div>
+                      <div class="row my-2">
+                        <span>
+                          <a class="col-md-3 text-decoration-none">Address: {bill.billOwnAddress.substring(0, 10)}... <MdContentCopy onClick={() => copyText(bill.billOwnAddress)} style={pointerHover}/></a>
+                          <a style={pointerHover} onClick={()=>navigateToTrack(bill.billOwnAddress)} class="text-decoration-none text-primary col-md-1 mx-2">Track<IoCaretForwardOutline/></a>
+                        </span>
                       </div>
                     </div>
     
@@ -283,6 +347,12 @@ const Auditor = () => {
                           {/* <button type="button" class="btn btn-none mx-1" disabled></button> */}
                         </div>
                       </div>
+                      <div class="row my-2">
+                        <span>
+                          <a class="col-md-3 text-decoration-none">Address: {bill.billOwnAddress.substring(0, 10)}... <MdContentCopy onClick={() => copyText(bill.billOwnAddress)} style={pointerHover}/></a>
+                          <a style={pointerHover} onClick={()=>navigateToTrack(bill.billOwnAddress)} class="text-decoration-none text-primary col-md-1 mx-2">Track<IoCaretForwardOutline/></a>
+                        </span>
+                      </div>
                     </div>
     
                     <div id={"collapse"+bill.billOwnAddress} class="collapse" aria-labelledby={"heading"+bill.billOwnAddress} data-parent={"#example"+bill.billOwnAddress}>
@@ -313,7 +383,7 @@ const Auditor = () => {
           </div>
         </div>
         <div class="col-md-11">
-          {selectedTab=="bills"? billList() : selectedTab=="funds"? fundList() : selectedTab=="track"? <TrackBills billAddress={"0x2E3c421EA26Ba1B6a1087f2Bdd2044c086d6982e"}/> : selectedTab=="view"? <DepartmentHierarchy depAddress = {depAddress}/> : <></>}
+          {selectedTab=="bills"? billList() : selectedTab=="funds"? fundList() : selectedTab=="track"? <TrackBills billAddress={navigateBillAddress}/> : selectedTab=="view"? <DepartmentHierarchy depAddress = {depAddress}/> : <></>}
         </div>
       </div>
   </div>

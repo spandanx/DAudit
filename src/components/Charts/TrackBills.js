@@ -6,13 +6,15 @@ import Popover from "react-bootstrap/Popover"
 import OverlayTrigger from "react-bootstrap/OverlayTrigger"
 import Button from "react-bootstrap/Button"
 import Tooltip from "react-bootstrap/Tooltip";
-import ReactCSSTransitionGroup from 'react-transition-group';
-// import { useCenteredTree } from "./helpers";
+// import ReactCSSTransitionGroup from 'react-transition-group';
 // import departmentABI from '../ABIs/DepartmentABI';
 // import departmentManagerABI from '../../ABIs/DepartmentManagerABI';
 // import DepartmentArrays from '../../CreatedContracts/DepartmentArrays';
-
+import { TiTick } from "react-icons/ti";
+import { BsExclamation } from "react-icons/bs";
 import Pagination from '../Pagination';
+
+import { StatusReverse } from '../Enums';
 
 import BillABI from '../../ABIs/BillABI';
 import BillManager from '../../CreatedContracts/BillManager';
@@ -21,7 +23,8 @@ import AccountManagerAudit from '../../CreatedContracts/AccountManagerAudit';
 const TrackBills = (props) => {
 
   const pageSize = 5;
-  let rootNode = {};
+  // let rootNode = {};
+  const [pageNumberMap, setPageNumberMap] = useState(new Map());
 
   const [chartData, setChartData] = useState({
     name: '',
@@ -30,19 +33,61 @@ const TrackBills = (props) => {
     children: [],
   });
   const [hoverItem, setHoverItem] = useState('');
+  const [executingBillAddress, setExecutingBillAddress] = useState('');
+  const [search_billAddress, setSearch_billAddress] = useState('');
+  const [search_error, setSearch_error] = useState('EMPTY');
+  const address0 = "0x0000000000000000000000000000000000000000";
+
+  const borderColor = {0:'blue', 1:'green', 2:'red'};
   // const [data, setData] = useState(chartData);
 
   //root node not setting---------------------////////////////////@@@@@@@@@@@
   useEffect(()=>{
-    console.log("Calling useEffect");
-    getBillData(props.billAddress, true);
-    console.log("Called useEffect");
+    checkAddressValidity(search_billAddress);
+  },[search_billAddress]);
+
+  useEffect(()=>{
+    if (!search_error){
+      setExecutingBillAddress(search_billAddress);
+    }
+  },[search_error]);
+
+  useEffect(()=>{
+    if (props.billAddress){
+      setExecutingBillAddress(props.billAddress);
+    }
   },[props.billAddress]);
+
+  useEffect(()=>{
+    if (executingBillAddress){
+      getBillData(executingBillAddress, true);
+    }
+  },[executingBillAddress]);
 
   const dataMap = {
     "Dummy": true
   }
 
+  const checkAddressValidity = async(address) => {
+    console.log("checkAddressValidity() called");
+    try{
+      await AccountManagerAudit.methods.bills(address).call().then((res)=>{
+        console.log("fetched: "+res);
+        if (res==address0){
+          console.log("Not found");
+          setSearch_error("Bill not found!");
+        }
+        else{
+          console.log("found");
+          setSearch_error("");
+        }
+      }).catch((err)=>{});
+    }
+    catch(err){
+      setSearch_error("Invalid address");
+    }
+    console.log("checkAddressValidity() exit");
+  }
 
   const getBillData = async(billAddress, isRoot) => {
     console.log("getDepartmentData() Start "+billAddress);
@@ -60,6 +105,7 @@ const TrackBills = (props) => {
         attributes: {
           billOwnAddress: response?.billOwnAddress,
           amount: response?.amount,
+          status: response?.status,
           size: size
         },
         children: [],
@@ -129,6 +175,7 @@ const TrackBills = (props) => {
             attributes: {
               billOwnAddress: item?.billOwnAddress,
               amount: item?.amount,
+              status: item?.status,
               size: size
             },
             children: [],
@@ -153,10 +200,52 @@ const TrackBills = (props) => {
     </Tooltip>
   );
   const nestedFunc = (item, args) => {
-    console.log("Called nestedFunc()");
-    console.log(item);
-    console.log(args);
+    // console.log("Called nestedFunc()");
+    // console.log(item);
+    // console.log(args);
+    let pageMap = pageNumberMap;
+    pageMap.set(args.data.attributes.billOwnAddress, item);
+    setPageNumberMap(pageMap);
+    // console.log("pageNumberMap: ");
+    // console.log(pageNumberMap);
     clicked(args, item);
+  }
+  const getPageNumber = (billAddress) => {
+    console.log("Calling getPageNumber() for bill: "+billAddress);
+    console.log(pageNumberMap);
+    // if (pageNumberMap.has(billAddress)){
+    //   console.log("PAGENUMBER: "+pageNumberMap.get(billAddress));
+    //   return pageNumberMap.get(billAddress);
+    // }
+    // else{
+    //   console.log("PAGENUMBER: -1");
+    //   return -1;
+    // }
+    console.log("PAGENUMBER: "+pageNumberMap.get(billAddress));
+    return pageNumberMap.get(billAddress);
+  }
+  const searchBar = () => {
+    return(
+      <nav class="navbar navbar-light bg-light">
+        <form class="container-fluid">
+          <div class="input-group">
+            <input type="text" class="form-control me-2" placeholder="Bill address" aria-label="Username" aria-describedby="basic-addon1"
+            value={search_billAddress} 
+            onChange={(event) => setSearch_billAddress(event.target.value)}
+            />
+            <div class="py-1 me-2">
+                {!search_error && 
+                  <div title={"Valid"} data-toggle="popover" data-trigger="hover" data-content="Some content"><TiTick color='green'/></div>
+                }
+                {search_error && 
+                  <div title={search_error} data-toggle="popover" data-trigger="hover" data-content="Some content"><BsExclamation color='red'/></div>
+                }
+            </div>
+            {/* <button class="btn btn-outline-success" type="submit" disabled={search_error}>Search</button> */}
+          </div>
+        </form>
+      </nav>
+    );
   }
   // const popover = () => (
   //   <Popover id="popover-basic">
@@ -173,16 +262,21 @@ const TrackBills = (props) => {
     foreignObjectProps
   }) => (
     <g>
-      <circle r={15}></circle>
+      {nodeDatum.__rd3t.depth==0 && <circle r={15} style={{fill: "red"}}></circle>}
+      {nodeDatum.__rd3t.depth>0 && nodeDatum.attributes.size==0 && <circle r={15} style={{fill: "green"}}></circle>}
+      {nodeDatum.__rd3t.depth>0 && nodeDatum.attributes.size>0 && <circle r={15} style={{fill: "yellow"}}></circle>}
       {/* {console.log("nodeDatum")} */}
+      {/* {console.log(nodeDatum)}
+      {console.log(foreignObjectProps)}
+      {console.log("----------------")} */}
       {/* `foreignObject` requires width & height to be explicitly set. */}
       <foreignObject {...foreignObjectProps} onMouseOver={()=>setHoverItem(nodeDatum.attributes.billOwnAddress)} onMouseOut={()=>setHoverItem('')}>
-      {/* <OverlayTrigger
+      <OverlayTrigger
             placement="right"
             delay={{ show: 250, hide: 400 }}
-            overlay={(event)=>renderTooltip(event, "Amount: "+ nodeDatum.attributes.amount)}
-          > */}
-          <div style={{ border: "1px solid black", backgroundColor: "white"}}>
+            overlay={(event)=>renderTooltip(event, StatusReverse[nodeDatum.attributes.status])}
+          >
+          <div style={{ border: "1px solid "+borderColor[nodeDatum.attributes.status], backgroundColor: "white", borderRadius: '5px'}}>
             <p style={{ textAlign: "center" }} onClick={toggleNode}>{nodeDatum.name}</p>
             {nodeDatum.attributes.billOwnAddress==hoverItem &&
             <>
@@ -192,12 +286,14 @@ const TrackBills = (props) => {
                 // <button style={{ width: "100%" }} onClick={()=>clicked({data: nodeDatum})}>
                 //   Fetch
                 // </button>
-                  <Pagination pageEnd={nodeDatum.attributes.size} pageTabs={3} function={(item)=>nestedFunc(item, {data: nodeDatum})}/>
+                <div class="d-flex justify-content-center">
+                  <Pagination activePage={getPageNumber(nodeDatum.attributes.billOwnAddress)} pageEnd={nodeDatum.attributes.size} pageTabs={3} function={(item)=>nestedFunc(item, {data: nodeDatum})}/>
+                </div>
               )}
             </>
           }
           </div>
-        {/* </OverlayTrigger> */}
+        </OverlayTrigger>
       </foreignObject>
     </g>
   );
@@ -214,20 +310,25 @@ const TrackBills = (props) => {
 
   return (
     // `<Tree />` will fill width/height of its container; in this case `#treeWrapper`.
-    <div id="treeWrapper" style={{ width: '60em', height: '50em' }}>
-      <Tree data={chartData} 
-      rootNodeClassName="node__root"
-      branchNodeClassName="node__branch"
-      leafNodeClassName="node__leaf"
-      pathFunc="step"
-      orientation="vertical"
-      translate={translate}
-      separation={separation}
-      onNodeClick = {(event)=>clicked(event)}
-      renderCustomNodeElement={(rd3tProps) =>
-        renderForeignObjectNode({ ...rd3tProps, foreignObjectProps })
+    <div>
+      {searchBar()}
+      {executingBillAddress && 
+        <div id="treeWrapper" style={{ width: '60em', height: '50em' }}>
+          <Tree data={chartData} 
+          // rootNodeClassName="node__root"
+          // branchNodeClassName="node__branch"
+          // leafNodeClassName="node__leaf"
+          pathFunc="diagonal"
+          orientation="vertical"
+          translate={translate}
+          separation={separation}
+          onNodeClick = {(event)=>clicked(event)}
+          renderCustomNodeElement={(rd3tProps) =>
+            renderForeignObjectNode({ ...rd3tProps, foreignObjectProps })
+          }
+          />
+        </div>
       }
-      />
     </div>
   );
 }
