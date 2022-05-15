@@ -3,6 +3,7 @@ pragma solidity ^0.8.7;
 import {StructLibrary} from "./StructLibrary.sol";
 import "./DepartmentStorage.sol";
 import "./AuditStorage.sol";
+import "./Merge.sol";
 
 import "hardhat/console.sol";
 
@@ -56,6 +57,24 @@ contract DepartmentArrays {
         StructLibrary.EmployeeStruct[] memory toReturn = new StructLibrary.EmployeeStruct[](addr.length);
         for (uint i = 0; i<addr.length; i++){
             toReturn[i] = Employee(addr[i]).getEmployeeStruct();
+        }
+        return toReturn;
+    }
+    function getMergeRequests(uint pageSize, uint pageNumber, address depAddress) external view returns(StructLibrary.MergeStruct[] memory){
+        DepartmentStorage dep = DepartmentStorage(depAddress);
+        address[] memory addr = dep.getArray(pageSize, pageNumber, StructLibrary.DepartmentArrayType.MERGE_REQUESTS, true);
+        StructLibrary.MergeStruct[] memory toReturn = new StructLibrary.MergeStruct[](addr.length);
+        for (uint i = 0; i<addr.length; i++){
+            toReturn[i] = Merge(addr[i]).getMergeStruct();
+        }
+        return toReturn;
+    }
+    function getMergeBills(uint pageSize, uint pageNumber, address depAddress) external view returns(StructLibrary.MergeStruct[] memory){
+        DepartmentStorage dep = DepartmentStorage(depAddress);
+        address[] memory addr = dep.getArray(pageSize, pageNumber, StructLibrary.DepartmentArrayType.MERGE_BILLS, true);
+        StructLibrary.MergeStruct[] memory toReturn = new StructLibrary.MergeStruct[](addr.length);
+        for (uint i = 0; i<addr.length; i++){
+            toReturn[i] = Merge(addr[i]).getMergeStruct();
         }
         return toReturn;
     }

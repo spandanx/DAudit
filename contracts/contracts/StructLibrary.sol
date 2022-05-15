@@ -12,11 +12,13 @@ library StructLibrary {
 
     enum AccountType{ EMPLOYEE, DEPARTMENT, AUDITOR }
 
-    enum DepartmentArrayType{ BILLS, FUNDS, SUBDEPARTMENTS, EMPLOYEES, AUDITORS }
+    enum DepartmentArrayType{ BILLS, FUNDS, SUBDEPARTMENTS, EMPLOYEES, AUDITORS, APPROVALS, MERGE_REQUESTS, MERGE_BILLS }
     
     enum Vote{ DID_NOT_VOTE, REJECTED, ACCEPTED }
 
     enum ApprovalStatus {DOES_NOT_EXISTS, EXISTS, ACCEPTED, REJECTED}
+
+    enum MergeBillType{ BILL, REQUEST }
 
     struct BillStruct {
         string name;
@@ -46,6 +48,7 @@ library StructLibrary {
         address parentDepartmentAddress;
         Status status;
         uint index;
+        address origin;
     }
     struct AuditorStruct {
         string name;
@@ -56,6 +59,27 @@ library StructLibrary {
         string name;
         address departmentAddress;
         uint balance;
+    }
+    struct MergeStruct {
+        string name;
+        string description;
+        uint threshold;
+        // string imagePath;
+        uint partiesAccepted;
+        uint partiesRejected;
+        uint deadline;
+        uint createdOn;
+        uint acceptedOrRejectedOn;
+        Status billStatus;
+        uint amount;
+        address fromBill;
+        address fromDepartment;
+        address toDepartment;
+        address billOwnAddress;
+        address toBill;
+        // string proofImagePath;
+        string comments;
+        Status requestStatus;
     }
     // function getFunds(uint pageSize, uint pageNumber, StructLibrary.BillStruct[] storage funds) external view returns(StructLibrary.BillStruct[] memory) {
     //     uint offset = pageNumber * pageSize;

@@ -22,7 +22,7 @@ import web3 from '../web3';
 
 const Auditor = () => {
 
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
 
     const location = useLocation();
     const [selectedTab, setSelectedTab] = useState("bills");
@@ -45,7 +45,7 @@ const Auditor = () => {
 
     const [navigateBillAddress, setNavigateBillAddress] = useState('');
 
-    const pageSize = 5;
+    const pageSize = 1;
 
     useEffect(()=>{
       console.log("ADDRESS CHANGED, GENERATING NEW CONTRACT");
@@ -69,6 +69,14 @@ const Auditor = () => {
       console.log("Token CONTRACT created");
     },[tokenAddress]);
 
+    useEffect(()=>{
+      refreshBills();
+    },[currentPageBill]);
+  
+    useEffect(()=>{
+      refreshFunds();
+    },[currentPageFund]);
+
     const generateContracts = async (emp) => {
       if (!audContract)
         return;
@@ -84,11 +92,11 @@ const Auditor = () => {
     }
     const nestedFuncBill = (pageNumber) => {
       setCurrentPageBill(pageNumber);
-      refreshBills();
+      // refreshBills();
     }
     const nestedFuncFund = (pageNumber) => {
       setCurrentPageFund(pageNumber);
-      refreshFunds();
+      // refreshFunds();
     }
     const getParcentage = (num) => {
         if (employeeCount==0)

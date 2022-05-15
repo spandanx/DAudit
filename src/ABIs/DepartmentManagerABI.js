@@ -39,6 +39,11 @@ const departmentManagerABI =
 						"internalType": "uint256",
 						"name": "index",
 						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "origin",
+						"type": "address"
 					}
 				],
 				"internalType": "struct StructLibrary.ApprovalStruct",
@@ -85,6 +90,11 @@ const departmentManagerABI =
 				"internalType": "uint256",
 				"name": "index",
 				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "origin",
+				"type": "address"
 			}
 		],
 		"stateMutability": "view",
@@ -238,6 +248,11 @@ const departmentManagerABI =
 						"internalType": "uint256",
 						"name": "index",
 						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "origin",
+						"type": "address"
 					}
 				],
 				"internalType": "struct StructLibrary.ApprovalStruct[]",
@@ -334,12 +349,76 @@ const departmentManagerABI =
 	{
 		"inputs": [
 			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "merge_bills",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "merge_requests",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "contract Bill",
 				"name": "bill",
 				"type": "address"
 			}
 		],
 		"name": "pushFund",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "mergeAddress",
+				"type": "address"
+			}
+		],
+		"name": "pushMergeBill",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "mergeAddress",
+				"type": "address"
+			}
+		],
+		"name": "pushMergeRequest",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -358,19 +437,6 @@ const departmentManagerABI =
 				"internalType": "address",
 				"name": "",
 				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "version",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",

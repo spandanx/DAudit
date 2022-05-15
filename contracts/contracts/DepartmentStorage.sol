@@ -34,6 +34,10 @@ contract DepartmentStorage{
     // mapping (address => Bill) fundMap;
     address[] public funds;
 
+    address[] public merge_requests;
+
+    address[] public merge_bills;
+
     // mapping(address => StructLibrary.Action)
 
     StructLibrary.ApprovalStruct[] public approvalList;
@@ -50,6 +54,10 @@ contract DepartmentStorage{
             return reverse? StructLibrary.getArrayFromEnd(pageSize, pageNumber, employeeList): StructLibrary.getArrayFromStart(pageSize, pageNumber, employeeList);
         else if (arrayType==StructLibrary.DepartmentArrayType.AUDITORS)
             return reverse? StructLibrary.getArrayFromEnd(pageSize, pageNumber, auditorList): StructLibrary.getArrayFromStart(pageSize, pageNumber, auditorList);
+        else if (arrayType==StructLibrary.DepartmentArrayType.MERGE_REQUESTS)
+            return reverse? StructLibrary.getArrayFromEnd(pageSize, pageNumber, merge_requests): StructLibrary.getArrayFromStart(pageSize, pageNumber, merge_requests);
+        else if (arrayType==StructLibrary.DepartmentArrayType.MERGE_BILLS)
+            return reverse? StructLibrary.getArrayFromEnd(pageSize, pageNumber, merge_bills): StructLibrary.getArrayFromStart(pageSize, pageNumber, merge_bills);
         else
             return new address[](0);
     }

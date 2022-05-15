@@ -9,14 +9,18 @@ contract AuditStorage {
 
     mapping (address => DepartmentManager) public departments;
     mapping (address => Employee) public employees;
-    mapping (address => Auditor) auditors;
+    mapping (address => Auditor) public auditors;
     mapping (address => StructLibrary.ApprovalStatus) public approvedStatus;
     mapping (address => Bill) public bills;
+    // mapping (address => Merge) public merges;
     mapping (address => Bill[]) billMap;
     
     function addBill(Bill bill) external {
         bills[address(bill)] = bill;
     }
+    // function addMerge(Merge merge) external {
+    //     merges[address(merge)] = merge;
+    // }
     // function getDepartmentsByAddress(address depAddress) view external returns(DepartmentManager){
     //     return departments[depAddress];
     // }

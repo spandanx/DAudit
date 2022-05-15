@@ -8,7 +8,7 @@ const Action = { REJECT:0, APPROVE:1 };
 // const ActionReverse = { 0:"REJECT", 1:"APPROVE" };
 const ApprovalStatusReverse = {0:"DOES_NOT_EXISTS", 1:"EXISTS", 2:"ACCEPTED", 3:"REJECTED"};
 
-const DepartmentArrayType = { BILLS:0, FUNDS:1, SUBDEPARTMENTS:2, EMPLOYEES:3, AUDITORS:4 };
+const DepartmentArrayType = { BILLS:0, FUNDS:1, SUBDEPARTMENTS:2, EMPLOYEES:3, AUDITORS:4,APPROVALS:5 };
 
 const VoteReverse = { 0:"DID_NOT_VOTE", 1:"REJECTED", 2:"ACCEPTED" };
 const Vote = { DID_NOT_VOTE:0, REJECTED:1, ACCEPTED:2 };

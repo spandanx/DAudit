@@ -211,8 +211,8 @@ const TrackBills = (props) => {
     clicked(args, item);
   }
   const getPageNumber = (billAddress) => {
-    console.log("Calling getPageNumber() for bill: "+billAddress);
-    console.log(pageNumberMap);
+    // console.log("Calling getPageNumber() for bill: "+billAddress);
+    // console.log(pageNumberMap);
     // if (pageNumberMap.has(billAddress)){
     //   console.log("PAGENUMBER: "+pageNumberMap.get(billAddress));
     //   return pageNumberMap.get(billAddress);
@@ -221,7 +221,7 @@ const TrackBills = (props) => {
     //   console.log("PAGENUMBER: -1");
     //   return -1;
     // }
-    console.log("PAGENUMBER: "+pageNumberMap.get(billAddress));
+    // console.log("PAGENUMBER: "+pageNumberMap.get(billAddress));
     return pageNumberMap.get(billAddress);
   }
   const searchBar = () => {

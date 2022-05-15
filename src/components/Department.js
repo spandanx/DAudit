@@ -14,6 +14,7 @@ import {pointerHover} from './styles/cursor.js';
 import { Modal, Button } from "react-bootstrap";
 import Pagination from './Pagination';
 import DepartmentArrays from '../CreatedContracts/DepartmentArrays';
+import MergeBill from './department/MergeBill';
 import Status from './Enums';
 import accountType from './Enums';
 import {Action} from './Enums';
@@ -53,11 +54,15 @@ const Department = () => {
   const handleClose = () => setShowModal(false);
   const handleShow = () => setShowModal(true);
 
-  const pageSize = 10;
+  const pageSize = 1;
 
   const [currentPageBill, setCurrentPageBill] = useState(0);
-  const [currentPageFund, setCurrentPageBillFund] = useState(0);
-  const [currentPageApproval, setCurrentPageBillapproval] = useState(0);
+  const [currentPageFund, setCurrentPageFund] = useState(0);
+  const [currentPageApproval, setCurrentPageApproval] = useState(0);
+
+  const [billLength, setBillLength] = useState(0);
+  const [fundLength, setFundLength] = useState(0);
+  const [approvalLength, setApprovalLength] = useState(0);
 
   const [fundsCreateBill, setFundsCreateBill] = useState([]);
   const [currentPageFundCreateBill, setCurrentPageFundCreateBill] = useState(0);
@@ -68,6 +73,11 @@ const Department = () => {
   //create new bill form
   const [fundAddress, setFundAddress] = useState('');
   const [subDepAddress, setSubDepAddress] = useState('');
+  const [createFundLength, setCreateFundLength] = useState(0);
+  const [createDepLength, setCreateDepLength] = useState(0);
+  const [createFundPageNumber, setCreateFundPageNumber] = useState(0);
+  const [createDepPageNumber, setCreateDepPageNumber] = useState(0);
+
   const [billName, setBillName] = useState('');
   const [description, setDescription] = useState('');
   const [threshold, setThreshold] = useState('');
@@ -106,10 +116,48 @@ const Department = () => {
     console.log("Token CONTRACT created");
   },[tokenAddress]);
 
+  useEffect(()=>{
+    refreshBills();
+  },[currentPageBill]);
+
+  useEffect(()=>{
+    refreshFunds();
+  },[currentPageFund]);
+
+  useEffect(()=>{
+    refreshApprovals();
+  },[currentPageApproval]);
+
+  useEffect(()=>{
+    getFundsOfCreateBill(createFundPageNumber);
+  },[createFundPageNumber]);
+
+  useEffect(()=>{
+    getSubDeptsOfCreateBill(createDepPageNumber);
+  },[createDepPageNumber]);
+
   const fetchEmployeeCount = async() => {
     await depContract.methods.getLength(DepartmentArrayType.EMPLOYEES).call().then((res)=>{
       setEmployeeCount(res);
       console.log("EMPLOYEE COUNT: "+res);
+    }).catch((err)=>{});
+  }
+  const fetchBillCount = async() => {
+    await depContract.methods.getLength(DepartmentArrayType.BILLS).call().then((res)=>{
+      setBillLength(res);
+      console.log("Bill COUNT: "+res);
+    }).catch((err)=>{});
+  }
+  const fetchFundCount = async() => {
+    await depContract.methods.getLength(DepartmentArrayType.FUNDS).call().then((res)=>{
+      setFundLength(res);
+      console.log("Fund COUNT: "+res);
+    }).catch((err)=>{});
+  }
+  const fetchApprovalCount = async() => {
+    await depContract.methods.getLength(DepartmentArrayType.APPROVALS).call().then((res)=>{
+      setApprovalLength(res);
+      console.log("Approvals COUNT: "+res);
     }).catch((err)=>{});
   }
 
@@ -127,6 +175,7 @@ const Department = () => {
       return;
     }
     fetchEmployeeCount();
+    fetchBillCount();
     // await depContract.methods.getBills(pageSize, pageNumber).call({
       await DepartmentArrays.methods.getBills(pageSize, pageNumber, location.state.depAddress).call({
       from: accounts[0]
@@ -143,6 +192,7 @@ const Department = () => {
     if (!depContract){
       return;
     }
+    fetchFundCount();
     // await depContract.methods.getBills(pageSize, pageNumber).call({
       await DepartmentArrays.methods.getFunds(pageSize, pageNumber, location.state.depAddress).call({
       from: accounts[0]
@@ -159,6 +209,7 @@ const Department = () => {
     if (!depContract){
       return;
     }
+    fetchApprovalCount();
     // await depContract.methods.getBills(pageSize, pageNumber).call({
       await DepartmentArrays.methods.getApprovals(pageSize, pageNumber, location.state.depAddress).call({
       from: accounts[0]
@@ -178,6 +229,11 @@ const Department = () => {
     if (!depContract){
       return;
     }
+    await depContract.methods.getLength(DepartmentArrayType.FUNDS).call().then((res)=>{
+      setCreateFundLength(res);
+      console.log("Fund COUNT: "+res);
+    }).catch((err)=>{});
+    //createFundLength
     // await depContract.methods.getBills(pageSize, pageNumber).call({
       await DepartmentArrays.methods.getFunds(pageSize, pageNumber, location.state.depAddress).call({
       from: accounts[0]
@@ -196,6 +252,11 @@ const Department = () => {
     if (!depContract){
       return;
     }
+    await depContract.methods.getLength(DepartmentArrayType.SUBDEPARTMENTS).call().then((res)=>{
+      setCreateDepLength(res);
+      console.log("departments COUNT: "+res);
+    }).catch((err)=>{});
+    //createDepLength
     // await depContract.methods.getBills(pageSize, pageNumber).call({
       await DepartmentArrays.methods.getSubDepartments(pageSize, pageNumber, location.state.depAddress).call({
       from: accounts[0]
@@ -235,7 +296,7 @@ const Department = () => {
             </button>
           </li>
           <li class="nav-item mx-2">
-            <Pagination pageEnd={8} pageTabs={3} function={(item)=>nestedFunc(item)}/>
+            <Pagination activePage={currentPageBill} pageEnd={Math.ceil(billLength/pageSize)} pageTabs={3} function={(item)=>nestedFuncBill(item)}/>
           </li>
       </ul>
     );
@@ -249,7 +310,7 @@ const Department = () => {
             </button>
           </li>
           <li class="nav-item mx-2">
-            <Pagination pageEnd={8} pageTabs={3} function={(item)=>nestedFunc(item)}/>
+            <Pagination activePage={currentPageFund} pageEnd={Math.ceil(fundLength/pageSize)} pageTabs={3} function={(item)=>nestedFuncFund(item)}/>
           </li>
       </ul>
     );
@@ -263,15 +324,37 @@ const Department = () => {
             </button>
           </li>
           <li class="nav-item mx-2">
-            <Pagination pageEnd={8} pageTabs={3} function={(item)=>nestedFunc(item)}/>
+            <Pagination activePage={currentPageApproval} pageEnd={Math.ceil(approvalLength/pageSize)} pageTabs={3} function={(item)=>nestedFuncApproval(item)}/>
           </li>
       </ul>
     );
   }
 
-  const nestedFunc = (num) => {
-    console.log("Calling nestedFunc()");
-    console.log(num);
+  // const nestedFunc = (num) => {
+  //   console.log("Calling nestedFunc()");
+  //   console.log(num);
+  // }
+  const nestedFuncCreateFund = (pageNumber) => {
+    setCreateFundPageNumber(pageNumber);
+    // console.log("Calling nestedFunc()");
+    // console.log(num);
+  }
+  const nestedFuncCreateDep = (pageNumber) => {
+    setCreateDepLength(pageNumber);
+    // console.log("Calling nestedFunc()");
+    // console.log(num);
+  }
+  const nestedFuncBill = (pageNumber) => {
+    setCurrentPageBill(pageNumber);
+    // refreshBills();
+  }
+  const nestedFuncFund = (pageNumber) => {
+    setCurrentPageApproval(pageNumber);
+    // refreshFunds();
+  }
+  const nestedFuncApproval = (pageNumber) => {
+    setCurrentPageApproval(pageNumber);
+    // refreshApprovals();
   }
 
   const createBill = async() => {
@@ -372,7 +455,7 @@ const Department = () => {
               </select>
             </div>
             <div class="col-md-3 py-1">
-              <Pagination pageEnd={8} pageTabs={3} function={(item)=>nestedFunc(item)}/>
+              <Pagination activePage={createFundPageNumber} pageEnd={Math.ceil(createFundLength/pageSize)} pageTabs={3} function={(item)=>nestedFuncCreateFund(item)}/>
             </div>
           </div>
           <div class="row">
@@ -385,7 +468,7 @@ const Department = () => {
               </select>
               </div>
               <div class="col-md-3 py-1">
-                <Pagination pageEnd={8} pageTabs={3} function={(item)=>nestedFunc(item)}/>
+                <Pagination activePage={createDepPageNumber}  pageEnd={Math.ceil(createDepLength/pageSize)} pageTabs={3} function={(item)=>nestedFuncCreateDep(item)}/>
               </div>
             </div>
             <div class="row my-3">
@@ -692,6 +775,7 @@ const Department = () => {
           <button onClick={()=>setSelectedTab("funds")} class={'nav-link'+ (selectedTab=="funds"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Funds</button>
           <button onClick={()=>setSelectedTab("bills")} class={'nav-link'+ (selectedTab=="bills"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Bills</button>
           <button onClick={()=>setSelectedTab("hierarchy")} class={'nav-link'+ (selectedTab=="hierarchy"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Hierarchy</button>
+          <button onClick={()=>setSelectedTab("mergeBills")} class={'nav-link'+ (selectedTab=="mergeBills"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Encashment Bills</button>
         </div>
           {/* <ul class="nav flex-column">
             <li class="nav-item">
@@ -706,7 +790,9 @@ const Department = () => {
           </ul> */}
         </div>
 
-        {selectedTab=="bills"? billList() : selectedTab=="funds"? fundList() : selectedTab=="approvals"? approvalList() : selectedTab=="hierarchy"? getHierarchy() : <></>}
+        {selectedTab=="bills"? billList() : selectedTab=="funds"? fundList() 
+        : selectedTab=="approvals"? approvalList() : selectedTab=="hierarchy"? getHierarchy() 
+        : selectedTab=="mergeBills"? <MergeBill depAddress = {location.state.depAddress}/> : <></>}
       </div>
   </div>
   )

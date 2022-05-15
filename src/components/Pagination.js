@@ -46,17 +46,21 @@ const Pagination = (props) => {
 
   return (
     <ul class="pagination">
-      <li key={"prev"} class={"page-item" + (!prevPossible()? ' disabled': '')} onClick={()=>prevSetOfPages()} style={(!prevPossible()? {}: pointerHover)}>
-        <a class="page-link" aria-label="Previous">
-          <span aria-hidden="true">&laquo;</span>
-        </a>
-      </li>
-      {getPages()}
-      <li key={"next"} class={"page-item" + (!nextPossible()? ' disabled': '')} onClick={()=>nextSetOfPages()} style={(!nextPossible()? {}: pointerHover)}>
-        <a class="page-link" aria-label="Next">
-          <span aria-hidden="true">&raquo;</span>
-        </a>
-      </li>
+      {getMin(pageEnd, pageOffset+maxPagesToDisplay)>0 && 
+        <>
+        <li key={"prev"} class={"page-item" + (!prevPossible()? ' disabled': '')} onClick={()=>prevSetOfPages()} style={(!prevPossible()? {}: pointerHover)}>
+          <a class="page-link" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+        {getPages()}
+        <li key={"next"} class={"page-item" + (!nextPossible()? ' disabled': '')} onClick={()=>nextSetOfPages()} style={(!nextPossible()? {}: pointerHover)}>
+          <a class="page-link" aria-label="Next">
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+        </>
+      }
     </ul>
   )
 }

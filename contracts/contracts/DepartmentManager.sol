@@ -114,6 +114,14 @@ contract DepartmentManager is DepartmentStorage{
         // token.transfer(address(bill), amount);
         bills.push(address(bill));
     }
+    function pushMergeBill(address mergeAddress) external {
+        // IERC20 token = IERC20(tokenAddress);
+        // token.transfer(address(bill), amount);
+        merge_bills.push(mergeAddress);
+    }
+    function pushMergeRequest(address mergeAddress) external {
+        merge_requests.push(mergeAddress);
+    }
     // function createBill(
     //     string memory _name,
     //     string memory _description,
@@ -159,9 +167,16 @@ contract DepartmentManager is DepartmentStorage{
             return employeeList.length;
         else if (arrayType==StructLibrary.DepartmentArrayType.AUDITORS)
             return auditorList.length;
+        else if (arrayType==StructLibrary.DepartmentArrayType.APPROVALS)
+            return approvalList.length;
+        else if (arrayType==StructLibrary.DepartmentArrayType.MERGE_REQUESTS)
+            return merge_requests.length;
+        else if (arrayType==StructLibrary.DepartmentArrayType.MERGE_BILLS)
+            return merge_bills.length;
         else
             return 0;
         // return funds.length;
+        //
     }
     // function pushFund(Bill bill) public {
     //     funds.push(bill.getBillStruct());

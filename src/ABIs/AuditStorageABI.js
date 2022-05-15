@@ -40,25 +40,6 @@ const auditStorageABI =
 				"type": "address"
 			}
 		],
-		"name": "auditors",
-		"outputs": [
-			{
-				"internalType": "contract Auditor",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
 		"name": "bills",
 		"outputs": [
 			{

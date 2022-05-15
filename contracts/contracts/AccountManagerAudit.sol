@@ -85,7 +85,8 @@ contract AccountManagerAudit is AuditStorage{
             accountAddress: addr,
             parentDepartmentAddress: parentDepartMent,
             status: StructLibrary.Status.OPEN,
-            index: 0
+            index: 0,
+            origin: msg.sender
         });
         // rootDep.addEmployee(address(subEmp));
         rootDep.addApproval(apr);

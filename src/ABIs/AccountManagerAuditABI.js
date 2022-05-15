@@ -3,6 +3,17 @@ const AccountManagerABI =
 	{
 		"inputs": [
 			{
+				"internalType": "string",
+				"name": "rootDepartmentName",
+				"type": "string"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "contract Bill",
 				"name": "bill",
 				"type": "address"
@@ -35,58 +46,6 @@ const AccountManagerABI =
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "parentBillAddress",
-				"type": "address"
-			},
-			{
-				"internalType": "contract Bill",
-				"name": "bill",
-				"type": "address"
-			}
-		],
-		"name": "pushBillMap",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "parentDepartMent",
-				"type": "address"
-			},
-			{
-				"internalType": "string",
-				"name": "name",
-				"type": "string"
-			},
-			{
-				"internalType": "enum StructLibrary.AccountType",
-				"name": "accType",
-				"type": "uint8"
-			}
-		],
-		"name": "register",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "rootDepartmentName",
-				"type": "string"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
 	},
 	{
 		"inputs": [
@@ -237,6 +196,47 @@ const AccountManagerABI =
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "parentBillAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "contract Bill",
+				"name": "bill",
+				"type": "address"
+			}
+		],
+		"name": "pushBillMap",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "parentDepartMent",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "enum StructLibrary.AccountType",
+				"name": "accType",
+				"type": "uint8"
+			}
+		],
+		"name": "register",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{

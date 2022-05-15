@@ -30,9 +30,11 @@ const Employee = () => {
   const [list, setList] = useState([]);
   const [depAddress, setDepAddress] = useState('');
 
-  const [pageNumber, setPageNUmber] = useState(0);
+  const [pageNumber, setPageNumber] = useState(0);
+  const [billCount, setBillCount] = useState('');
   const [employeeCount, setEmployeeCount] = useState(0);
   const [depContract, setDepContract] = useState('');
+
   
   const [tokenAddress, setTokenAddress] = useState('');
   const [tokenContract, setTokenContract] = useState('');
@@ -41,7 +43,7 @@ const Employee = () => {
   const [activeTab, setActiveTab] = useState('bills');
   const [voteMap, setVoteMap] = useState(new Map());
 
-  const pageSize = 10;
+  const pageSize = 1;
 
   // useEffect(()=>{
   //   console.log("DEPARTMENT RELOADED");
@@ -68,6 +70,10 @@ const Employee = () => {
   useEffect(()=>{
     checkIfVoted(list);
   },[list]);
+
+  useEffect(()=>{
+    getBills(pageNumber);
+  },[pageNumber]);
 
   // const setBillArray = async()=>{
 
@@ -130,6 +136,11 @@ const Employee = () => {
       console.log("EMPLOYEE COUNT: "+res);
     }).catch((err)=>{});
 
+    await depContract.methods.getLength(DepartmentArrayType.BILLS).call().then((res)=>{
+      setBillCount(res);
+      console.log("Bill count: "+res);
+    }).catch((err)=>{});
+
     await DepartmentArrays.methods.getBills(pageSize, pageNumber, depAddress).call({
       from: accounts[0]
     }).then(async(response)=>{
@@ -157,8 +168,9 @@ const Employee = () => {
       return "N/A";
     return (num*100/employeeCount).toFixed(2);
   }
-  const nestedFunc = async() => {
-
+  const nestedFunc = async(page) => {
+    // getBills(pageNumber);
+    setPageNumber(page);
   }
   const getTopBarBills = () => {
     return (
@@ -169,7 +181,7 @@ const Employee = () => {
             </button>
           </li>
           <li class="nav-item mx-2">
-            <Pagination pageEnd={8} pageTabs={3} function={(item)=>nestedFunc(item)}/>
+            <Pagination activePage={pageNumber} pageEnd={Math.ceil(billCount/pageSize)} pageTabs={3} function={(item)=>nestedFunc(item)}/>
           </li>
       </ul>
     );
