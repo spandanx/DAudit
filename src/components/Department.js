@@ -15,6 +15,8 @@ import { Modal, Button } from "react-bootstrap";
 import Pagination from './Pagination';
 import DepartmentArrays from '../CreatedContracts/DepartmentArrays';
 import MergeBill from './department/MergeBill';
+import MergeRequest from './department/MergeRequest';
+
 import Status from './Enums';
 import accountType from './Enums';
 import {Action} from './Enums';
@@ -64,12 +66,6 @@ const Department = () => {
   const [fundLength, setFundLength] = useState(0);
   const [approvalLength, setApprovalLength] = useState(0);
 
-  const [fundsCreateBill, setFundsCreateBill] = useState([]);
-  const [currentPageFundCreateBill, setCurrentPageFundCreateBill] = useState(0);
-
-  const [departmentsCreateBill, setDepartmentsCreateBill] = useState([]);
-  const [currentPageDepCreateBill, setCurrentPageDepCreateBill] = useState(0);
-
   //create new bill form
   const [fundAddress, setFundAddress] = useState('');
   const [subDepAddress, setSubDepAddress] = useState('');
@@ -82,6 +78,12 @@ const Department = () => {
   const [description, setDescription] = useState('');
   const [threshold, setThreshold] = useState('');
   const [amount, setAmount] = useState('');
+
+  const [fundsCreateBill, setFundsCreateBill] = useState([]);
+  const [currentPageFundCreateBill, setCurrentPageFundCreateBill] = useState(0);
+
+  const [departmentsCreateBill, setDepartmentsCreateBill] = useState([]);
+  const [currentPageDepCreateBill, setCurrentPageDepCreateBill] = useState(0);
   // const [toAddress, setToAddress] = useState('');
 
   // let gdata = {
@@ -776,6 +778,7 @@ const Department = () => {
           <button onClick={()=>setSelectedTab("bills")} class={'nav-link'+ (selectedTab=="bills"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Bills</button>
           <button onClick={()=>setSelectedTab("hierarchy")} class={'nav-link'+ (selectedTab=="hierarchy"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Hierarchy</button>
           <button onClick={()=>setSelectedTab("mergeBills")} class={'nav-link'+ (selectedTab=="mergeBills"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Encashment Bills</button>
+          <button onClick={()=>setSelectedTab("mergeRequests")} class={'nav-link'+ (selectedTab=="mergeRequests"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Merge Requests</button>
         </div>
           {/* <ul class="nav flex-column">
             <li class="nav-item">
@@ -792,7 +795,8 @@ const Department = () => {
 
         {selectedTab=="bills"? billList() : selectedTab=="funds"? fundList() 
         : selectedTab=="approvals"? approvalList() : selectedTab=="hierarchy"? getHierarchy() 
-        : selectedTab=="mergeBills"? <MergeBill depAddress = {location.state.depAddress}/> : <></>}
+        : selectedTab=="mergeBills"? <MergeBill depAddress = {location.state.depAddress}/>
+        : selectedTab=="mergeRequests"? <MergeRequest depAddress = {location.state.depAddress}/> : <></>}
       </div>
   </div>
   )

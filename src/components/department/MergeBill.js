@@ -8,6 +8,10 @@ import web3 from '../../web3';
 import DepartmentArrays from '../../CreatedContracts/DepartmentArrays';
 import AccountManagerAudit from '../../CreatedContracts/AccountManagerAudit';
 import departmentManagerABI from '../../ABIs/DepartmentManagerABI';
+import BillManager from '../../CreatedContracts/BillManager';
+import BillABI from '../../ABIs/BillABI';
+
+import {toast } from 'react-toastify';
 
 const MergeBill = (props) => {
 
@@ -21,6 +25,30 @@ const MergeBill = (props) => {
     const [depContract, setDepContract] = useState(false);
     const [tokenAddress, setTokenAddress] = useState('');
 
+    //create new bill form
+    const [fundAddress, setFundAddress] = useState('');
+    const [subDepAddress, setSubDepAddress] = useState('');
+    const [createFundLength, setCreateFundLength] = useState(0);
+    const [createDepLength, setCreateDepLength] = useState(0);
+    const [createFundPageNumber, setCreateFundPageNumber] = useState(0);
+    const [createDepPageNumber, setCreateDepPageNumber] = useState(0);
+
+    const [billName, setBillName] = useState('');
+    const [description, setDescription] = useState('');
+    const [threshold, setThreshold] = useState('');
+    const [amount, setAmount] = useState('');
+
+    const [fundsCreateBill, setFundsCreateBill] = useState([]);
+    const [currentPageFundCreateBill, setCurrentPageFundCreateBill] = useState(0);
+
+    // const [departmentsCreateBill, setDepartmentsCreateBill] = useState([]);
+    // const [currentPageDepCreateBill, setCurrentPageDepCreateBill] = useState(0);
+
+    const [destinationBill, setDestinationBill] = useState([]);
+    const [currentPageDepDestination, setCurrentPageDepDestination] = useState(0);
+
+    const [selectedDepAddressFund, setSelectedDepAddressFund] = useState(0);
+
     const handleClose = () => setShowModal(false);
     const handleShow = () => setShowModal(true);
 
@@ -32,7 +60,13 @@ const MergeBill = (props) => {
         fetchEmployeeCount();
         fetchBillCount();
         getBills(currentPageBill);
+        getFundsOfCreateBill(currentPageFundCreateBill);
+        getDestinationFunds(currentPageFundCreateBill);
+        // getSubDeptsOfCreateBill(currentPageDepCreateBill);
     },[depContract]);
+    // useEffect(()=>{
+    //     getDestinationFunds(currentPageDepDestination);
+    // },[selectedDepAddressFund]);
 
     useEffect(()=>{
         getBills(currentPageBill);
@@ -41,10 +75,10 @@ const MergeBill = (props) => {
     const generateContract = async (depAddress) => {
         setDepContract(new web3.eth.Contract(departmentManagerABI, depAddress));
     
-          await AccountManagerAudit.methods.tokenAddress().call().then((res)=>{
-            setTokenAddress(res);
-          }).catch((err)=>{});
-          console.log("Token address fetched: "+tokenAddress);
+        await AccountManagerAudit.methods.tokenAddress().call().then((res)=>{
+        setTokenAddress(res);
+        }).catch((err)=>{});
+        console.log("Token address fetched: "+tokenAddress);
     }
     const fetchEmployeeCount = async() => {
         if (!depContract)
@@ -62,6 +96,86 @@ const MergeBill = (props) => {
           console.log("Bill COUNT: "+res);
         }).catch((err)=>{});
     }
+    const getDestinationFunds = async(pageNumber) => {
+        console.log("CALLED getFundsOfCreateBill()");
+        // let accounts = await web3.eth.getAccounts();
+        // if (!selectedDepAddressFund){
+        //   return;
+        // }
+        // await depContract.methods.getLength(DepartmentArrayType.FUNDS).call().then((res)=>{
+        //   setCreateFundLength(res);
+        // //   console.log("Fund COUNT: "+res);
+        // }).catch((err)=>{});
+        await AccountManagerAudit.methods.billAddress().call().then(async(res)=>{
+            let billStrct = new web3.eth.Contract(BillABI, res);
+            console.log("INSIDE rootBillAddress");
+            billStrct.methods.getBillStruct().call().then((res1)=>{
+                console.log("INSIDE rootBillAddress billSTRUCT");
+                console.log(res1);
+
+                setDestinationBill([res1]);
+            }).catch((err)=>{console.log(err)});
+        }).catch((err)=>{console.log(err)});
+        //createFundLength
+        // await depContract.methods.getBills(pageSize, pageNumber).call({
+        //   await DepartmentArrays.methods.getFunds(pageSize, pageNumber, props.depAddress).call({
+        //   from: accounts[0]
+        // }).then((response)=>{
+        //   console.log("Fetched Funds");
+        //   console.log(response);
+        //   setFundsCreateBill(response);
+        // }).catch(error=>{
+        //   console.log("error: "+error);
+        // });
+    }
+    const getFundsOfCreateBill = async(pageNumber) => {
+        console.log("Called getFundsOfCreateBill()");
+        let accounts = await web3.eth.getAccounts();
+        if (!depContract){
+          return;
+        }
+        await depContract.methods.getLength(DepartmentArrayType.FUNDS).call().then((res)=>{
+          setCreateFundLength(res);
+          console.log("Fund COUNT: "+res);
+        }).catch((err)=>{});
+        //createFundLength
+        // await depContract.methods.getBills(pageSize, pageNumber).call({
+          await DepartmentArrays.methods.getFunds(pageSize, pageNumber, props.depAddress).call({
+          from: accounts[0]
+        }).then((response)=>{
+          console.log("Fetched Funds");
+          console.log(response);
+          setFundsCreateBill(response);
+        }).catch(error=>{
+          console.log("error: "+error);
+        });
+    }
+    const selectDestinationDepartment = (destFundAddress) => {
+        setFundAddress(destFundAddress);
+        setSelectedDepAddressFund(destFundAddress);
+    }
+    // const getSubDeptsOfCreateBill = async(pageNumber) => {
+    //     console.log("Called getFundsOfCreateBill()");
+    //     let accounts = await web3.eth.getAccounts();
+    //     if (!depContract){
+    //       return;
+    //     }
+    //     await depContract.methods.getLength(DepartmentArrayType.SUBDEPARTMENTS).call().then((res)=>{
+    //       setCreateDepLength(res);
+    //       console.log("departments COUNT: "+res);
+    //     }).catch((err)=>{});
+    //     //createDepLength
+    //     // await depContract.methods.getBills(pageSize, pageNumber).call({
+    //       await DepartmentArrays.methods.getSubDepartments(pageSize, pageNumber, props.depAddress).call({
+    //       from: accounts[0]
+    //     }).then((response)=>{
+    //       console.log("Fetched subDepartments");
+    //       console.log(response);
+    //       setDepartmentsCreateBill(response);
+    //     }).catch(error=>{
+    //       console.log("error: "+error);
+    //     });
+    //   }
     const refreshBills = async() => {
         console.log("refreshing bills");
         getBills(currentPageBill);
@@ -74,7 +188,7 @@ const MergeBill = (props) => {
         fetchEmployeeCount();
         fetchBillCount();
         // await depContract.methods.getBills(pageSize, pageNumber).call({
-          await DepartmentArrays.methods.getBills(pageSize, pageNumber, props.depAddress).call({
+          await DepartmentArrays.methods.getMergeBills(pageSize, pageNumber, props.depAddress).call({
           from: accounts[0]
         }).then((response)=>{
           console.log("Fetched Bills");
@@ -87,6 +201,185 @@ const MergeBill = (props) => {
     const nestedFuncBill = (pageNumber) => {
         setCurrentPageBill(pageNumber);
         // refreshBills();
+    }
+    const createBill = async() => {
+        handleClose();
+
+    let accounts = await web3.eth.getAccounts();
+    toast.info("Creating bill", {
+      position: "bottom-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      pauseOnFocusLoss: false,
+      draggable: true,
+      progress: undefined,
+      });
+      // const [fundAddress, setFundAddress] = useState('');
+      // const [subDepAddress, setSubDepAddress] = useState('');
+      // const [billName, setBillName] = useState('');
+      // const [description, setDescription] = useState('');
+      // const [amount, setAmount] = useState('');
+      // const [toAddress, setToAddress] = useState('');
+      let date = (new Date()).getTime();
+      let currentTimestamp = date;
+
+      // let tokenAddress;
+      // await AccountManagerAudit.methods.tokenAddress().call().then((res)=>{
+      //   tokenAddress = res;
+      // }).catch((err)=>{
+
+      // });
+      console.log("_name: "+billName);
+      console.log("_description: "+description);
+      console.log("_threshold: "+threshold);
+      console.log("_imagePath: ");
+      console.log("_deadline: "+currentTimestamp);
+      console.log("_acceptedOrRejectedOn: "+currentTimestamp);
+      console.log("_amount: "+amount);
+      console.log("_fromBill: "+fundAddress);
+      console.log("_fromDepartment: "+props.depAddress);
+      console.log("_toDepartment: "+subDepAddress);
+      console.log("tokenAddress: "+tokenAddress);
+      await BillManager.methods.createMergeBill(
+        billName,
+        description,
+        threshold,
+        "Dummy",
+        currentTimestamp,
+        currentTimestamp,
+        amount,
+        fundAddress,
+        props.depAddress,
+        subDepAddress,
+        tokenAddress,
+        destinationBill
+    ).send({
+      from: accounts[0]
+    }).then((res)=>{
+      toast.success("bill created", {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        pauseOnFocusLoss: false,
+        draggable: true,
+        progress: undefined,
+        });
+        refreshBills();
+    }).catch((err)=>{
+      toast.error("could not create bill!", {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        pauseOnFocusLoss: false,
+        draggable: true,
+        progress: undefined,
+        });
+    });
+    }
+    const nestedFuncCreateFund = (pageNumber) => {
+        setCreateFundPageNumber(pageNumber);
+        // console.log("Calling nestedFunc()");
+        // console.log(num);
+      }
+      const nestedFuncCreateDep = (pageNumber) => {
+        setCreateDepLength(pageNumber);
+        // console.log("Calling nestedFunc()");
+        // console.log(num);
+      }
+
+
+    const getModal = () => {
+        // getFundsOfCreateBill(currentPageFundCreateBill);
+        return (
+          <Modal show={showModal} onHide={handleClose}>
+            <Modal.Header closeButton>
+              <Modal.Title>Create new bill</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <div class="row">
+                <div class="col-md-7">
+                  <select class="form-select form-select-sm my-2" aria-label=".form-select-sm example" onChange={(event)=>setFundAddress(event.target.value)}>
+                    <option defaultValue>Select fund</option>
+                    {fundsCreateBill.map((fund)=>(
+                      <option value={fund.billOwnAddress}>{fund.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div class="col-md-3 py-1">
+                  <Pagination activePage={createFundPageNumber} pageEnd={Math.ceil(createFundLength/pageSize)} pageTabs={3} function={(item)=>nestedFuncCreateFund(item)}/>
+                </div>
+              </div>
+              {/* <div class="row">
+                <div class="col-md-7">
+                  <select class="form-select form-select-sm my-2" aria-label=".form-select-sm example" onChange={(event)=>setSubDepAddress(event.target.value)}>
+                    <option defaultValue>Select Department</option>
+                    {departmentsCreateBill.map((dept)=>(
+                      <option value={dept.departmentAddress}>{dept.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div class="col-md-3 py-1">
+                <Pagination activePage={createDepPageNumber}  pageEnd={Math.ceil(createDepLength/pageSize)} pageTabs={3} function={(item)=>nestedFuncCreateDep(item)}/>
+                </div>
+            </div> */}
+            <div class="row">
+                <div class="col-md-7">
+                  <select class="form-select form-select-sm my-2" aria-label=".form-select-sm example" onChange={(event)=>selectDestinationDepartment(event.target.value)}>
+                    <option defaultValue>Select destination fund</option>
+                    {destinationBill.map((fund)=>(
+                      <option value={fund.billOwnAddress}>{fund.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div class="col-md-3 py-1">
+                  <Pagination activePage={createFundPageNumber} pageEnd={Math.ceil(createFundLength/pageSize)} pageTabs={3} function={(item)=>nestedFuncCreateFund(item)}/>
+                </div>
+              </div>
+            <div class="row my-3">
+                <input type="text" class="form-control select2-offscreen" id="accountName" placeholder="Bill name" tabIndex="-1"
+                        value={billName} 
+                        onChange={(event) => setBillName(event.target.value)}
+                />
+            </div>
+            <div class="row my-3">
+                <textarea class="form-control" id="message" name="body" rows="3" placeholder="Description"
+                    value={description} 
+                    onChange={(event) => setDescription(event.target.value)}
+                ></textarea>
+            </div>
+            <div class="row my-3">
+                <input type="text" class="form-control select2-offscreen" id="accountName" placeholder="Amount" tabIndex="-1"
+                        value={amount}
+                        onChange={(event) => setAmount(event.target.value)}
+                />
+            </div>
+            <div class="row my-3">
+                <input type="text" class="form-control select2-offscreen" id="accountName" placeholder="Threshold" tabIndex="-1"
+                            value={threshold}
+                            onChange={(event) => setThreshold(event.target.value)}
+                    />
+                {/* <textarea class="form-control" id="message" name="body" rows="3" placeholder="Threshold"
+                    value={threshold} 
+                    onChange={(event) => setThreshold(event.target.value)}
+                ></textarea> */}
+            </div>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleClose}>
+                Close
+              </Button>
+              <Button variant="primary" onClick={()=>createBill()}>
+                Create Bill
+              </Button>
+            </Modal.Footer>
+          </Modal>
+        );
     }
     const getTopBarBill = () => {
         return (
@@ -136,7 +429,7 @@ const MergeBill = (props) => {
 return (
     <div class="col-md-11">
         {getTopBarBill()}
-        {/* {getModal()} */}
+        {getModal()}
         {bills.map((bill)=> (
         <div class="border-1">
             
