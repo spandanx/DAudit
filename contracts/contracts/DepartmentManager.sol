@@ -10,6 +10,8 @@ import "hardhat/console.sol";
 
 contract DepartmentManager is DepartmentStorage{
 
+    uint public version = 11;
+
     constructor (string memory _name) {
         // name = _name;
         // addressPoint = address(this);

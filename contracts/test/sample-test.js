@@ -218,6 +218,75 @@ describe("create bill", () => {
     console.log("diff2: "+diff2);
     expect(diff2.eq(mergeBillAmount)).to.be.true;
   });
+  it("Check encashment Reject", async()=>{
+
+    let blCoin = await ethers.getContractFactory("BLT");
+
+    // let rootFundAddress = await accountManagerAudit.billAddress();
+    let rootFundAddress = await accountManagerAudit.billAddress();
+    let balanceBeforeMergeBill  = await blCoin.attach( tokenAddress ).balanceOf(bill1Address);
+    console.log("balanceAfterBeforeBill: "+balanceBeforeMergeBill);
+    let mergeBillAmount = 90;
+    await billManager.createMergeBill(
+      "Merge Bill1",
+      "Merge bill description",
+      70,
+      // "Dummy",
+      1651895311,
+      1651895311,
+      mergeBillAmount,
+      bill1Address,
+      department1Address,
+      rootDepartmentAddress,
+      tokenAddress,
+      rootFundAddress
+    );
+
+    let mergeBills = await depArraysManager.getMergeBills(10, 0, department1Address);
+    // console.log("mergeBills");
+    // console.log(mergeBills);
+    let mergeBillOwnAddress = mergeBills[0].billOwnAddress;
+
+    let balanceAfterMergeBill  = await blCoin.attach( tokenAddress ).balanceOf(bill1Address);
+    let balanceOfMergeBill  = await blCoin.attach( tokenAddress ).balanceOf(mergeBillOwnAddress);
+    console.log("balanceAfterMergeBill: "+balanceAfterMergeBill);
+    console.log("balanceOfMergeBill: "+balanceOfMergeBill);
+    diff = balanceBeforeMergeBill.sub(balanceAfterMergeBill);
+    expect(diff.eq(balanceOfMergeBill)).to.be.true;
+
+    //voteMerge(address mergeAddress, StructLibrary.Action opinion, address departmentAddress, address tokenAddress, address employeeAddress)
+    await accountManagerAudit.connect(emp2).register(
+      department1Address,
+      "Employee2",
+      accType.EMPLOYEE
+    );
+    let employeeAddress = await accountManagerAudit.employees(emp2.address);
+    await accountManagerAudit.approve(department1Address, employeeAddress, action.ACCEPT);
+    await voteManager.voteMerge(mergeBillOwnAddress, action.ACCEPT, department1Address, tokenAddress, employeeAddress);
+    
+    let mergeRequests = await depArraysManager.getMergeRequests(10, 0, rootDepartmentAddress);
+    expect(mergeRequests.length).to.be.equal(1);
+    // console.log("mergeRequests");
+    // console.log(mergeRequests);
+    //getMergeRequests
+    let rootFundBalanceBeforeAccept = await blCoin.attach( tokenAddress ).balanceOf(rootFundAddress);
+    console.log("rootFundBalanceBeforeAccept: "+rootFundBalanceBeforeAccept);
+
+    console.log("accountManagerAudit.address: ");
+    console.log(accountManagerAudit.address);
+    await voteManager.approveRequestMerge(mergeBillOwnAddress, rootDepartmentAddress, accountManagerAudit.address, action.REJECT, tokenAddress, "Merge request accepted");
+    console.log("Request rejected");
+    // let balanceOfMergeRequest  = await blCoin.attach( tokenAddress ).balanceOf(mergeBillOwnAddress);
+    // console.log("balanceOfMergeRequest: "+balanceOfMergeRequest);
+    // let rootFundBalanceAfterAccept = await blCoin.attach( tokenAddress ).balanceOf(rootFundAddress);
+    // console.log("rootFundBalanceAfterAccept: "+rootFundBalanceAfterAccept);
+    // let diff2 = rootFundBalanceAfterAccept.sub(rootFundBalanceBeforeAccept);
+    // console.log("diff2: "+diff2);
+    // expect(diff2.eq(mergeBillAmount)).to.be.true;
+    let fundsOfRequesterDep = await depArraysManager.getFunds(10, 0, department1Address);
+    console.log("fundsOfRequesterDep");
+    console.log(fundsOfRequesterDep);
+  });
   it("Should approve vote", async()=>{
     let employeeAddress = await accountManagerAudit.employees(emp1.address);
     await accountManagerAudit.approve(rootDepartmentAddress, employeeAddress, action.ACCEPT);

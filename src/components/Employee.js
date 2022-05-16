@@ -11,6 +11,7 @@ import DepartmentArrays from '../CreatedContracts/DepartmentArrays';
 import { AiOutlineReload } from "react-icons/ai";
 import { MdRefresh } from "react-icons/md";
 import Pagination from './Pagination';
+import MergeBillsEmployee from './employee/MergeBillsEmployee';
 
 import VoteManager from '../CreatedContracts/VoteManager';
 import AccountManagerAudit from '../CreatedContracts/AccountManagerAudit';
@@ -115,7 +116,7 @@ const Employee = () => {
     //     map.set(b.billOwnAddress, res);
     //   }).catch((err)=>{});
     // });
-    // setVoteMap(map);
+    setVoteMap(map);
     setBills(billArray);
   }
   const checkVoteType = (billOwnAddress)=>{
@@ -253,7 +254,7 @@ const Employee = () => {
 
   const BillList = () => {
     return(
-      <div class="col-md-11">
+      <div class="col-md-10 mx-2">
       {getTopBarBills()}
       {bills.map((bill)=> (
         <div class="border-1">
@@ -313,7 +314,7 @@ const Employee = () => {
                   }
                   {StatusReverse[bill.status]=="REJECTED" && 
                   <div class="col-md-2">
-                    <button type="button" class="btn btn-danger mx-1">Rejected</button>
+                    <button type="button" class="btn btn-danger mx-1" disabled>Rejected</button>
                   </div>
                   }
                 </div>
@@ -342,9 +343,10 @@ const Employee = () => {
         <div class="col-md-1">
           <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
             <button onClick={()=>setActiveTab('bills')} class={"nav-link"+(activeTab=='bills'? " active": "")} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Bills</button>
+            <button onClick={()=>setActiveTab('mergeBills')} class={"nav-link"+(activeTab=='mergeBills'? " active": "")} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Encashments</button>
           </div>
         </div>
-        {activeTab=='bills'? BillList(): <></>}
+        {activeTab=='bills'? BillList(): activeTab=='mergeBills'? <MergeBillsEmployee depAddress={depAddress} empAddress={location.state.empAddress}/> : <></>}
       </div>
   </div>
   )

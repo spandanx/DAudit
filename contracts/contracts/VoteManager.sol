@@ -133,9 +133,14 @@ contract VoteManager {
             // require(_threshold>=0 && _threshold<=100, "Threshold should be between 0 to 100");
             DepartmentManager parentDep = DepartmentManager(merge.getMergeStruct().fromDepartment);
             Merge parentMerge = Merge(merge.getMergeStruct().billOwnAddress);
+            console.log("DEP, merge instance created");
+            bytes memory b;
+            b = abi.encodePacked("REJECTED: ");
+            b = abi.encodePacked(b, merge.getMergeStruct().name);
+            console.log("string concatenated");
 
             Bill bill = new Bill({
-                _name: merge.getMergeStruct().name,
+                _name: string(b),
                 _description: merge.getMergeStruct().description,
                 _threshold: merge.getMergeStruct().threshold,
                 _imagePath: "",
@@ -146,13 +151,19 @@ contract VoteManager {
                 _fromDepartment: merge.getMergeStruct().fromDepartment,
                 _toDepartment: merge.getMergeStruct().fromDepartment
             });
+            console.log("bill instance created");
             parentMerge.transferToken(address(bill), tokenAddress, merge.getMergeStruct().amount);
             parentDep.pushFund(bill);
-            auditStorage.pushBillMap(merge.getMergeStruct().fromBill, bill);
-            auditStorage.addBill(bill);
-            
+            console.log("token transfered to bill");
             merge.setComments(proof);
             merge.setStatus(StructLibrary.Status.REJECTED, StructLibrary.MergeBillType.REQUEST);
+            console.log("merge status changed to rejected");
+            console.log("merge.getMergeStruct().fromBill");
+            console.log(merge.getMergeStruct().fromBill);
+            auditStorage.pushBillMap(merge.getMergeStruct().fromBill, bill);
+            console.log("bill inserted into map");
+            auditStorage.addBill(bill);
+            console.log("bill added");
         }
     }
 }

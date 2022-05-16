@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {StatusReverse, tokenName, DepartmentArrayType, Action} from '../Enums';
+import {StatusReverse, tokenName, DepartmentArrayType, Vote, Action} from '../Enums';
 import { AiOutlineReload } from "react-icons/ai";
 import { BsPlusCircle } from "react-icons/bs";
 import { Modal, Button } from "react-bootstrap";
@@ -8,11 +8,13 @@ import web3 from '../../web3';
 import DepartmentArrays from '../../CreatedContracts/DepartmentArrays';
 import AccountManagerAudit from '../../CreatedContracts/AccountManagerAudit';
 import departmentManagerABI from '../../ABIs/DepartmentManagerABI';
+import billABI from '../../ABIs/BillABI';
 import VoteManager from '../../CreatedContracts/VoteManager';
+import MergeABI from '../../ABIs/MergeABI';
 
 import {toast } from 'react-toastify';
 
-const MergeRequest = (props) => {
+const MergeBillsEmployee = (props) => {
   
     const pageSize = 1;
 
@@ -24,17 +26,27 @@ const MergeRequest = (props) => {
     const [depContract, setDepContract] = useState(false);
     const [tokenAddress, setTokenAddress] = useState('');
 
-    //Set attributes before approving
-    const [selectedMergeAddress, setSelectedMergeAddress] = useState('');
-    const [selectedDepAddress, setSelectedDepAddress] = useState('');
-    const [selectedAction, setSelectedAction] = useState('');
-    //tokenAddress
-    //auditStorageAddress
-    const [proof, setProof] = useState('');
 
+    const [voteMap, setVoteMap] = useState(new Map());
+    const [list, setList] = useState([]);
+    //create new bill form
+    // const [fundAddress, setFundAddress] = useState('');
+    // const [subDepAddress, setSubDepAddress] = useState('');
+    // const [createFundLength, setCreateFundLength] = useState(0);
+    // const [createDepLength, setCreateDepLength] = useState(0);
+    // const [createFundPageNumber, setCreateFundPageNumber] = useState(0);
+    // const [createDepPageNumber, setCreateDepPageNumber] = useState(0);
 
-    const handleClose = () => setShowModal(false);
-    const handleShow = () => setShowModal(true);
+    // const [billName, setBillName] = useState('');
+    // const [description, setDescription] = useState('');
+    // const [threshold, setThreshold] = useState('');
+    // const [amount, setAmount] = useState('');
+
+    // const [fundsCreateBill, setFundsCreateBill] = useState([]);
+    // const [currentPageFundCreateBill, setCurrentPageFundCreateBill] = useState(0);
+
+    // const [departmentsCreateBill, setDepartmentsCreateBill] = useState([]);
+    // const [currentPageDepCreateBill, setCurrentPageDepCreateBill] = useState(0);
 
     useEffect(()=>{
         generateContract(props.depAddress);
@@ -49,6 +61,10 @@ const MergeRequest = (props) => {
     useEffect(()=>{
         getBills(currentPageBill);
     },[currentPageBill]);
+
+    useEffect(()=>{
+      checkIfVoted(list);
+    },[list]);
 
     const generateContract = async (depAddress) => {
         setDepContract(new web3.eth.Contract(departmentManagerABI, depAddress));
@@ -69,7 +85,7 @@ const MergeRequest = (props) => {
     const fetchBillCount = async() => {
         if (!depContract)
             return;
-        await depContract.methods.getLength(DepartmentArrayType.MERGE_REQUESTS).call().then((res)=>{
+        await depContract.methods.getLength(DepartmentArrayType.MERGE_BILLS).call().then((res)=>{
           setBillLength(res);
           console.log("Bill COUNT: "+res);
         }).catch((err)=>{});
@@ -77,6 +93,18 @@ const MergeRequest = (props) => {
     const refreshBills = async() => {
         console.log("refreshing bills");
         getBills(currentPageBill);
+    }
+    const checkIfVoted = async(billArray) => {
+      let mergeContract;
+      let map = voteMap;
+      for (let i = 0; i<billArray.length; i++){
+        mergeContract = new web3.eth.Contract(MergeABI, billArray[i].billOwnAddress);
+        await mergeContract.methods.voteMapping(props.empAddress).call().then((res)=>{
+          map.set(billArray[i].billOwnAddress, res);
+        }).catch((err)=>{});
+      }
+      setVoteMap(map);
+      setBills(billArray);
     }
     const getBills = async(pageNumber) => {
         let accounts = await web3.eth.getAccounts();
@@ -86,12 +114,12 @@ const MergeRequest = (props) => {
         fetchEmployeeCount();
         fetchBillCount();
         // await depContract.methods.getBills(pageSize, pageNumber).call({
-          await DepartmentArrays.methods.getMergeRequests(pageSize, pageNumber, props.depAddress).call({
+          await DepartmentArrays.methods.getMergeBills(pageSize, pageNumber, props.depAddress).call({
           from: accounts[0]
         }).then((response)=>{
           console.log("Fetched Bills");
           console.log(response);
-          setBills(response);
+          setList(response);
         }).catch(error=>{
           console.log("error: "+error);
         });
@@ -141,67 +169,10 @@ const MergeRequest = (props) => {
         // 16-5-2015 9:50
         return datestring;
       }
-      const getModal = () => {
-        // getFundsOfCreateBill(currentPageFundCreateBill);
-        return (
-          <Modal show={showModal} onHide={handleClose}>
-            <Modal.Header closeButton>
-              <Modal.Title>Submit proof</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-            <div class="row my-3">
-                <textarea class="form-control" id="message" name="body" rows="3" placeholder="Description"
-                    value={proof} 
-                    onChange={(event) => setProof(event.target.value)}
-                ></textarea>
-            </div>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={handleClose}>
-                Close
-              </Button>
-              <Button variant="primary" disabled={!proof} onClick={()=>approve()}>
-                Create Bill
-              </Button>
-            </Modal.Footer>
-          </Modal>
-        );
-      }
-      const clickOnApprove = (mergeAddress, depAddress, action) => {
-        setSelectedMergeAddress(mergeAddress);
-        setSelectedDepAddress(depAddress);
-        setSelectedAction(action);
-        handleShow();
-      }
-      const approve = async() => {
-        handleClose();
-        let tokenAddress;
-        await AccountManagerAudit.methods.tokenAddress().call().then((res)=>{
-          tokenAddress = res;
-        }).catch((err)=>{});
-        let auditStorageAddress = AccountManagerAudit._address;
-        console.log(AccountManagerAudit);
-        console.log("auditStorageAddress");
-        console.log(auditStorageAddress);
-        //auditStorageAddress
-        //approve(bill.billOwnAddress, props.depAddress, Action.APPROVE)
+      const vote= async(mergeAddress, action) => {
         let accounts = await web3.eth.getAccounts();
-        let msg = '';
-        let successMsg = '';
-        let errorMsg = '';
-        console.log("action");
-        console.log(selectedAction);
-        if (selectedAction==Action.REJECT){
-          msg = "Rejecting request";
-          successMsg = "Rejected request";
-          errorMsg = "Could not reject request";
-        }
-        else {
-          msg = "Accepting request";
-          successMsg = "Accepted request";
-          errorMsg = "Could not accept request";
-        }
-        toast.info(msg, {
+    
+        toast.info("Submitting vote", {
           position: "bottom-right",
           autoClose: 5000,
           hideProgressBar: false,
@@ -211,12 +182,12 @@ const MergeRequest = (props) => {
           draggable: true,
           progress: undefined,
           });
-          ////approveRequestMerge(address mergeAddress, address departmentAddress, address auditStorageAddress, StructLibrary.Action opinion, address tokenAddress, string memory proof)
-        // await AccountManagerAudit.methods.approve(parentDepartmentAddress, accountAddress, action).send({
-        await VoteManager.methods.approveRequestMerge(selectedMergeAddress, selectedDepAddress, auditStorageAddress, selectedAction, tokenAddress, proof).send({
+    
+        // await VoteManager.methods.vote(billAddress, action, depAddress, tokenAddress, location.state.empAddress).send({
+        await VoteManager.methods.voteMerge(mergeAddress, action, props.depAddress, tokenAddress, props.empAddress).send({
           from: accounts[0]
-        }).then((response)=>{
-          toast.success(successMsg, {
+        }).then((res)=>{
+          toast.success("Submitted vote", {
             position: "bottom-right",
             autoClose: 5000,
             hideProgressBar: false,
@@ -226,9 +197,9 @@ const MergeRequest = (props) => {
             draggable: true,
             progress: undefined,
             });
-            refreshBills();
-        }).catch((error)=>{
-          toast.error(errorMsg, {
+            getBills(currentPageBill);
+        }).catch((err)=>{
+          toast.error("Error while submitting vote", {
             position: "bottom-right",
             autoClose: 5000,
             hideProgressBar: false,
@@ -240,10 +211,16 @@ const MergeRequest = (props) => {
             });
         });
       }
-  return (
-    <div class="col-md-11">
+      const checkVoteType = (billOwnAddress)=>{
+        if (voteMap.has(billOwnAddress)){
+          return voteMap.get(billOwnAddress);
+        }
+        return -1;
+      }
+return (
+    <div class="col-md-10 mx-2">
         {getTopBarBill()}
-        {getModal()}
+        {/* {getModal()} */}
         {bills.map((bill)=> (
         <div class="border-1">
             
@@ -262,25 +239,49 @@ const MergeRequest = (props) => {
                     <div class="col-md-3">
                     <p class="card-text py-1 border border-light rounded-2">Amount: {bill.amount + " "+tokenName}</p>
                     </div>
-                    <div class="col-md-7">
-                      
+                    {StatusReverse[bill.billStatus]=="OPEN" && 
+                    <>
+                    <div class="col-md-3 px-5">
+                        <p class="card-text text-center py-1 border border-light rounded-2 bg-white">Acceptance threshold: <span class="text-primary">{bill.threshold} %</span></p>
                     </div>
-                    {StatusReverse[bill.requestStatus]=="OPEN" && 
-                    <div class="col-md-2">
-                      <button type="button col-md-2" class="btn btn-success mx-1" onClick={()=>clickOnApprove(bill.billOwnAddress, props.depAddress, Action.APPROVE)}>Accept</button>
-                      <button type="button col-md-2" class="btn btn-danger mx-1" onClick={()=>clickOnApprove(bill.billOwnAddress, props.depAddress, Action.REJECT)}>Reject</button>
+                    <br/>
+                    <div class="col-md-2 px-2">
+                        <p class="card-text text-center py-1 border border-light rounded-2 bg-white">Votes in favor: <span class="text-success">{getParcentage(bill.partiesAccepted)} %</span></p>
                     </div>
+                    <div class="col-md-2 px-2">
+                        <p class="card-text text-center py-1 border border-light rounded-2 bg-white">Votes against: <span class="text-danger">{getParcentage(bill.partiesRejected)} %</span></p>
+                    </div>
+                    </>
                     }
-                    {StatusReverse[bill.requestStatus]=="ACCEPTED" && 
-                    <div class="col-md-2">
-                      <button type="button" class="btn btn-success mx-1" disabled>Accepted</button>
-                    </div>
+                    {StatusReverse[bill.billStatus]!="OPEN" && 
+                    <div class="col-md-7"></div>
                     }
-                    {StatusReverse[bill.requestStatus]=="REJECTED" && 
-                    <div class="col-md-2">
-                      <button type="button" class="btn btn-danger mx-1" disabled>Rejected</button>
-                    </div>
-                    }
+                  {StatusReverse[bill.billStatus]=="OPEN" && checkVoteType(bill.billOwnAddress)==Vote.DID_NOT_VOTE &&
+                  <div class="col-md-2">
+                    <button type="button" class="btn btn-success mx-1" onClick={()=>vote(bill.billOwnAddress, Action.APPROVE)}>Accept</button>
+                    <button type="button" class="btn btn-danger mx-1" onClick={()=>vote(bill.billOwnAddress, Action.REJECT)}>Reject</button>
+                  </div>
+                  }
+                  {StatusReverse[bill.billStatus]=="OPEN" && checkVoteType(bill.billOwnAddress)==Vote.ACCEPTED &&
+                  <div class="col-md-2">
+                    <button type="button" class="btn btn-success mx-1" disabled>Voted: Accept</button>
+                  </div>
+                  }
+                  {StatusReverse[bill.billStatus]=="OPEN" && checkVoteType(bill.billOwnAddress)==Vote.REJECTED &&
+                  <div class="col-md-2">
+                    <button type="button" class="btn btn-danger mx-1" disabled>Voted: Reject</button>
+                  </div>
+                  }
+                  {StatusReverse[bill.billStatus]=="ACCEPTED" && 
+                  <div class="col-md-2">
+                    <button type="button" class="btn btn-success mx-1" disabled>Accepted</button>
+                  </div>
+                  }
+                  {StatusReverse[bill.billStatus]=="REJECTED" && 
+                  <div class="col-md-2">
+                    <button type="button" class="btn btn-danger mx-1">Rejected</button>
+                  </div>
+                  }
                 </div>
                 </div>
 
@@ -301,4 +302,4 @@ const MergeRequest = (props) => {
     );
 }
 
-export default MergeRequest
+export default MergeBillsEmployee;

@@ -27,6 +27,8 @@ const MergeBill = (props) => {
 
     //create new bill form
     const [fundAddress, setFundAddress] = useState('');
+    const [rootDepartmentAddress, setRootDepartmentAddress] = useState('');
+
     const [subDepAddress, setSubDepAddress] = useState('');
     const [createFundLength, setCreateFundLength] = useState(0);
     const [createDepLength, setCreateDepLength] = useState(0);
@@ -91,7 +93,7 @@ const MergeBill = (props) => {
     const fetchBillCount = async() => {
         if (!depContract)
             return;
-        await depContract.methods.getLength(DepartmentArrayType.BILLS).call().then((res)=>{
+        await depContract.methods.getLength(DepartmentArrayType.MERGE_BILLS).call().then((res)=>{
           setBillLength(res);
           console.log("Bill COUNT: "+res);
         }).catch((err)=>{});
@@ -112,7 +114,7 @@ const MergeBill = (props) => {
             billStrct.methods.getBillStruct().call().then((res1)=>{
                 console.log("INSIDE rootBillAddress billSTRUCT");
                 console.log(res1);
-
+                setRootDepartmentAddress(res1.toDepartment);
                 setDestinationBill([res1]);
             }).catch((err)=>{console.log(err)});
         }).catch((err)=>{console.log(err)});
@@ -151,7 +153,8 @@ const MergeBill = (props) => {
         });
     }
     const selectDestinationDepartment = (destFundAddress) => {
-        setFundAddress(destFundAddress);
+        console.log("Calling selectDestinationDepartment()");
+        console.log("Fund address: "+destFundAddress);
         setSelectedDepAddressFund(destFundAddress);
     }
     // const getSubDeptsOfCreateBill = async(pageNumber) => {
@@ -205,94 +208,105 @@ const MergeBill = (props) => {
     const createBill = async() => {
         handleClose();
 
-    let accounts = await web3.eth.getAccounts();
-    toast.info("Creating bill", {
-      position: "bottom-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      pauseOnFocusLoss: false,
-      draggable: true,
-      progress: undefined,
+      let accounts = await web3.eth.getAccounts();
+      toast.info("Creating bill", {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        pauseOnFocusLoss: false,
+        draggable: true,
+        progress: undefined,
+        });
+        // const [fundAddress, setFundAddress] = useState('');
+        // const [subDepAddress, setSubDepAddress] = useState('');
+        // const [billName, setBillName] = useState('');
+        // const [description, setDescription] = useState('');
+        // const [amount, setAmount] = useState('');
+        // const [toAddress, setToAddress] = useState('');
+        let date = (new Date()).getTime();
+        let currentTimestamp = date;
+
+        // let tokenAddress;
+        // await AccountManagerAudit.methods.tokenAddress().call().then((res)=>{
+        //   tokenAddress = res;
+        // }).catch((err)=>{
+
+        // });
+        
+        // string memory _name,
+        // string memory _description,
+        // uint _threshold,
+        // uint _deadline,
+        // uint _acceptedOrRejectedOn,
+        // uint _amount,
+        // address _fromBill,
+        // address _fromDepartment,
+        // address _toDepartment,
+        // address tokenAddress,
+        // address _toBill
+        console.log("_name: "+billName);
+        console.log("_description: "+description);
+        console.log("_threshold: "+threshold);
+        console.log("_deadline: "+currentTimestamp);
+        console.log("_acceptedOrRejectedOn: "+currentTimestamp);
+        console.log("_amount: "+amount);
+        console.log("_fromBill: "+fundAddress);
+        console.log("_fromDepartment: "+props.depAddress);
+        console.log("_toDepartment: "+rootDepartmentAddress);
+        console.log("tokenAddress: "+tokenAddress);
+        console.log("_toBill: "+selectedDepAddressFund);
+        await BillManager.methods.createMergeBill(
+          billName,
+          description,
+          threshold,
+          // "Dummy",
+          currentTimestamp,
+          currentTimestamp,
+          amount,
+          fundAddress,
+          props.depAddress,
+          rootDepartmentAddress,
+          tokenAddress,
+          selectedDepAddressFund
+      ).send({
+        from: accounts[0]
+      }).then((res)=>{
+        toast.success("bill created", {
+          position: "bottom-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          pauseOnFocusLoss: false,
+          draggable: true,
+          progress: undefined,
+          });
+          refreshBills();
+      }).catch((err)=>{
+        toast.error("could not create bill!", {
+          position: "bottom-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          pauseOnFocusLoss: false,
+          draggable: true,
+          progress: undefined,
+          });
       });
-      // const [fundAddress, setFundAddress] = useState('');
-      // const [subDepAddress, setSubDepAddress] = useState('');
-      // const [billName, setBillName] = useState('');
-      // const [description, setDescription] = useState('');
-      // const [amount, setAmount] = useState('');
-      // const [toAddress, setToAddress] = useState('');
-      let date = (new Date()).getTime();
-      let currentTimestamp = date;
-
-      // let tokenAddress;
-      // await AccountManagerAudit.methods.tokenAddress().call().then((res)=>{
-      //   tokenAddress = res;
-      // }).catch((err)=>{
-
-      // });
-      console.log("_name: "+billName);
-      console.log("_description: "+description);
-      console.log("_threshold: "+threshold);
-      console.log("_imagePath: ");
-      console.log("_deadline: "+currentTimestamp);
-      console.log("_acceptedOrRejectedOn: "+currentTimestamp);
-      console.log("_amount: "+amount);
-      console.log("_fromBill: "+fundAddress);
-      console.log("_fromDepartment: "+props.depAddress);
-      console.log("_toDepartment: "+subDepAddress);
-      console.log("tokenAddress: "+tokenAddress);
-      await BillManager.methods.createMergeBill(
-        billName,
-        description,
-        threshold,
-        "Dummy",
-        currentTimestamp,
-        currentTimestamp,
-        amount,
-        fundAddress,
-        props.depAddress,
-        subDepAddress,
-        tokenAddress,
-        destinationBill
-    ).send({
-      from: accounts[0]
-    }).then((res)=>{
-      toast.success("bill created", {
-        position: "bottom-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        pauseOnFocusLoss: false,
-        draggable: true,
-        progress: undefined,
-        });
-        refreshBills();
-    }).catch((err)=>{
-      toast.error("could not create bill!", {
-        position: "bottom-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        pauseOnFocusLoss: false,
-        draggable: true,
-        progress: undefined,
-        });
-    });
     }
     const nestedFuncCreateFund = (pageNumber) => {
         setCreateFundPageNumber(pageNumber);
         // console.log("Calling nestedFunc()");
         // console.log(num);
-      }
-      const nestedFuncCreateDep = (pageNumber) => {
+    }
+    const nestedFuncCreateDep = (pageNumber) => {
         setCreateDepLength(pageNumber);
         // console.log("Calling nestedFunc()");
         // console.log(num);
-      }
-
+    }
 
     const getModal = () => {
         // getFundsOfCreateBill(currentPageFundCreateBill);
@@ -448,7 +462,7 @@ return (
                     <div class="col-md-3">
                     <p class="card-text py-1 border border-light rounded-2">Amount: {bill.amount + " "+tokenName}</p>
                     </div>
-                    {StatusReverse[bill.status]=="OPEN" && 
+                    {StatusReverse[bill.billStatus]=="OPEN" && 
                     <>
                     <div class="col-md-3 px-5">
                         <p class="card-text text-center py-1 border border-light rounded-2 bg-white">Acceptance threshold: <span class="text-primary">{bill.threshold} %</span></p>
@@ -462,20 +476,20 @@ return (
                     </div>
                     </>
                     }
-                    {StatusReverse[bill.status]!="OPEN" &&
+                    {StatusReverse[bill.billStatus]!="OPEN" &&
                     <div class="col-md-7"></div>
                     }
-                    {StatusReverse[bill.status]=="OPEN" && 
+                    {StatusReverse[bill.billStatus]=="OPEN" && 
                     <div class="col-md-2">
                     <button type="button" class="btn btn-primary mx-1" disabled>Active</button>
                     </div>
                     }
-                    {StatusReverse[bill.status]=="ACCEPTED" && 
+                    {StatusReverse[bill.billStatus]=="ACCEPTED" && 
                     <div class="col-md-2">
                     <button type="button" class="btn btn-success mx-1" disabled>Accepted</button>
                     </div>
                     }
-                    {StatusReverse[bill.status]=="REJECTED" && 
+                    {StatusReverse[bill.billStatus]=="REJECTED" && 
                     <div class="col-md-2">
                     <button type="button" class="btn btn-danger mx-1">Rejected</button>
                     </div>

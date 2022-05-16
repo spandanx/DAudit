@@ -351,7 +351,7 @@ const Department = () => {
     // refreshBills();
   }
   const nestedFuncFund = (pageNumber) => {
-    setCurrentPageApproval(pageNumber);
+    setCurrentPageFund(pageNumber);
     // refreshFunds();
   }
   const nestedFuncApproval = (pageNumber) => {
