@@ -38,7 +38,7 @@ Metamask chrome extension
 
 ### ER Diagram
 
-![AuditDepartmentStructure](https://user-images.githubusercontent.com/56664469/168852263-0ae3c62c-d12d-445b-81f2-406a54b11be2.png)
+![AuditDepartmentStructure (1)](https://user-images.githubusercontent.com/56664469/168854554-7e3500c3-3ca1-47d8-b862-d423df9e739c.jpg)
 
 ### Sample Department Hierarchy
 
