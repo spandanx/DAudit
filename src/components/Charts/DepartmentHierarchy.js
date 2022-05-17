@@ -10,7 +10,7 @@ import Pagination from '../Pagination';
 import departmentManagerABI from '../../ABIs/DepartmentManagerABI';
 import DepartmentArrays from '../../CreatedContracts/DepartmentArrays';
 
-import {DepartmentArrayType} from '../Enums';
+import {DepartmentArrayType, pageSize} from '../Enums';
 
 // This is a simplified example of an org chart with a depth of 2.
 // Note how deeper levels are defined recursively via the `children` property.
@@ -25,7 +25,8 @@ const DepartmentHierarchy = (props) => {
     },
     children: [],
   });
-  const pageSize = 5;
+  // const pageSize = 5;
+
   const [pageNumberMap, setPageNumberMap] = useState(new Map());
   const [hoverItem, setHoverItem] = useState('');
   // const [data, setData] = useState(chartData);
@@ -47,9 +48,17 @@ const DepartmentHierarchy = (props) => {
     console.log("getDepartmentData() Start "+depAddress);
     let contract = new web3.eth.Contract(departmentManagerABI, depAddress);
 
-    let size = 0;
+    let depSize = 0;
+    let empSize = 0;
+    let audSize = 0;
     await contract.methods.getLength(DepartmentArrayType.SUBDEPARTMENTS).call().then((res)=>{
-      size = res;
+      depSize = Math.ceil(res/pageSize);
+    }).catch((err)=>{});
+    await contract.methods.getLength(DepartmentArrayType.EMPLOYEES).call().then((res)=>{
+      empSize = Math.ceil(res/pageSize);
+    }).catch((err)=>{});
+    await contract.methods.getLength(DepartmentArrayType.AUDITORS).call().then((res)=>{
+      audSize = Math.ceil(res/pageSize);
     }).catch((err)=>{});
 
     await contract.methods.getDepartmentStruct().call().then((response)=>{
@@ -60,7 +69,10 @@ const DepartmentHierarchy = (props) => {
         attributes: {
           departmentAddress: response?.departmentAddress,
           balance: response?.balance,
-          size: size
+          depSize: depSize,
+          empSize: empSize,
+          audSize: audSize,
+          type: DepartmentArrayType.SUBDEPARTMENTS
         },
         children: [],
       };
@@ -109,16 +121,36 @@ const DepartmentHierarchy = (props) => {
     let depAddress = event.data.attributes.departmentAddress;
     console.log("Address: "+depAddress);
 
-      await DepartmentArrays.methods.getSubDepartments(pageSize, pageNumber, depAddress).call().then(async(response)=>{
-      console.log("Data for "+depAddress);
+    let depPageNumber = getPageNumber(depAddress, DepartmentArrayType.SUBDEPARTMENTS);
+    let empPageNumber = getPageNumber(depAddress, DepartmentArrayType.EMPLOYEES);
+    let audPageNumber = getPageNumber(depAddress, DepartmentArrayType.AUDITORS);
+
+    console.log("depPageNumber: "+depPageNumber);
+    console.log("empPageNumber: "+empPageNumber);
+    console.log("audPageNumber: "+audPageNumber);
+
+    let newNodes = [];
+    if (depPageNumber!=undefined){
+      await DepartmentArrays.methods.getSubDepartments(pageSize, depPageNumber, depAddress).call().then(async(response)=>{
+      console.log("Subdepartments for "+depAddress);
       console.log(response);
-      let newNodes = [];
       for (let i = 0; i<response.length; i++){
         let item = response[i];
-        let size = 0;
+        
+        let depSize = 0;
+        let empSize = 0;
+        let audSize = 0;
+
         let contract = new web3.eth.Contract(departmentManagerABI, item.departmentAddress);
+
         await contract.methods.getLength(DepartmentArrayType.SUBDEPARTMENTS).call().then((res)=>{
-          size = res;
+          depSize = Math.ceil(res/pageSize);
+        }).catch((err)=>{});
+        await contract.methods.getLength(DepartmentArrayType.EMPLOYEES).call().then((res)=>{
+          empSize = Math.ceil(res/pageSize);
+        }).catch((err)=>{});
+        await contract.methods.getLength(DepartmentArrayType.AUDITORS).call().then((res)=>{
+          audSize = Math.ceil(res/pageSize);
         }).catch((err)=>{});
 
         newNodes.push(
@@ -127,27 +159,80 @@ const DepartmentHierarchy = (props) => {
           attributes: {
             departmentAddress: item?.departmentAddress,
             balance: item?.balance,
-            size: size
+            depSize: depSize,
+            empSize: empSize,
+            audSize: audSize,
+            type: DepartmentArrayType.SUBDEPARTMENTS
           },
           children: [],
         });
-      }
-      // let newNodes = response.map((item)=>{
-        // return {
-          
-      // }
-      // );
-      console.log("New Nodes defined");
-      console.log(newNodes);
-      let modifiedTree = addNode(chartData, newNodes, depAddress, true);
-      // modifiedTree = newNode;
-      // console.log("Modified Node");
-      // console.log(modifiedTree);
-      setChartData(modifiedTree);
-      // console.log("TREE MODIFIED");
-    }).catch(error=>{
-      console.log("error: "+error);
-    });
+        }
+        }).catch(error=>{
+          console.log("error: "+error);
+      });
+    }
+    //EMPLOYEES
+    if (empPageNumber!=undefined){
+      await DepartmentArrays.methods.getEmployees(pageSize, empPageNumber, depAddress).call().then(async(response)=>{
+        console.log("employees for "+depAddress);
+        console.log(response);
+        for (let i = 0; i<response.length; i++){
+          let item = response[i];
+    
+          newNodes.push(
+          {
+            name: item?.name,
+            attributes: {
+              departmentAddress: item?.employeeAddress,
+              balance: item?.balance,
+              depSize: 0,
+              empSize: 0,
+              audSize: 0,
+              type: DepartmentArrayType.EMPLOYEES
+            },
+            children: [],
+          });
+        }
+        console.log("New Nodes employee");
+        console.log(newNodes);
+        }).catch(error=>{
+          console.log("error: "+error);
+      });
+    }
+    //AUDITORS
+    if (audPageNumber!=undefined){
+      await DepartmentArrays.methods.getAuditors(pageSize, audPageNumber, depAddress).call().then(async(response)=>{
+        console.log("auditors for "+depAddress);
+        console.log(response);
+        for (let i = 0; i<response.length; i++){
+          let item = response[i];
+    
+          newNodes.push(
+          {
+            name: item?.name,
+            attributes: {
+              departmentAddress: item?.auditorAddress,
+              balance: item?.balance,
+              depSize: 0,
+              empSize: 0,
+              audSize: 0,
+              type: DepartmentArrayType.AUDITORS
+            },
+            children: [],
+          });
+        }
+        console.log("New Nodes auditor");
+        console.log(newNodes);
+        }).catch(error=>{
+          console.log("error: "+error);
+      });
+    }
+
+    let modifiedTree = addNode(chartData, newNodes, depAddress, true);
+    // modifiedTree = newNode;
+    // console.log("Modified Node");
+    // console.log(modifiedTree);
+    setChartData(modifiedTree);
     console.log("getDepartmentData() End");
   }
   const renderTooltip = (props, msg) => (
@@ -155,13 +240,31 @@ const DepartmentHierarchy = (props) => {
       {msg}
     </Tooltip>
   );
-  const getPageNumber = (billAddress) => {
-    return pageNumberMap.get(billAddress);
+  const getPageNumber = (depAddress, ObjectType) => {
+    // return pageNumberMap.get(depAddress);
+    if (!pageNumberMap.has(depAddress))
+      return undefined;
+    return pageNumberMap.get(depAddress).get(ObjectType);
   }
-  const nestedFunc = (pNumber, args) => {
-    let pageMap = pageNumberMap;
-    pageMap.set(args.data.attributes.departmentAddress, pNumber);
-    setPageNumberMap(pageMap);
+  const setPageNumber = (depAddress, objectType, pageNumber) => {
+    let copyOfPageNumberMap = pageNumberMap;
+    if (!pageNumberMap.has(depAddress)){
+      let localMap = new Map();
+      // localMap.set(DepartmentArrayType.SUBDEPARTMENTS, 0);
+      // localMap.set(DepartmentArrayType.EMPLOYEES, 0);
+      // localMap.set(DepartmentArrayType.AUDITORS, 0);
+      copyOfPageNumberMap.set(depAddress, localMap);
+    }
+    let localMap = pageNumberMap.get(depAddress);
+    localMap.set(objectType, pageNumber);
+    copyOfPageNumberMap.set(depAddress, localMap);
+    setPageNumberMap(copyOfPageNumberMap);
+  }
+  const nestedFunc = (pNumber, args, objectType) => {
+    // let pageMap = pageNumberMap;
+    // pageMap.set(args.data.attributes.departmentAddress, pNumber);
+    // setPageNumberMap(pageMap);
+    setPageNumber(args.data.attributes.departmentAddress, objectType, pNumber);
     // console.log("pageNumberMap: ");
     // console.log(pageNumberMap);
     clicked(args, pNumber);
@@ -173,7 +276,15 @@ const DepartmentHierarchy = (props) => {
   }) => (
     <g>
       {/* <circle r={15} style={{fill: "red"}}></circle> */}
-      <rect x="-20" y="-20" width="40" height="40" style={{fill:"red"}} />
+      {nodeDatum.attributes?.type==DepartmentArrayType.SUBDEPARTMENTS && 
+        <rect x="-20" y="-20" width="40" height="40" style={{fill:"yellow"}} />
+      }
+      {nodeDatum.attributes?.type==DepartmentArrayType.EMPLOYEES && 
+        <polygon points="-25,0 0,25 25,0 0,-25" style={{fill:"blue"}} />
+      }
+      {nodeDatum.attributes?.type==DepartmentArrayType.AUDITORS && 
+        <circle r={20} style={{fill: "red"}}/>
+      }
       {/* <polygon points="0,0 25,25 0,50 -25,25" style={{fill:"lime",stroke:"purple"}} /> */}
       {/* {nodeDatum.__rd3t.depth==0 && <circle r={15} style={{fill: "red"}}></circle>}
       {nodeDatum.__rd3t.depth>0 && nodeDatum.attributes.size==0 && <circle r={15} style={{fill: "green"}}></circle>}
@@ -195,9 +306,28 @@ const DepartmentHierarchy = (props) => {
             <>
               {/* <p style={{ textAlign: "center" }} onClick={toggleNode}>Address: {nodeDatum.attributes?.departmentAddress}</p> */}
               {/* {getPageNumber(nodeDatum.attributes.billOwnAddress)} */}
-              {nodeDatum.attributes?.size>0 && nodeDatum.attributes.departmentAddress==hoverItem && (
+              {nodeDatum.attributes?.depSize>0 && nodeDatum.attributes.departmentAddress==hoverItem && (
                 <div class="d-flex justify-content-center">
-                  <Pagination activePage={getPageNumber(nodeDatum.attributes.departmentAddress)} pageEnd={nodeDatum.attributes.size} pageTabs={3} function={(item)=>nestedFunc(item, {data: nodeDatum})}/>
+                  <div class="row-md-1">
+                  Departments: 
+                   <Pagination activePage={getPageNumber(nodeDatum.attributes.departmentAddress, DepartmentArrayType.SUBDEPARTMENTS)} pageEnd={nodeDatum.attributes.depSize} pageTabs={3} function={(item)=>nestedFunc(item, {data: nodeDatum}, DepartmentArrayType.SUBDEPARTMENTS)}/>
+                  </div>
+                </div>
+              )}
+              {nodeDatum.attributes?.empSize>0 && nodeDatum.attributes.departmentAddress==hoverItem && (
+                <div class="d-flex justify-content-center">
+                  <div class="row-md-1">
+                  Employees: 
+                  <Pagination activePage={getPageNumber(nodeDatum.attributes.departmentAddress, DepartmentArrayType.EMPLOYEES)} pageEnd={nodeDatum.attributes.empSize} pageTabs={3} function={(item)=>nestedFunc(item, {data: nodeDatum}, DepartmentArrayType.EMPLOYEES)}/>
+                  </div>
+                </div>
+              )}
+              {nodeDatum.attributes?.audSize>0 && nodeDatum.attributes.departmentAddress==hoverItem && (
+                <div class="d-flex justify-content-center">
+                  <div class="row-md-1">
+                  Auditors: 
+                  <Pagination activePage={getPageNumber(nodeDatum.attributes.departmentAddress, DepartmentArrayType.AUDITORS)} pageEnd={nodeDatum.attributes.audSize} pageTabs={3} function={(item)=>nestedFunc(item, {data: nodeDatum}, DepartmentArrayType.AUDITORS)}/>
+                  </div>
                 </div>
               )}
             </>
@@ -236,11 +366,12 @@ const DepartmentHierarchy = (props) => {
         // rootNodeClassName="node__root"
         // branchNodeClassName="node__branch"
         // leafNodeClassName="node__leaf"
-        pathFunc="diagonal"
+        pathFunc="step"
         orientation="vertical"
         translate={translate}
         separation={separation}
         onNodeClick = {(event)=>clicked(event)}
+        depthFactor= {200}
         renderCustomNodeElement={(rd3tProps) =>
           renderForeignObjectNode({ ...rd3tProps, foreignObjectProps })
         }

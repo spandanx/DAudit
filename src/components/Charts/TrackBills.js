@@ -14,7 +14,7 @@ import { TiTick } from "react-icons/ti";
 import { BsExclamation } from "react-icons/bs";
 import Pagination from '../Pagination';
 
-import { StatusReverse } from '../Enums';
+import { StatusReverse, tokenName, pageSize } from '../Enums';
 
 import BillABI from '../../ABIs/BillABI';
 import BillManager from '../../CreatedContracts/BillManager';
@@ -22,7 +22,7 @@ import AccountManagerAudit from '../../CreatedContracts/AccountManagerAudit';
 
 const TrackBills = (props) => {
 
-  const pageSize = 5;
+  // const pageSize = 5;
   // let rootNode = {};
   const [pageNumberMap, setPageNumberMap] = useState(new Map());
 
@@ -280,7 +280,7 @@ const TrackBills = (props) => {
             <p style={{ textAlign: "center" }} onClick={toggleNode}>{nodeDatum.name}</p>
             {nodeDatum.attributes.billOwnAddress==hoverItem &&
             <>
-              <p style={{ textAlign: "center" }} onClick={toggleNode}>Amount: {nodeDatum.attributes.amount}</p>
+              <p style={{ textAlign: "center" }} onClick={toggleNode}>Amount: {nodeDatum.attributes.amount +" "+ tokenName}</p>
             
               {nodeDatum.attributes.size>0 && (
                 // <button style={{ width: "100%" }} onClick={()=>clicked({data: nodeDatum})}>

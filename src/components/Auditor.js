@@ -12,7 +12,7 @@ import { IoCaretForwardOutline } from "react-icons/io5";
 import { AiOutlineReload } from "react-icons/ai";
 
 import {pointerHover} from './styles/cursor.js';
-import {tokenName, DepartmentArrayType, StatusReverse} from './Enums';
+import {tokenName, DepartmentArrayType, StatusReverse, pageSize} from './Enums';
 import DepartmentArrays from '../CreatedContracts/DepartmentArrays';
 import auditorABI from '../ABIs/AuditorABI';
 import departmentManagerABI from '../ABIs/DepartmentManagerABI';
@@ -45,7 +45,7 @@ const Auditor = () => {
 
     const [navigateBillAddress, setNavigateBillAddress] = useState('');
 
-    const pageSize = 1;
+    // const pageSize = 1;
 
     useEffect(()=>{
       console.log("ADDRESS CHANGED, GENERATING NEW CONTRACT");

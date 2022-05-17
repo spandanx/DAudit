@@ -16,7 +16,7 @@ import MergeBillsEmployee from './employee/MergeBillsEmployee';
 import VoteManager from '../CreatedContracts/VoteManager';
 import AccountManagerAudit from '../CreatedContracts/AccountManagerAudit';
 import departmentManagerABI from '../ABIs/DepartmentManagerABI';
-import {Action, VoteReverse, Vote, StatusReverse, DepartmentArrayType, tokenName} from './Enums';
+import {Action, VoteReverse, Vote, StatusReverse, DepartmentArrayType, tokenName, pageSize} from './Enums';
 
 import {toast } from 'react-toastify';
 
@@ -44,7 +44,7 @@ const Employee = () => {
   const [activeTab, setActiveTab] = useState('bills');
   const [voteMap, setVoteMap] = useState(new Map());
 
-  const pageSize = 1;
+  // const pageSize = 1;
 
   // useEffect(()=>{
   //   console.log("DEPARTMENT RELOADED");

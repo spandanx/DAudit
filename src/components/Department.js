@@ -17,13 +17,9 @@ import DepartmentArrays from '../CreatedContracts/DepartmentArrays';
 import MergeBill from './department/MergeBill';
 import MergeRequest from './department/MergeRequest';
 
-import Status from './Enums';
-import accountType from './Enums';
-import {Action} from './Enums';
-import {AccountTypeReverse} from './Enums';
-import {StatusReverse} from './Enums';
-import {DepartmentArrayType} from './Enums';
-import {tokenName} from './Enums';
+// import Status from './Enums';
+// import accountType from './Enums';
+import {Action, AccountTypeReverse, StatusReverse, DepartmentArrayType, tokenName, pageSize} from './Enums';
 // import {ActionReverse} from './Enums';
 import AccountManagerAudit from '../CreatedContracts/AccountManagerAudit';
 import BillManager from '../CreatedContracts/BillManager';
@@ -56,7 +52,7 @@ const Department = () => {
   const handleClose = () => setShowModal(false);
   const handleShow = () => setShowModal(true);
 
-  const pageSize = 1;
+  // const pageSize = 1;
 
   const [currentPageBill, setCurrentPageBill] = useState(0);
   const [currentPageFund, setCurrentPageFund] = useState(0);
@@ -858,7 +854,7 @@ const Department = () => {
             <button onClick={()=>setSelectedTab("mergeRequests")} class={'nav-link'+ (selectedTab=="mergeRequests"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Merge Requests</button>
             <button onClick={()=>setSelectedTab("funds")} class={'nav-link'+ (selectedTab=="funds"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Funds</button>
             <button onClick={()=>setSelectedTab("bills")} class={'nav-link'+ (selectedTab=="bills"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Bills</button>
-            <button onClick={()=>setSelectedTab("hierarchy")} class={'nav-link'+ (selectedTab=="hierarchy"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Hierarchy</button>
+            {/* <button onClick={()=>setSelectedTab("hierarchy")} class={'nav-link'+ (selectedTab=="hierarchy"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Hierarchy</button> */}
             <button onClick={()=>setSelectedTab("mergeBills")} class={'nav-link'+ (selectedTab=="mergeBills"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Encashments</button>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {StatusReverse, tokenName, DepartmentArrayType} from '../Enums';
+import {StatusReverse, tokenName, DepartmentArrayType, pageSize} from '../Enums';
 import { AiOutlineReload } from "react-icons/ai";
 import { BsPlusCircle } from "react-icons/bs";
 import { Modal, Button } from "react-bootstrap";
@@ -15,7 +15,7 @@ import {toast } from 'react-toastify';
 
 const MergeBill = (props) => {
 
-    const pageSize = 1;
+    // const pageSize = 1;
 
     const [bills, setBills] = useState([]);
     const [currentPageBill, setCurrentPageBill] = useState(0);

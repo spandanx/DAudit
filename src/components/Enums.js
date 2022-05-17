@@ -17,4 +17,6 @@ const Vote = { DID_NOT_VOTE:0, REJECTED:1, ACCEPTED:2 };
 const tokenName = "BLT";
 const DEPARTMENT_VERSION = "11";
 
-export {VoteReverse, Vote, AccountType, Status, AccountTypeReverse, StatusReverse, Action, ApprovalStatusReverse, DepartmentArrayType, tokenName, DEPARTMENT_VERSION};
+const pageSize = 5;
+
+export {pageSize, VoteReverse, Vote, AccountType, Status, AccountTypeReverse, StatusReverse, Action, ApprovalStatusReverse, DepartmentArrayType, tokenName, DEPARTMENT_VERSION};
