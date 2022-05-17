@@ -23,8 +23,8 @@ This application is to track the transfer of funds(or bills) between different d
 
 ### Step 2. Install required softwares
 
-Node.js
-Metamask chrome extension
+`Node.js`
+`Metamask chrome extension`
 
 
 ### Step 5. Start the react application
