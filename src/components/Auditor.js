@@ -251,7 +251,7 @@ const Auditor = () => {
       }
       const billList = () => {
         return (
-          <div class="col-md-11">
+          <div class="col-md-12">
             {getTopBarBill()}
             {bills.map((bill)=> (
               <div class="border-1">
@@ -387,10 +387,10 @@ const Auditor = () => {
             <button class={"nav-link" + (selectedTab=='funds'? " active" : "")} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true" onClick={()=>setSelectedTab('funds')}>Funds</button>
             <button class={"nav-link" + (selectedTab=='bills'? " active" : "")} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true" onClick={()=>setSelectedTab('bills')}>Bills</button>
             <button class={"nav-link" + (selectedTab=='track'? " active" : "")} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true" onClick={()=>setSelectedTab('track')}>Track</button>
-            <button class={"nav-link" + (selectedTab=='view'? " active" : "")} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true" onClick={()=>setSelectedTab('view')}>View Department</button>
+            <button class={"nav-link" + (selectedTab=='view'? " active" : "")} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true" onClick={()=>setSelectedTab('view')}>Hierarchy</button>
           </div>
         </div>
-        <div class="col-md-11">
+        <div class="col-md-11 px-4">
           {selectedTab=="bills"? billList() : selectedTab=="funds"? fundList() : selectedTab=="track"? <TrackBills billAddress={navigateBillAddress}/> : selectedTab=="view"? <DepartmentHierarchy depAddress = {depAddress}/> : <></>}
         </div>
       </div>

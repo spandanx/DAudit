@@ -241,7 +241,7 @@ const MergeRequest = (props) => {
         });
       }
   return (
-    <div class="col-md-11">
+    <div class="col-md-12">
         {getTopBarBill()}
         {getModal()}
         {bills.map((bill)=> (

@@ -84,6 +84,11 @@ const Department = () => {
 
   const [departmentsCreateBill, setDepartmentsCreateBill] = useState([]);
   const [currentPageDepCreateBill, setCurrentPageDepCreateBill] = useState(0);
+
+  // billName, description, amount, threshold
+  const [validAmount, setValidAmount] = useState(false);
+  const [validThreshold, setValidThreshold] = useState(false);
+  const [validForm, setValidForm] = useState(false);
   // const [toAddress, setToAddress] = useState('');
 
   // let gdata = {
@@ -137,7 +142,55 @@ const Department = () => {
   useEffect(()=>{
     getSubDeptsOfCreateBill(createDepPageNumber);
   },[createDepPageNumber]);
+  
+  useEffect(()=>{
+    if (!fundAddress || !subDepAddress || !billName){
+      setValidForm(false);
+      return;
+    }
+    checkAmountValidity();
+    checkThresholdValidity();
+    if (!validAmount || !validThreshold){
+      setValidForm(false);
+      return;
+    }
+    setValidForm(true);
+  },[fundAddress, subDepAddress, billName, description, amount, threshold, validAmount, validThreshold]);
 
+  const checkAmountValidity = () => {
+    if (isNumeric(amount)){
+      setValidAmount(true);
+    }
+    else{
+      setValidAmount(false);
+    }
+  }
+  const checkThresholdValidity = () =>{
+    if (isValidThreshold(threshold)){
+      setValidThreshold(true);
+      console.log("setValidThreshold(true)");
+    }
+    else{
+      setValidThreshold(false);
+      console.log("setValidThreshold(false)");
+    }
+  }
+  const isNumeric = (num) => {
+    let value1 = num.toString();
+    let value2 = parseInt(num).toString();
+    return (value1 === value2);
+  }
+  const isValidThreshold = (num) => {
+    if (!isNumeric(num))
+      return false;
+    let val = parseInt(num);
+    console.log("Val: "+val);
+    console.log("val<0: "+(val<0));
+    console.log("val>100: "+(val>100));
+    if (val<0 || val>100)
+      return false;
+    return true;
+  }
   const fetchEmployeeCount = async() => {
     await depContract.methods.getLength(DepartmentArrayType.EMPLOYEES).call().then((res)=>{
       setEmployeeCount(res);
@@ -506,7 +559,7 @@ const Department = () => {
           <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>
-          <Button variant="primary" onClick={()=>createBill()}>
+          <Button variant="primary" onClick={()=>createBill()} disabled={!validForm}>
             Create Bill
           </Button>
         </Modal.Footer>
@@ -544,7 +597,7 @@ const Department = () => {
   
   const billList = () => {
     return (
-      <div class="col-md-11">
+      <div class="col-md-12">
         {getTopBarBill()}
         {getModal()}
         {bills.map((bill)=> (
@@ -635,7 +688,7 @@ const Department = () => {
 
   const fundList = () => {
     return (
-      <div class="col-md-11">
+      <div class="col-md-12">
         {getTopBarFund()}
         {funds.map((bill)=> (
           <div class="border-1">
@@ -735,31 +788,59 @@ const Department = () => {
   }
   const approvalList = () => {
     return (
-      <div class="col-md-11">
+      <div class="col-md-12 ml-5">
         {getTopBarApprovals()}
         {getModal()}
         {approvals.map((appr)=> (
-          <div>
-            <h5 class="card-header">{AccountTypeReverse[appr.accountType]}</h5>
-            <div class="card-body">
-              <h5 class="card-title">Address: {appr.accountAddress}</h5>
-              {StatusReverse[appr.status]=="OPEN" &&  
-              <>
-                <button type="button" class="btn btn-success mx-1" onClick={()=>approve(appr.parentDepartmentAddress, appr.accountAddress, Action.APPROVE)}>Accept</button>
-                <button type="button" class="btn btn-danger mx-1" onClick={()=>approve(appr.parentDepartmentAddress, appr.accountAddress, Action.REJECT)}>Reject</button>
-              </>
-              }
-              {StatusReverse[appr.status]=="ACCEPTED" &&  
-              <>
-                <button type="button" class="btn btn-success mx-1" disabled>Accepted</button>
-              </>}
-              {StatusReverse[appr.status]=="REJECTED" &&  
-              <>
-                <button type="button" class="btn btn-danger mx-1" disabled>Rejected</button>
-              </>}
-              {/* <a href="#" class="btn btn-primary">{fund.amount}</a> */}
+        <div class="border-1">
+            
+          <div class="accordion px-2" id="accordionExample">
+            <div class="card">
+            <div class="card-header collapsed">
+                <div class="row"  id={"heading"+appr.accountAddress} type="button" data-toggle="collapse" data-target={"#collapse"+appr.accountAddress} aria-expanded="true" aria-controls={"collapse"+appr.accountAddress}>
+                    <h5 class="col-md-9">
+                      Type: {AccountTypeReverse[appr.accountType]}
+                    </h5>
+                    {/* <div class="col-md-3">
+                    <p class="card-text text-center">Created on: {getTime(bill.createdOn)}</p>
+                    </div> */}
+                </div>
+                <div class="row">
+                  <div class="col-md-7">
+                    Sender Address: {appr.origin}
+                  </div>
+                  <div class="col-md-3">
+                  </div>
+                  {StatusReverse[appr.status]=="OPEN" && 
+                    <div class="col-md-2">
+                      <button type="button" class="btn btn-primary mx-1" disabled>Active</button>
+                    </div>
+                  }
+                  {StatusReverse[appr.status]=="ACCEPTED" && 
+                    <div class="col-md-2">
+                      <button type="button" class="btn btn-success mx-1" disabled>Accepted</button>
+                    </div>
+                  }
+                  {StatusReverse[appr.status]=="REJECTED" && 
+                    <div class="col-md-2">
+                      <button type="button" class="btn btn-danger mx-1" disabled>Rejected</button>
+                    </div>
+                  }
+                </div>
+                </div>
+
+                <div id={"collapse"+appr.accountAddress} class="collapse" aria-labelledby={"heading"+appr.accountAddress} data-parent={"#example"+appr.accountAddress}>
+                <div class="card-body">
+                    Contract address: {appr.accountAddress}
+                </div>
+                </div>
             </div>
-          </div>
+            </div>
+
+            <div class="card-body">
+            
+            </div>
+        </div>
         ))}
         </div>
     );
@@ -772,31 +853,22 @@ const Department = () => {
     <div class="col-md-12">
       <div class="row">
         <div class="col-md-1">
-        <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-          <button onClick={()=>setSelectedTab("approvals")} class={'nav-link'+ (selectedTab=="approvals"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Approvals</button>
-          <button onClick={()=>setSelectedTab("funds")} class={'nav-link'+ (selectedTab=="funds"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Funds</button>
-          <button onClick={()=>setSelectedTab("bills")} class={'nav-link'+ (selectedTab=="bills"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Bills</button>
-          <button onClick={()=>setSelectedTab("hierarchy")} class={'nav-link'+ (selectedTab=="hierarchy"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Hierarchy</button>
-          <button onClick={()=>setSelectedTab("mergeBills")} class={'nav-link'+ (selectedTab=="mergeBills"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Encashment Bills</button>
-          <button onClick={()=>setSelectedTab("mergeRequests")} class={'nav-link'+ (selectedTab=="mergeRequests"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Merge Requests</button>
+          <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+            <button onClick={()=>setSelectedTab("approvals")} class={'nav-link'+ (selectedTab=="approvals"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Approvals</button>
+            <button onClick={()=>setSelectedTab("mergeRequests")} class={'nav-link'+ (selectedTab=="mergeRequests"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Merge Requests</button>
+            <button onClick={()=>setSelectedTab("funds")} class={'nav-link'+ (selectedTab=="funds"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Funds</button>
+            <button onClick={()=>setSelectedTab("bills")} class={'nav-link'+ (selectedTab=="bills"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Bills</button>
+            <button onClick={()=>setSelectedTab("hierarchy")} class={'nav-link'+ (selectedTab=="hierarchy"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Hierarchy</button>
+            <button onClick={()=>setSelectedTab("mergeBills")} class={'nav-link'+ (selectedTab=="mergeBills"? ' active':'')} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Encashments</button>
+          </div>
         </div>
-          {/* <ul class="nav flex-column">
-            <li class="nav-item">
-              <a class="nav-link" onClick={()=>setSelectedTab("approvals")}>Approvals</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" onClick={()=>setSelectedTab("bills")}>Bills</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" onClick={()=>setSelectedTab("hierarchy")}>Hierarchy</a>
-            </li>
-          </ul> */}
-        </div>
-
+        <div class="col-md-11 px-4">
         {selectedTab=="bills"? billList() : selectedTab=="funds"? fundList() 
-        : selectedTab=="approvals"? approvalList() : selectedTab=="hierarchy"? getHierarchy() 
+        : selectedTab=="approvals"? approvalList() 
+        : selectedTab=="hierarchy"? <DepartmentHierarchy depAddress={location.state.depAddress}/>
         : selectedTab=="mergeBills"? <MergeBill depAddress = {location.state.depAddress}/>
         : selectedTab=="mergeRequests"? <MergeRequest depAddress = {location.state.depAddress}/> : <></>}
+        </div>
       </div>
   </div>
   )

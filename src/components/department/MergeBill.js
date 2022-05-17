@@ -50,6 +50,10 @@ const MergeBill = (props) => {
     const [currentPageDepDestination, setCurrentPageDepDestination] = useState(0);
 
     const [selectedDepAddressFund, setSelectedDepAddressFund] = useState(0);
+    //form validation
+    const [validAmount, setValidAmount] = useState(false);
+    const [validThreshold, setValidThreshold] = useState(false);
+    const [validForm, setValidForm] = useState(false);
 
     const handleClose = () => setShowModal(false);
     const handleShow = () => setShowModal(true);
@@ -73,6 +77,55 @@ const MergeBill = (props) => {
     useEffect(()=>{
         getBills(currentPageBill);
     },[currentPageBill]);
+
+    useEffect(()=>{
+      if (!fundAddress || !selectedDepAddressFund || !billName){
+        setValidForm(false);
+        return;
+      }
+      checkAmountValidity();
+      checkThresholdValidity();
+      if (!validAmount || !validThreshold){
+        setValidForm(false);
+        return;
+      }
+      setValidForm(true);
+    },[fundAddress, subDepAddress, billName, description, amount, threshold, validAmount, validThreshold]);
+  
+    const checkAmountValidity = () => {
+      if (isNumeric(amount)){
+        setValidAmount(true);
+      }
+      else{
+        setValidAmount(false);
+      }
+    }
+    const checkThresholdValidity = () =>{
+      if (isValidThreshold(threshold)){
+        setValidThreshold(true);
+        console.log("setValidThreshold(true)");
+      }
+      else{
+        setValidThreshold(false);
+        console.log("setValidThreshold(false)");
+      }
+    }
+    const isNumeric = (num) => {
+      let value1 = num.toString();
+      let value2 = parseInt(num).toString();
+      return (value1 === value2);
+    }
+    const isValidThreshold = (num) => {
+      if (!isNumeric(num))
+        return false;
+      let val = parseInt(num);
+      console.log("Val: "+val);
+      console.log("val<0: "+(val<0));
+      console.log("val>100: "+(val>100));
+      if (val<0 || val>100)
+        return false;
+      return true;
+    }
 
     const generateContract = async (depAddress) => {
         setDepContract(new web3.eth.Contract(departmentManagerABI, depAddress));
@@ -388,7 +441,7 @@ const MergeBill = (props) => {
               <Button variant="secondary" onClick={handleClose}>
                 Close
               </Button>
-              <Button variant="primary" onClick={()=>createBill()}>
+              <Button variant="primary" onClick={()=>createBill()} disabled={!validForm}>
                 Create Bill
               </Button>
             </Modal.Footer>
@@ -441,7 +494,7 @@ const MergeBill = (props) => {
         return datestring;
       }
 return (
-    <div class="col-md-11">
+    <div class="col-md-12">
         {getTopBarBill()}
         {getModal()}
         {bills.map((bill)=> (

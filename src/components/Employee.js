@@ -254,7 +254,7 @@ const Employee = () => {
 
   const BillList = () => {
     return(
-      <div class="col-md-10 mx-2">
+      <div class="col-md-12">
       {getTopBarBills()}
       {bills.map((bill)=> (
         <div class="border-1">
@@ -346,7 +346,9 @@ const Employee = () => {
             <button onClick={()=>setActiveTab('mergeBills')} class={"nav-link"+(activeTab=='mergeBills'? " active": "")} id="v-pills-Inbox-tab" data-bs-toggle="pill" data-bs-target="#v-pills-Inbox" type="button" role="tab" aria-controls="v-pills-Inbox" aria-selected="true">Encashments</button>
           </div>
         </div>
-        {activeTab=='bills'? BillList(): activeTab=='mergeBills'? <MergeBillsEmployee depAddress={depAddress} empAddress={location.state.empAddress}/> : <></>}
+        <div class="col-md-11 px-4">
+          {activeTab=='bills'? BillList(): activeTab=='mergeBills'? <MergeBillsEmployee depAddress={depAddress} empAddress={location.state.empAddress}/> : <></>}
+        </div>
       </div>
   </div>
   )
