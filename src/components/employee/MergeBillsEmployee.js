@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {StatusReverse, tokenName, DepartmentArrayType, Vote, Action} from '../Enums';
+import {StatusReverse, tokenName, DepartmentArrayType, Vote, Action, pageSize} from '../Enums';
 import { AiOutlineReload } from "react-icons/ai";
 import { BsPlusCircle } from "react-icons/bs";
 import { Modal, Button } from "react-bootstrap";
@@ -16,7 +16,7 @@ import {toast } from 'react-toastify';
 
 const MergeBillsEmployee = (props) => {
   
-    const pageSize = 1;
+    // const pageSize = 1;
 
     const [bills, setBills] = useState([]);
     const [currentPageBill, setCurrentPageBill] = useState(0);
@@ -218,7 +218,7 @@ const MergeBillsEmployee = (props) => {
         return -1;
       }
 return (
-    <div class="col-md-10 mx-2">
+    <div class="col-md-12 mx-2">
         {getTopBarBill()}
         {/* {getModal()} */}
         {bills.map((bill)=> (
@@ -236,7 +236,7 @@ return (
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                     <p class="card-text py-1 border border-light rounded-2">Amount: {bill.amount + " "+tokenName}</p>
                     </div>
                     {StatusReverse[bill.billStatus]=="OPEN" && 
@@ -253,32 +253,33 @@ return (
                     </div>
                     </>
                     }
-                    {StatusReverse[bill.billStatus]!="OPEN" && 
-                    <div class="col-md-7"></div>
-                    }
+                    
                   {StatusReverse[bill.billStatus]=="OPEN" && checkVoteType(bill.billOwnAddress)==Vote.DID_NOT_VOTE &&
-                  <div class="col-md-2">
+                  <div class="col-md-3 justify-content-end">
                     <button type="button" class="btn btn-success mx-1" onClick={()=>vote(bill.billOwnAddress, Action.APPROVE)}>Accept</button>
                     <button type="button" class="btn btn-danger mx-1" onClick={()=>vote(bill.billOwnAddress, Action.REJECT)}>Reject</button>
                   </div>
                   }
                   {StatusReverse[bill.billStatus]=="OPEN" && checkVoteType(bill.billOwnAddress)==Vote.ACCEPTED &&
-                  <div class="col-md-2">
+                  <div class="col-md-3 justify-content-end">
                     <button type="button" class="btn btn-success mx-1" disabled>Voted: Accept</button>
                   </div>
                   }
                   {StatusReverse[bill.billStatus]=="OPEN" && checkVoteType(bill.billOwnAddress)==Vote.REJECTED &&
-                  <div class="col-md-2">
+                  <div class="col-md-3 justify-content-end">
                     <button type="button" class="btn btn-danger mx-1" disabled>Voted: Reject</button>
                   </div>
                   }
+                  {StatusReverse[bill.billStatus]!="OPEN" && 
+                    <div class="col-md-7"></div>
+                  }
                   {StatusReverse[bill.billStatus]=="ACCEPTED" && 
-                  <div class="col-md-2">
+                  <div class="col-md-3 justify-content-end">
                     <button type="button" class="btn btn-success mx-1" disabled>Accepted</button>
                   </div>
                   }
                   {StatusReverse[bill.billStatus]=="REJECTED" && 
-                  <div class="col-md-2">
+                  <div class="col-md-3 justify-content-end">
                     <button type="button" class="btn btn-danger mx-1">Rejected</button>
                   </div>
                   }

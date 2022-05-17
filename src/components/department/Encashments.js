@@ -529,23 +529,44 @@ return (
                     </div>
                     </>
                     }
-                    {StatusReverse[bill.billStatus]!="OPEN" &&
-                    <div class="col-md-7"></div>
-                    }
+                    {/* {StatusReverse[bill.billStatus]!="OPEN" &&
+                     <div class="col-md-7"></div>
+                    } */}
                     {StatusReverse[bill.billStatus]=="OPEN" && 
                     <div class="col-md-2">
-                    <button type="button" class="btn btn-primary mx-1" disabled>Active</button>
+                      <button type="button" class="btn btn-primary mx-1" disabled>Active</button>
                     </div>
                     }
                     {StatusReverse[bill.billStatus]=="ACCEPTED" && 
-                    <div class="col-md-2">
-                    <button type="button" class="btn btn-success mx-1" disabled>Accepted</button>
-                    </div>
+                    <>
+                      <div class="col-md-5"></div>
+                      {StatusReverse[bill.requestStatus]=="OPEN" && 
+                        <div class="col-md-2">
+                          <button type="button" class="btn btn-primary mx-1" disabled>Waiting for department</button>
+                        </div>
+                      }
+                      {StatusReverse[bill.requestStatus]=="ACCEPTED" && 
+                        <div class="col-md-2">
+                          <button type="button" class="btn btn-success mx-1" disabled>Accepted by department</button>
+                        </div>
+                      }
+                      {StatusReverse[bill.requestStatus]=="REJECTED" && 
+                        <div class="col-md-2">
+                          <button type="button" class="btn btn-danger mx-1" disabled>Rejected by department</button>
+                        </div>
+                      }
+                      <div class="col-md-2">
+                        <button type="button" class="btn btn-success mx-1" disabled>Accepted by employees</button>
+                      </div>
+                    </>
                     }
                     {StatusReverse[bill.billStatus]=="REJECTED" && 
-                    <div class="col-md-2">
-                    <button type="button" class="btn btn-danger mx-1">Rejected</button>
-                    </div>
+                    <>
+                      <div class="col-md-7"></div>
+                      <div class="col-md-2">
+                        <button type="button" class="btn btn-danger mx-1">Rejected by employees</button>
+                      </div>
+                    </>
                     }
                 </div>
                 </div>
@@ -553,6 +574,13 @@ return (
                 <div id={"collapse"+bill.billOwnAddress} class="collapse" aria-labelledby={"heading"+bill.billOwnAddress} data-parent={"#example"+bill.billOwnAddress}>
                 <div class="card-body">
                 {bill.description}
+                {bill.comments &&
+                  <div>
+                    <hr/>
+                    <h5>Proof: </h5>
+                    <img src={bill.comments} class="rounded mx-auto d-block" alt="Proof of payment"/>
+                  </div>
+                }
                 </div>
                 </div>
             </div>

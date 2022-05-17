@@ -9,6 +9,7 @@ import DepartmentArrays from '../../CreatedContracts/DepartmentArrays';
 import AccountManagerAudit from '../../CreatedContracts/AccountManagerAudit';
 import departmentManagerABI from '../../ABIs/DepartmentManagerABI';
 import VoteManager from '../../CreatedContracts/VoteManager';
+import { ImageUpload  } from 'react-ipfs-uploader';
 
 import {toast } from 'react-toastify';
 
@@ -150,10 +151,11 @@ const MergeRequest = (props) => {
             </Modal.Header>
             <Modal.Body>
             <div class="row my-3">
-                <textarea class="form-control" id="message" name="body" rows="3" placeholder="Description"
+                {/* <textarea class="form-control" id="message" name="body" rows="3" placeholder="Description"
                     value={proof} 
                     onChange={(event) => setProof(event.target.value)}
-                ></textarea>
+                ></textarea> */}
+                <ImageUpload setUrl={setProof} />
             </div>
             </Modal.Body>
             <Modal.Footer>

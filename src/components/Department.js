@@ -14,7 +14,7 @@ import {pointerHover} from './styles/cursor.js';
 import { Modal, Button } from "react-bootstrap";
 import Pagination from './Pagination';
 import DepartmentArrays from '../CreatedContracts/DepartmentArrays';
-import MergeBill from './department/MergeBill';
+import Encashments from './department/Encashments';
 import MergeRequest from './department/MergeRequest';
 
 // import Status from './Enums';
@@ -862,7 +862,7 @@ const Department = () => {
         {selectedTab=="bills"? billList() : selectedTab=="funds"? fundList() 
         : selectedTab=="approvals"? approvalList() 
         : selectedTab=="hierarchy"? <DepartmentHierarchy depAddress={location.state.depAddress}/>
-        : selectedTab=="mergeBills"? <MergeBill depAddress = {location.state.depAddress}/>
+        : selectedTab=="mergeBills"? <Encashments depAddress = {location.state.depAddress}/>
         : selectedTab=="mergeRequests"? <MergeRequest depAddress = {location.state.depAddress}/> : <></>}
         </div>
       </div>
