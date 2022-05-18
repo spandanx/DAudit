@@ -366,7 +366,7 @@ const MergeBill = (props) => {
         return (
           <Modal show={showModal} onHide={handleClose}>
             <Modal.Header closeButton>
-              <Modal.Title>Create new bill</Modal.Title>
+              <Modal.Title>Create new encashment bill</Modal.Title>
             </Modal.Header>
             <Modal.Body>
               <div class="row">

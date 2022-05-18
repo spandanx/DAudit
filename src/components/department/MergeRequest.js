@@ -163,7 +163,7 @@ const MergeRequest = (props) => {
                 Close
               </Button>
               <Button variant="primary" disabled={!proof} onClick={()=>approve()}>
-                Create Bill
+                Submit
               </Button>
             </Modal.Footer>
           </Modal>
