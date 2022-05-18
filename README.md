@@ -38,7 +38,7 @@ This application is to track the transfer of funds(or bills) between different d
 
 ### ER Diagram
 
-![AuditDepartmentStructure (1)](https://user-images.githubusercontent.com/56664469/168854554-7e3500c3-3ca1-47d8-b862-d423df9e739c.jpg)
+![AuditDepartmentStructure (2)](https://user-images.githubusercontent.com/56664469/168956124-86166b7c-d9c4-4db5-a894-f8d3f766a6a3.jpg)
 
 ### Sample Department Hierarchy
 
