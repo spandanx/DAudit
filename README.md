@@ -14,7 +14,8 @@ This application is to track the transfer of funds(or bills) between different d
 
 1. Clone the repository
 2. Install required softwares
-5. Start the react application
+3. Deploy required contracts
+4. Start the react application
 
 ### Step 1. Clone the repository
 
@@ -26,15 +27,25 @@ This application is to track the transfer of funds(or bills) between different d
 `Node.js`
 `Metamask chrome extension`
 
+### Step 3. Deploy required contracts
 
-### Step 5. Start the react application
+`Open AccountManagerAudit.sol file in remix IDE`
+![AccountManagerAuditFile](https://user-images.githubusercontent.com/56664469/169008436-9935639b-4fad-4214-87ae-4d1b8151aec6.PNG)
+`Deploy the file in rinkeby test network using metamask`
+![AccountManagerAuditFileDeploy](https://user-images.githubusercontent.com/56664469/169008506-00b2a205-8ad8-4bda-b1b7-2c08d381c8d3.PNG)
+`copy the address`
+![AccountManagerAuditCopyAddress](https://user-images.githubusercontent.com/56664469/169008669-57661904-775b-48d3-b7bd-921a16e43251.PNG)
+`replace the address in the AccountManagerAudit.js file under CreatedContracts folder`
+![AccountManagerAuditGitLocation](https://user-images.githubusercontent.com/56664469/169008761-0120276e-b239-456f-ba27-11e012671a64.PNG)
+![AccountManagerAuditReplaceAddress](https://user-images.githubusercontent.com/56664469/169008832-7752e9d2-b04f-4427-9cb5-0cd2a5519a3c.PNG)
+
+### Step 4. Start the react application
 
 `go to directory`
 
 `npm install`
 
 `npm start run`
-
 
 ### ER Diagram
 
@@ -43,3 +54,7 @@ This application is to track the transfer of funds(or bills) between different d
 ### Sample Department Hierarchy
 
 ![DepartmentHierarchy](https://user-images.githubusercontent.com/56664469/168852488-264b83a2-df68-4c55-ae9b-0eee02b79144.PNG)
+
+### Flow of funds diagram
+
+![FundCycle (1)](https://user-images.githubusercontent.com/56664469/169005436-03a9fdc9-f15e-4fdb-bedc-efb1d10861c2.jpg)
