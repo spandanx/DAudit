@@ -67,6 +67,9 @@ This application is to track the transfer of funds(or bills) between different d
 
 ## 3. DepartmentArrays.sol
 `Similarly create contract, this contract can be created with no parameters`
+
+`replace the address`
+
 ## 4. VoteManager.sol
 `Similarly create this contract and replace address`
 
