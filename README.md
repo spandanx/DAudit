@@ -29,10 +29,10 @@ This application is to track the transfer of funds(or bills) between different d
 
 ### Step 3. Deploy required contracts
 
-# 1. AccountManagerAudit.sol
-# 2. BillManager.sol
-# 3. DepartmentArrays.sol
-# 4. VoteManager.sol
+`1. AccountManagerAudit.sol`
+`2. BillManager.sol`
+`3. DepartmentArrays.sol`
+`4. VoteManager.sol`
 
 
 ## 1. AccountManagerAudit.sol
