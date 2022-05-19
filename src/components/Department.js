@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import web3 from '../web3';
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // import departmentABI from '../ABIs/DepartmentABI';
 import departmentManagerABI from '../ABIs/DepartmentManagerABI';
@@ -30,6 +30,8 @@ import {toast } from 'react-toastify';
 const Department = () => {
 
   const location = useLocation();
+  const navigate = useNavigate();
+
   console.log("location department");
   console.log(location);
   const [bills, setBills] = useState([]);
@@ -590,12 +592,28 @@ const Department = () => {
     // 16-5-2015 9:50
     return datestring;
   }
+
+  const getTestButtons = () => {
+    return (
+      <div>
+        <button type="button" class="btn btn-primary mx-1" onClick={()=>window.location = ""}>Check1</button>
+        <button type="button" class="btn btn-primary mx-1" onClick={()=>window.location.href = ""}>Check2</button>
+        {/* <button type="button" class="btn btn-primary mx-1" onClick={()=>location.pathname = "/"}>Check3</button>
+        <button type="button" class="btn btn-primary mx-1" onClick={()=>location.pathname = ""}>Check4</button> */}
+        <button type="button" class="btn btn-primary mx-1" onClick={()=>navigate(0)}>Check5</button>
+        {/* <button type="button" class="btn btn-primary mx-1" onClick={()=>navigate(-1)}>Check6</button> */}
+        {/* <button type="button" class="btn btn-primary mx-1" onClick={()=>navigate("")}>Check7</button> */}
+        <button type="button" class="btn btn-primary mx-1" onClick={()=>navigate("/")}>Check8</button>
+      </div>
+    );
+  }
   
   const billList = () => {
     return (
       <div class="col-md-12">
         {getTopBarBill()}
         {getModal()}
+        {getTestButtons()}
         {bills.map((bill)=> (
           <div class="border-1">
             

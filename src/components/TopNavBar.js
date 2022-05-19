@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react'
 import web3 from '../web3';
 import AccountManagerAudit from '../CreatedContracts/AccountManagerAudit';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -17,6 +17,7 @@ import {pointerHover} from './styles/cursor.js';
 const TopNavBar = () => {
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   const address0 = "0x0000000000000000000000000000000000000000";
   // const [accountType, setAccountType] = useState('');
@@ -30,7 +31,21 @@ const TopNavBar = () => {
   useEffect(() => {
     console.log("Calling useEffect()");
     checkIfAccountsExists();
+    console.log("Initial location");
+    console.log(location);
   }, []);
+
+  // useEffect(()=>{
+  //   console.log("Location change Detected");
+  //   checkIfAccountsExists();
+  //   console.log(location);
+  // }, [location]);
+
+  useEffect(()=>{
+    console.log("Location pathname change Detected");
+    checkIfAccountsExists();
+    console.log(location.pathname);
+  }, [location.pathname]);
 
   window.ethereum.on('accountsChanged', function (accounts) {
     console.log("Account Changed");
