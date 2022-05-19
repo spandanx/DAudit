@@ -661,7 +661,7 @@ const Department = () => {
                     }
                     {StatusReverse[bill.status]=="REJECTED" && 
                     <div class="col-md-2">
-                      <button type="button" class="btn btn-danger mx-1">Rejected</button>
+                      <button type="button" class="btn btn-danger mx-1" disabled>Rejected</button>
                     </div>
                     }
                   </div>
