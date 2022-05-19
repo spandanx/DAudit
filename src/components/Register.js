@@ -277,7 +277,9 @@ const Register = () => {
         from: accounts[0]
       }).then((response)=>{
         getToast("Registered as employee!", "SUCCESS");
-          window.location.reload();
+          // window.location.reload();
+          // navigate("/");
+          window.location.href="";
       }).catch((error)=>{
         console.log("ERROR:");
         console.log(error);
@@ -308,8 +310,9 @@ const Register = () => {
         from: accounts[0]
       }).then((response)=>{
         getToast('Registered as departmnet!', "SUCCESS");
-          // navigate('/');
-          window.location.reload();
+          // navigate('');
+          // window.location.reload();
+          window.location.href="";
       }).catch((error)=>{
         console.log("ERROR:");
         console.log(error);
@@ -342,8 +345,9 @@ const Register = () => {
         from: accounts[0]
       }).then((response)=>{
         getToast('Registered as auditor', "SUCCESS");
-          // navigate('/');
-          window.location.reload();
+          navigate('/');
+          // window.location.reload();
+          window.location.href="";
       }).catch((error)=>{
         console.log("ERROR:");
         console.log(error);

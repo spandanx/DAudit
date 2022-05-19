@@ -2,7 +2,8 @@ import web3 from '../web3';
 // const { abi, evm } = require('./compile');
 import BillManagerABI from '../ABIs/BillManagerABI';
 
-const address = "0x609E94eC4d769B668FC98248ea043AaDB9654942";
+const address = "0xad79C0bdc4B925ec3463B6af7163827a308D9e54";
+//0x609E94eC4d769B668FC98248ea043AaDB9654942 - previous complete
 //0xe0E26716C2a1c73Cd155F60609EeB3eF050D4270
 //0x7e3eCE94Bb6bCf2b1738C9B79f8a356ADB9Bd78F
 //0xDC3e8f3Adfd106588Bfb7F326F6d1ffDdaa49862
