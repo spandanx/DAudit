@@ -93,6 +93,7 @@ const TrackBills = (props) => {
     console.log("getDepartmentData() Start "+billAddress);
     let size = 0;
     await AccountManagerAudit.methods.getBillLength(billAddress).call().then((res)=>{
+      console.log("Size of nested bill for "+billAddress+" = "+res);
       size = Math.ceil(res/pageSize);
     }).catch((err)=>{});
 
@@ -157,7 +158,7 @@ const TrackBills = (props) => {
     //----------
     // let contract = new web3.eth.Contract(departmentABI, depAddress);
     // await contract.methods.getSubDepartmentsPaginate(10, 0).call().then((response)=>{
-      await BillManager.methods.getBillsFromMap(pageSize, pageNumber, billAddr).call().then((response)=>{
+      await BillManager.methods.getBillsFromMap(pageSize, pageNumber, billAddr).call().then(async(response)=>{
       // await DepartmentArrays.methods.getSubDepartments(10, 0, billAddr).call().then((response)=>{
       console.log("Data for "+billAddr);
       console.log(response);
@@ -167,7 +168,8 @@ const TrackBills = (props) => {
         // let newNodes = response.map((item)=>{
           let size = 0;
           item = response[i];
-          AccountManagerAudit.methods.getBillLength(billAddr).call().then((res)=>{
+          await AccountManagerAudit.methods.getBillLength(item.billOwnAddress).call().then((res)=>{
+            console.log("Size of nested bill for "+item.billOwnAddress+" = "+res);
             size = Math.ceil(res/pageSize);
           }).catch((err)=>{});
           newNodes.push({
@@ -313,7 +315,7 @@ const TrackBills = (props) => {
     <div>
       {searchBar()}
       {executingBillAddress && 
-        <div id="treeWrapper" style={{ width: '60em', height: '50em' }}>
+        <div id="treeWrapper" style={{ width: '75em', height: '50em' }}>
           <Tree data={chartData} 
           // rootNodeClassName="node__root"
           // branchNodeClassName="node__branch"

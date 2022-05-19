@@ -339,7 +339,7 @@ const DepartmentHierarchy = (props) => {
   );
 
   let translate = {x: 500, y: 100};
-  const nodeSize = { x: 200, y: 200 };
+  const nodeSize = { x: 200, y: 300 };
   const foreignObjectProps = { width: nodeSize.x, height: nodeSize.y, x: 20 };
   // const [translate, containerRef] = useCenteredTree();
   const containerStyles = {
@@ -360,7 +360,7 @@ const DepartmentHierarchy = (props) => {
     //   onNodeClick = {(event)=>clicked(event)}
     //   />
     // </div>
-    <div id="treeWrapper" style={{ width: '60em', height: '50em' }}>
+    <div id="treeWrapper" style={{ width: '75em', height: '50em' }}>
       {chartData && 
         <Tree data={chartData} 
         // rootNodeClassName="node__root"
