@@ -809,7 +809,8 @@ const Department = () => {
                   </div>
                   {StatusReverse[appr.status]=="OPEN" && 
                     <div class="col-md-2">
-                      <button type="button" class="btn btn-primary mx-1" disabled>Active</button>
+                        <button type="button" class="btn btn-success mx-1" onClick={()=>approve(appr.parentDepartmentAddress, appr.accountAddress, Action.APPROVE)}>Accept</button>
+                        <button type="button" class="btn btn-danger mx-1" onClick={()=>approve(appr.parentDepartmentAddress, appr.accountAddress, Action.REJECT)}>Reject</button>
                     </div>
                   }
                   {StatusReverse[appr.status]=="ACCEPTED" && 
@@ -837,6 +838,27 @@ const Department = () => {
             
             </div>
         </div>
+        // <div>
+        //     <h5 class="card-header">{AccountTypeReverse[appr.accountType]}</h5>
+        //     <div class="card-body">
+        //       <h5 class="card-title">Address: {appr.accountAddress}</h5>
+        //       {StatusReverse[appr.status]=="OPEN" &&  
+        //       <>
+        //         <button type="button" class="btn btn-success mx-1" onClick={()=>approve(appr.parentDepartmentAddress, appr.accountAddress, Action.APPROVE)}>Accept</button>
+        //         <button type="button" class="btn btn-danger mx-1" onClick={()=>approve(appr.parentDepartmentAddress, appr.accountAddress, Action.REJECT)}>Reject</button>
+        //       </>
+        //       }
+        //       {StatusReverse[appr.status]=="ACCEPTED" &&  
+        //       <>
+        //         <button type="button" class="btn btn-success mx-1" disabled>Accepted</button>
+        //       </>}
+        //       {StatusReverse[appr.status]=="REJECTED" &&  
+        //       <>
+        //         <button type="button" class="btn btn-danger mx-1" disabled>Rejected</button>
+        //       </>}
+        //       {/* <a href="#" class="btn btn-primary">{fund.amount}</a> */}
+        //     </div>
+        //   </div>
         ))}
         </div>
     );
