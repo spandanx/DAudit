@@ -613,7 +613,7 @@ const Department = () => {
       <div class="col-md-12">
         {getTopBarBill()}
         {getModal()}
-        {getTestButtons()}
+        {/* {getTestButtons()} */}
         {bills.map((bill)=> (
           <div class="border-1">
             

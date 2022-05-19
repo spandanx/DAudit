@@ -278,7 +278,7 @@ const Register = () => {
       }).then((response)=>{
         getToast("Registered as employee!", "SUCCESS");
           // window.location.reload();
-          // navigate("/");
+          navigate("/");
           // window.location.href="";
           window.location="";
       }).catch((error)=>{
@@ -311,7 +311,7 @@ const Register = () => {
         from: accounts[0]
       }).then((response)=>{
         getToast('Registered as departmnet!', "SUCCESS");
-          // navigate('');
+          navigate("/")
           // window.location.reload();
           // window.location.href="";
           window.location="";
@@ -347,10 +347,10 @@ const Register = () => {
         from: accounts[0]
       }).then((response)=>{
         getToast('Registered as auditor', "SUCCESS");
-          navigate('/');
+          navigate("/")
           // window.location.reload();
           // window.location.href="";
-          window.location="";
+          // window.location="";
       }).catch((error)=>{
         console.log("ERROR:");
         console.log(error);
