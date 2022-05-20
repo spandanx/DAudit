@@ -9,6 +9,7 @@ This application is to track the transfer of funds(or bills) between different d
 3. Metamask
 4. Rinkeby test network
 5. React.js
+6. Hardhat
 
 ## Steps to run locally
 
@@ -96,3 +97,7 @@ This application is to track the transfer of funds(or bills) between different d
 ### Flow of funds diagram
 
 ![FundCycle (1)](https://user-images.githubusercontent.com/56664469/169005436-03a9fdc9-f15e-4fdb-bedc-efb1d10861c2.jpg)
+
+## Youtube link
+
+https://youtu.be/iTgtS_oRdDA
