@@ -34,6 +34,8 @@ This application is to track the transfer of funds(or bills) between different d
 `3. DepartmentArrays.sol`
 `4. VoteManager.sol`
 
+<details>
+  <summary>Click to expand!</summary>
 
 ## 1. AccountManagerAudit.sol
 
@@ -72,6 +74,8 @@ This application is to track the transfer of funds(or bills) between different d
 
 ## 4. VoteManager.sol
 `Similarly create this contract and replace address`
+  
+</details>
 
 ### Step 4. Start the react application
 
