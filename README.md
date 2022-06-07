@@ -1,6 +1,6 @@
 # DECENTRALISED AUDIT APPLICATION
 
-This application is to track the transfer of funds(or bills) between different departments for different projects.
+This application is to track the transfer of funds(or bills) between different departments for different projects in an organization.
 
 ## Technologies used
 
