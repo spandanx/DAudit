@@ -6,7 +6,7 @@ if (window.ethereum && window.ethereum.isMetaMask){
     web3 = new Web3(window.ethereum);
 }
 else{
-    alert("Please install metamask");
+    alert("Please install MetaMask");
 }
 
 export default web3;
