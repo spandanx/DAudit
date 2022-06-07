@@ -1,6 +1,12 @@
 import Web3 from "web3";
+var web3;
 
-window.ethereum.request({ method: "eth_requestAccounts" });
-const web3 = new Web3(window.ethereum);
+if (window.ethereum && window.ethereum.isMetaMask){
+    window.ethereum.request({ method: "eth_requestAccounts" });
+    web3 = new Web3(window.ethereum);
+}
+else{
+    alert("Please install metamask");
+}
 
 export default web3;
